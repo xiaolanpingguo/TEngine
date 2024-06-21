@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-#if ENABLE_INPUT_SYSTEM 
-    using UnityEngine.InputSystem;
-#endif
+
 
 namespace TEngine.Localization
 {
@@ -49,11 +47,7 @@ namespace TEngine.Localization
 
         bool IsTouchInputSupported()
         {
-            #if ENABLE_INPUT_SYSTEM
-                return Touchscreen.current != null;
-            #else
-                return UnityEngine.Input.touchSupported;
-            #endif
+            return UnityEngine.Input.touchSupported;
         }
 
         public virtual string GetFallbackSpecialization(string specialization)

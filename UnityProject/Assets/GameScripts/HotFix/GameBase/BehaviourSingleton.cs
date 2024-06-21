@@ -20,8 +20,8 @@ namespace TEngine
                 {
                     _instance = new T();
                     Log.Assert(_instance != null);
-                    _instance.Awake();
-                    RegSingleton(_instance);
+                    //_instance.Awake();
+                    //RegSingleton(_instance);
                 }
 
                 return _instance;
@@ -31,6 +31,12 @@ namespace TEngine
         private static void RegSingleton(BaseBehaviourSingleton inst)
         {
             BehaviourSingleSystem.Instance.RegSingleton(inst);
+        }
+
+        public static void RegisterSelf()
+        {
+            Instance.Awake();
+            BehaviourSingleSystem.Instance.RegSingleton(Instance);
         }
     }
 

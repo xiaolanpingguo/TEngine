@@ -1,0 +1,55 @@
+using GameBase;
+using UnityEngine;
+
+
+namespace Lockstep.Game
+{
+    public class GameConfigSingleton : Singleton<GameConfigSingleton>
+    {
+        public bool IsVideoLoading { get; set; }
+        public bool IsVideoMode { get; set; }
+        public bool IsRunVideo { get; set; }
+        public bool IsClientMode { get; set; }
+        public bool IsReconnecting { get; set; }
+        public bool IsPursueFrame { get; set; }
+        public int SnapshotFrameInterval { get; set; }
+
+        private GameConfig _config;
+        public string configPath = "GameConfig";
+
+        protected override void Init()
+        {
+            _config = Resources.Load<GameConfig>(configPath);
+            _config.DoAwake();
+        }
+
+        public EntityConfig GetEntityConfig(int id)
+        {
+            if (id >= 100)
+            {
+                return _config.GetSpawnerConfig(id - 100);
+            }
+            if (id >= 10)
+            {
+                return _config.GetEnemyConfig(id - 10);
+            }
+
+            return _config.GetPlayerConfig(id);
+        }
+
+        public AnimatorConfig GetAnimatorConfig(int id)
+        {
+            return _config.GetAnimatorConfig(id - 1);
+        }
+
+        public SkillBoxConfig GetSkillConfig(int id)
+        {
+            return _config.GetSkillConfig(id - 1);
+        }
+
+        public CollisionConfig CollisionConfig => _config.CollisionConfig;
+        public string RecorderFilePath => _config.RecorderFilePath;
+        public string DumpStrPath => _config.DumpStrPath;
+        public GameStartInfo ClientModeInfo => _config.ClientModeInfo;
+    }
+}

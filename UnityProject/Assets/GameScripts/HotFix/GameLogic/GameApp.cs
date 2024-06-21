@@ -1,7 +1,11 @@
 using System.Collections.Generic;
 using System.Reflection;
+using Cysharp.Threading.Tasks;
 using GameBase;
 using TEngine;
+using GameLogic;
+using Lockstep.Game;
+
 
 /// <summary>
 /// 游戏App。
@@ -37,7 +41,14 @@ public partial class GameApp:Singleton<GameApp>
     /// </summary>
     private void StartGameLogic()
     {
-        
+        StartGame().Forget();
+    }
+
+    private async UniTaskVoid StartGame()
+    {
+        await GameModule.Scene.LoadScene("Demo").ToUniTask();
+        OldInputManager.RegisterSelf();
+        Game.RegisterSelf();
     }
 
     /// <summary>
