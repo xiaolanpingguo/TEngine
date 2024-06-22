@@ -1,70 +1,66 @@
 using Lockstep.Framework;
-using TEngine;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Windows;
 
 
 namespace Lockstep.Game
 {
-    [Update]
-    public class OldInputManager : BehaviourSingleton<OldInputManager>
+    public struct PlayerCommands
     {
-        private int _floorMask;
-
-        public bool IsReplay = false;
-        public float camRayLength = 100;
-
-        public bool hasHitFloor;
-        public LVector2 mousePos;
         public LVector2 inputUV;
-        public bool isInputFire;
-        public int skillId;
-        public bool isSpeedUp;
+        public byte skillId;
+        public bool isJump;
+        public byte ActorId;
+        public int Tick;
+        public bool IsMiss;
 
-        public static PlayerInput1 CurGameInput = new PlayerInput1();
-
-        public override void Start()
+        public void Reset()
         {
-            _floorMask = LayerMask.GetMask("Floor");
+            inputUV = LVector2.zero;
+            skillId = 0;
+            isJump = false;
+            ActorId = 0;
+            Tick = -1;
+            IsMiss = false;
+        }
+    }
+
+    public class InputManager
+    {
+        public static PlayerCommands CurrentInput = new PlayerCommands();
+
+        private static InputActions.GameplayMapActions _inputActionsMap;
+
+        public static void Init()
+        {
+            InputActions actions = new InputActions();
+            actions.Enable();
+            _inputActionsMap = actions.GameplayMap;
+            _inputActionsMap.Enable();
         }
 
-        public override void Update()
+        public static void Update()
         {
-            if (World.Instance != null && !IsReplay)
+            CurrentInput.Reset();
+
+            Vector2 move = Vector2.ClampMagnitude(_inputActionsMap.Move.ReadValue<Vector2>(), 1f);
+            CurrentInput.inputUV = move.ToLVector2();
+
+            if (_inputActionsMap.Jump.IsPressed())
             {
-                float h = Input.GetAxisRaw("Horizontal");
-                float v = Input.GetAxisRaw("Vertical");
-                inputUV = new LVector2(h.ToLFloat(), v.ToLFloat());
+                CurrentInput.isJump = true;
+            }
 
-                isInputFire = Input.GetButton("Fire1");
-                hasHitFloor = Input.GetMouseButtonDown(1);
-                if (hasHitFloor)
-                {
-                    Ray camRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-                    RaycastHit floorHit;
-                    if (Physics.Raycast(camRay, out floorHit, camRayLength, _floorMask))
-                    {
-                        mousePos = floorHit.point.ToLVector2XZ();
-                    }
-                }
-
-                skillId = 0;
-                for (int i = 0; i < 6; i++)
-                {
-                    if (Input.GetKey(KeyCode.Keypad1 + i))
-                    {
-                        skillId = i + 1;
-                    }
-                }
-
-                isSpeedUp = Input.GetKeyDown(KeyCode.Space);
-                CurGameInput = new PlayerInput1()
-                {
-                    mousePos = mousePos,
-                    inputUV = inputUV,
-                    isInputFire = isInputFire,
-                    skillId = skillId,
-                    isSpeedUp = isSpeedUp,
-                };
+            if (_inputActionsMap.Skill1.IsPressed())
+            {
+                CurrentInput.skillId++;
+            }
+            if (_inputActionsMap.Skill2.IsPressed())
+            {
+                CurrentInput.skillId++;
             }
         }
     }

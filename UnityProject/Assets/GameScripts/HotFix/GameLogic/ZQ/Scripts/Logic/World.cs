@@ -12,13 +12,14 @@ namespace Lockstep.Game
         public static World Instance { get; private set; }
         public bool IsPause { get; set; }
         public int Tick { get; set; }
-        public PlayerInput1[] PlayerInputs => GameStateService.Instance.GetPlayers().Select(a => a.input).ToArray();
+        public PlayerCommands[] PlayerInputs => GameStateService.Instance.GetPlayers().Select(a => a.input).ToArray();
         public static Player MyPlayer;
         public static object MyPlayerTrans => MyPlayer?.engineTransform;
         private List<IGameSystem> _systems = new List<IGameSystem>();
         private bool _hasStart = false;
 
         private Dictionary<int, GameObject> _id2Prefab = new Dictionary<int, GameObject>();
+        private InputManager _inputManager = null;
 
         public void RollbackTo(int tick, int maxContinueServerTick, bool isNeedClear = true)
         {
@@ -38,9 +39,10 @@ namespace Lockstep.Game
             Tick = tick;
         }
 
-        public void StartSimulate()
+        public void Init()
         {
             Instance = this;
+            _inputManager = new InputManager();
             RegisterSystems();
 
             foreach (var mgr in _systems)
@@ -49,7 +51,7 @@ namespace Lockstep.Game
             }
         }
 
-        public void StartGame(GameStartInfo gameStartInfo, int localPlayerId)
+        public void StartGame(int localPlayerId)
         {
             if (_hasStart) return;
             _hasStart = true;

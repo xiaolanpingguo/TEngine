@@ -14,7 +14,7 @@ namespace Lockstep.Game
             for (int i = 0; i < 3; i++)
             {
                 var configId = 100 + i;
-                var config = GameConfigService.Instance.GetEntityConfig(configId) as SpawnerConfig;
+                var config = GameConfigSingleton.Instance.GetEntityConfig(configId) as SpawnerConfig;
                 GameStateService.Instance.CreateEntity<Spawner>(configId, config.entity.Info.spawnPoint);
             }
 

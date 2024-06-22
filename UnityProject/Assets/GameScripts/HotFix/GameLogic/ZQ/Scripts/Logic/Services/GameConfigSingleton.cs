@@ -50,6 +50,5 @@ namespace Lockstep.Game
         public CollisionConfig CollisionConfig => _config.CollisionConfig;
         public string RecorderFilePath => _config.RecorderFilePath;
         public string DumpStrPath => _config.DumpStrPath;
-        public GameStartInfo ClientModeInfo => _config.ClientModeInfo;
     }
 }

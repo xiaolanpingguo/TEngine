@@ -9,7 +9,6 @@ namespace Lockstep.Game
     public class Game : BehaviourSingleton<Game>
     {
         private RepMissFrame _framesInfo;
-        private GameStartInfo _gameStartInfo;
 
         public string RecordPath;
         public int MaxRunTick = int.MaxValue;
@@ -39,19 +38,11 @@ namespace Lockstep.Game
             if (IsVideoMode)
             {
                 GameConfigSingleton.Instance.SnapshotFrameInterval = 20;
-                //OpenRecordFile(RecordPath);
-            }
-
-            if (IsVideoMode)
-            {
                 SimulatorService.Instance.OnEvent_BorderVideoFrame(_framesInfo);
-                SimulatorService.Instance.OnEvent_OnGameCreate(_gameStartInfo);
             }
             else if (IsClientMode)
             {
-                _gameStartInfo = GameConfigService.Instance.ClientModeInfo;
-                SimulatorService.Instance.OnEvent_OnGameCreate(_gameStartInfo);
-                SimulatorService.Instance.OnEvent_LevelLoadDone(_gameStartInfo);
+                SimulatorService.Instance.CreateGame(0, 1);
             }
         }
 

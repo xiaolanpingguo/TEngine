@@ -47,7 +47,6 @@ public partial class GameApp:Singleton<GameApp>
     private async UniTaskVoid StartGame()
     {
         await GameModule.Scene.LoadScene("Demo").ToUniTask();
-        OldInputManager.RegisterSelf();
         Game.RegisterSelf();
     }
 

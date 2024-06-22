@@ -40,7 +40,7 @@ namespace Lockstep.Game
         public override void Init()
         {
             _instance = this;
-            config = GameConfigService.Instance.CollisionConfig;
+            config = GameConfigSingleton.Instance.CollisionConfig;
 
             if (_instance != this)
             {

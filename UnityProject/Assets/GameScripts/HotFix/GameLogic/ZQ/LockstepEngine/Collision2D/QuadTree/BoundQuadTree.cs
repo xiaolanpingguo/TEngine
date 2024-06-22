@@ -84,8 +84,6 @@ namespace Lockstep.Framework
         {
             if (minNodeSize > initialWorldSize)
             {
-                Debug.Log("Minimum node size must be at least as big as the initial world size. Was: " +
-                                 minNodeSize + " Adjusted to: " + initialWorldSize);
                 minNodeSize = initialWorldSize;
             }
 
@@ -98,7 +96,6 @@ namespace Lockstep.Framework
 
         public void UpdateObj(ColliderProxy obj, LRect bound)
         {
-            LTLog.Info($"ColliderProxy UpdateObj {obj.Id} objBounds  {bound}");
             var node = GetNode(obj);
             if (node == null)
             {
@@ -138,7 +135,6 @@ namespace Lockstep.Framework
         /// <param name="objBounds">3D bounding box around the object.</param>
         public void Add(ColliderProxy obj, LRect objBounds)
         {
-            LTLog.Info($"ColliderProxy Add {obj.Id} objBounds  {objBounds}");
             // Add object or expand the octree until it can be added
             int count = 0; // Safety check against infinite/excessive growth
             while (!rootNode.Add(obj, objBounds))
@@ -162,7 +158,6 @@ namespace Lockstep.Framework
         /// <returns>True if the object was removed successfully.</returns>
         public bool Remove(ColliderProxy obj)
         {
-            LTLog.Info($"ColliderProxy Remove {obj.Id} ");
             bool removed = rootNode.Remove(obj);
 
             // See if we can shrink the octree down now that we've removed the item
@@ -183,7 +178,6 @@ namespace Lockstep.Framework
         /// <returns>True if the object was removed successfully.</returns>
         public bool Remove(ColliderProxy obj, LRect objBounds)
         {
-            LTLog.Info($"ColliderProxy Add {obj.Id} objBounds  {objBounds}");
             bool removed = rootNode.Remove(obj, objBounds);
 
             // See if we can shrink the octree down now that we've removed the item
@@ -277,7 +271,6 @@ namespace Lockstep.Framework
         /// <param name="direction">Direction to grow.</param>
         void Grow(LVector2 direction)
         {
-            LTLog.Info("Grow");
             int xDirection = direction.x >= 0 ? 1 : -1;
             int yDirection = direction.y >= 0 ? 1 : -1;
             BoundsQuadTreeNode oldRoot = rootNode;
@@ -318,7 +311,6 @@ namespace Lockstep.Framework
         /// </summary>
         void Shrink()
         {
-            LTLog.Info("Shrink");
             rootNode = rootNode.ShrinkIfPossible(initialSize);
         }
     }

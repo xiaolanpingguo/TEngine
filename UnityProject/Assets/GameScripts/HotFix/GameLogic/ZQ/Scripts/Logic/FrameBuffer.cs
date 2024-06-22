@@ -96,8 +96,8 @@ namespace Lockstep.Game
         private int _spaceRollbackNeed;
         private int _maxServerOverFrameCount;
 
-        private ServerFrame1[] _serverBuffer;
-        private ServerFrame1[] _clientBuffer;
+        private ServerFrame[] _serverBuffer;
+        private ServerFrame[] _clientBuffer;
 
         //ping 
         public int PingVal { get; private set; }
@@ -133,8 +133,8 @@ namespace Lockstep.Game
             this._maxClientPredictFrameCount = maxClientPredictFrameCount;
             _spaceRollbackNeed = snapshotFrameInterval * 2;
             _maxServerOverFrameCount = bufferSize - _spaceRollbackNeed;
-            _serverBuffer = new ServerFrame1[bufferSize];
-            _clientBuffer = new ServerFrame1[bufferSize];
+            _serverBuffer = new ServerFrame[bufferSize];
+            _clientBuffer = new ServerFrame[bufferSize];
         }
 
         public void SetClientTick(int tick)
@@ -142,27 +142,27 @@ namespace Lockstep.Game
             _nextClientTick = tick + 1;
         }
 
-        public void PushLocalFrame(ServerFrame1 frame)
+        public void PushLocalFrame(ServerFrame frame)
         {
             var sIdx = frame.tick % _bufferSize;
             UnityEngine.Debug.Assert(_clientBuffer[sIdx] == null || _clientBuffer[sIdx].tick <= frame.tick, "Push local frame error!");
             _clientBuffer[sIdx] = frame;
         }
 
-        public void PushMissServerFrames(ServerFrame1[] frames, bool isNeedDebugCheck = true)
+        public void PushMissServerFrames(ServerFrame[] frames, bool isNeedDebugCheck = true)
         {
             PushServerFrames(frames, isNeedDebugCheck);
             //_networkService.SendMissFrameRepAck(MaxContinueServerTick + 1);
         }
 
-        public void ForcePushDebugFrame(ServerFrame1 data)
+        public void ForcePushDebugFrame(ServerFrame data)
         {
             var targetIdx = data.tick % _bufferSize;
             _serverBuffer[targetIdx] = data;
             _clientBuffer[targetIdx] = data;
         }
 
-        public void PushServerFrames(ServerFrame1[] frames, bool isNeedDebugCheck = true)
+        public void PushServerFrames(ServerFrame[] frames, bool isNeedDebugCheck = true)
         {
             var count = frames.Length;
             for (int i = 0; i < count; i++)
@@ -288,7 +288,7 @@ namespace Lockstep.Game
             }
         }
 
-        public void SendInput(PlayerInput1 input)
+        public void SendInput(PlayerCommands input)
         {
             _tick2SendTimestamp[input.Tick] = LTime.realtimeSinceStartupMS;
 #if DEBUG_SHOW_INPUT
@@ -302,7 +302,7 @@ namespace Lockstep.Game
             // _networkService.SendInput(input);
         }
 
-        public ServerFrame1 GetFrame(int tick)
+        public ServerFrame GetFrame(int tick)
         {
             var sFrame = GetServerFrame(tick);
             if (sFrame != null)
@@ -313,7 +313,7 @@ namespace Lockstep.Game
             return GetLocalFrame(tick);
         }
 
-        public ServerFrame1 GetServerFrame(int tick)
+        public ServerFrame GetServerFrame(int tick)
         {
             if (tick > MaxServerTickInBuffer)
             {
@@ -323,7 +323,7 @@ namespace Lockstep.Game
             return _GetFrame(_serverBuffer, tick);
         }
 
-        public ServerFrame1 GetLocalFrame(int tick)
+        public ServerFrame GetLocalFrame(int tick)
         {
             if (tick >= _nextClientTick)
             {
@@ -333,7 +333,7 @@ namespace Lockstep.Game
             return _GetFrame(_clientBuffer, tick);
         }
 
-        private ServerFrame1 _GetFrame(ServerFrame1[] buffer, int tick)
+        private ServerFrame _GetFrame(ServerFrame[] buffer, int tick)
         {
             var idx = tick % _bufferSize;
             var frame = buffer[idx];

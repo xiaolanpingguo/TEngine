@@ -20,11 +20,10 @@ namespace Lockstep.Game
         public override void BindEntity(BaseEntity e)
         {
             base.BindEntity(e);
-            config = GameConfigService.Instance.GetSkillConfig(configId);
+            config = GameConfigSingleton.Instance.GetSkillConfig(configId);
             if (config == null) return;
             if (config.skillInfos.Count != _skills.Count)
             {
-                //Debug.LogError("Skill count diff");
                 _skills.Clear();
                 foreach (var info in config.skillInfos)
                 {

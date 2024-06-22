@@ -30,7 +30,7 @@ namespace Lockstep.Game
         public override void BindEntity(BaseEntity baseEntity)
         {
             base.BindEntity(baseEntity);
-            config = GameConfigService.Instance.GetAnimatorConfig(configId);
+            config = GameConfigSingleton.Instance.GetAnimatorConfig(configId);
             if (config == null) return;
             UpdateBindInfo();
             _animNames.Clear();

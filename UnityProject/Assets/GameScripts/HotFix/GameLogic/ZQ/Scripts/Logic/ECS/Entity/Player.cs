@@ -8,7 +8,7 @@ namespace Lockstep.Game
     public partial class Player : Entity, IAfterBackup
     {
         public int localId;
-        public PlayerInput1 input = new PlayerInput1();
+        public PlayerCommands input = new PlayerCommands();
         public CMover mover = new CMover();
 
         protected override void BindRef()

@@ -131,7 +131,6 @@ namespace Lockstep.Game
         public CollisionConfig CollisionConfig;
         public string RecorderFilePath;
         public string DumpStrPath;
-        public GameStartInfo ClientModeInfo = new GameStartInfo();
 
         public List<PlayerConfig> player = new List<PlayerConfig>();
         public List<EnemyConfig> enemies = new List<EnemyConfig>();

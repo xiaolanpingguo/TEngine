@@ -265,7 +265,7 @@ namespace Lockstep.Game
             //    //aabb
             //    var pos = entity?.transform.TransformPoint(col.pos) ?? col.pos;
             //    Gizmos.DrawCube(pos.ToVector3XZ(LFloat.one), col.size.ToVector3XZ(LFloat.one));
-            //    DebugExtension.DebugLocalCube(Matrix4x4.TRS(
+            //    DebugDraw.DebugLocalCube(Matrix4x4.TRS(
             //            pos.ToVector3XZ(LFloat.one),
             //            Quaternion.Euler(0, entity.transform.deg.ToFloat(), 0),
             //            Vector3.one),

@@ -10,7 +10,7 @@ namespace Lockstep.Game
     {
         public Entity entity => (Entity)baseEntity;
         public Player player => (Player)baseEntity;
-        public PlayerInput1 input => player.input;
+        public PlayerCommands input => player.input;
 
 
         static LFloat _sqrStopDist = new LFloat(true, 40);
