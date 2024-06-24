@@ -55,8 +55,11 @@ namespace Lockstep.Game
 
         public virtual void TakeDamage(BaseEntity atker, int amount, LVector3 hitPoint)
         {
-            if (isInvincible || isDead) return;
-            SimulatorService.Instance.Trace($"{atker.EntityId} attack {EntityId}  damage:{amount} hitPos:{hitPoint}");
+            if (isInvincible || isDead)
+            {
+                return;
+            }
+
             curHealth -= amount;
             EntityView?.OnTakeDamage(amount, hitPoint);
             OnTakeDamage(amount, hitPoint);
@@ -74,7 +77,7 @@ namespace Lockstep.Game
         {
             EntityView?.OnDead();
             PhysicSystem.Instance.RemoveCollider(this);
-            GameStateService.Instance.DestroyEntity(this);
+            World.Instance.DestroyEntity(this);
         }
     }
 }

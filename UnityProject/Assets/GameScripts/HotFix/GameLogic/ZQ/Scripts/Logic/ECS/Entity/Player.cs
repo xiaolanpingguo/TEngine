@@ -5,7 +5,7 @@ using Lockstep.Framework;
 namespace Lockstep.Game
 {
     [Serializable]
-    public partial class Player : Entity, IAfterBackup
+    public partial class Player : Entity
     {
         public int localId;
         public PlayerCommands input = new PlayerCommands();
@@ -24,10 +24,6 @@ namespace Lockstep.Game
             {
                 Fire(input.skillId);
             }
-        }
-
-        public void OnAfterDeserialize()
-        {
         }
     }
 }

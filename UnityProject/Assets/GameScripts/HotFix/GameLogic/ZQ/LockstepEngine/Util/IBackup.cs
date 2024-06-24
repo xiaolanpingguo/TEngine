@@ -18,9 +18,4 @@ namespace Lockstep.Framework
     {
         void DumpStr(StringBuilder sb, string prefix);
     }
-
-    public interface IAfterBackup
-    {
-        void OnAfterDeserialize();
-    }
 }

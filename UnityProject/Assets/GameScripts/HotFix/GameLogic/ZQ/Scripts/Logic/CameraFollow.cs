@@ -25,7 +25,7 @@ namespace Lockstep.Game
         {
             if (_target == null)
             {
-                target = World.MyPlayerTrans as Transform;
+                target = World.MyPlayer?.engineTransform as Transform;
             }
 
             if (_target == null)

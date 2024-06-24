@@ -13,7 +13,7 @@ namespace Lockstep.Framework
     }
 
     [Serializable]
-    public partial class CTransform2D : IComponent, IAfterBackup
+    public partial class CTransform2D : IComponent
     {
         public CTransform2D() { }
         public CTransform2D(LVector2 pos, LFloat y) : this(pos, y, LFloat.zero) { }
@@ -134,10 +134,6 @@ namespace Lockstep.Framework
         public override string ToString()
         {
             return $"(deg:{deg} pos:{pos} y:{y})";
-        }
-
-        public void OnAfterDeserialize()
-        {
         }
     }
 }

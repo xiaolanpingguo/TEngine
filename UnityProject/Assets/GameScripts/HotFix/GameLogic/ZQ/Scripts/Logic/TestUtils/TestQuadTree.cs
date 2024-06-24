@@ -41,7 +41,7 @@ namespace Lockstep.Game
                 minNodeSize = minNodeSize.ToLFloat(),
                 loosenessval = loosenessval.ToLFloat()
             };
-            collisionSystem.DoStart(InterestingMasks, allTypes);
+            collisionSystem.Start(InterestingMasks, allTypes);
             //init prefab 
             const int size = 4;
 
@@ -146,7 +146,7 @@ namespace Lockstep.Game
         private void Update()
         {
             collisionSystem.ShowTreeId = showTreeId;
-            collisionSystem.DoUpdate(Time.deltaTime.ToLFloat());
+            collisionSystem.Update(Time.deltaTime.ToLFloat());
             ////class version 1.41ms
             //Profiler.BeginSample("CheckCollision");
             //CheckCollision();

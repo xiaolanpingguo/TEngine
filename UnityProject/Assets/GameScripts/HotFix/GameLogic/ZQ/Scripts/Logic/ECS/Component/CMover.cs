@@ -6,12 +6,11 @@ namespace Lockstep.Game
 {
 
     [Serializable]
-    public partial class CMover : BaseComponent, IAfterBackup
+    public partial class CMover : BaseComponent
     {
         public Entity entity => (Entity)baseEntity;
         public Player player => (Player)baseEntity;
         public PlayerCommands input => player.input;
-
 
         static LFloat _sqrStopDist = new LFloat(true, 40);
         public LFloat speed => player.moveSpd;
@@ -35,10 +34,6 @@ namespace Lockstep.Game
             }
 
             hasReachTarget = !needChase;
-        }
-
-        public void OnAfterDeserialize()
-        {
         }
     }
 }

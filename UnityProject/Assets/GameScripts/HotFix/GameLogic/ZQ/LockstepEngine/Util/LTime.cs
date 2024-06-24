@@ -21,12 +21,12 @@ namespace Lockstep.Framework
         private static DateTime _initTime;
         private static DateTime lastFrameTime;
 
-        public static void DoStart()
+        public static void Init()
         {
             _initTime = DateTime.Now;
         }
 
-        public static void DoUpdate()
+        public static void Update()
         {
             var now = DateTime.Now;
             deltaTime = (float)((now - lastFrameTime).TotalSeconds);

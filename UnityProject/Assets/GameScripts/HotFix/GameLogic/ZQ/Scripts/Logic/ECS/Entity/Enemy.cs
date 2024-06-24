@@ -5,7 +5,7 @@ using Lockstep.Framework;
 namespace Lockstep.Game
 {
     [Serializable]
-    public partial class Enemy : Entity, IAfterBackup
+    public partial class Enemy : Entity
     {
         public CBrain brain = new CBrain();
 
@@ -15,10 +15,6 @@ namespace Lockstep.Game
             RegisterComponent(brain);
             moveSpd = 2;
             turnSpd = 150;
-        }
-
-        public void OnAfterDeserialize()
-        {
         }
     }
 }

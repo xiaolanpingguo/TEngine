@@ -34,7 +34,7 @@ namespace Lockstep.Framework
         public bool[] InterestingMasks;
         public int LayerCount;
 
-        public void DoStart(bool[] interestingMasks, int[] allTypes)
+        public void Start(bool[] interestingMasks, int[] allTypes)
         {
             LayerCount = allTypes.Length;
             this.InterestingMasks = interestingMasks;
@@ -128,7 +128,7 @@ namespace Lockstep.Framework
 
 
         //public List<>
-        public void DoUpdate(LFloat deltaTime)
+        public void Update(LFloat deltaTime)
         {
             tempLst.Clear();
             //deal layer

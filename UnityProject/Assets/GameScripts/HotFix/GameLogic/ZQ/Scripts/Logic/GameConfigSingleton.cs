@@ -6,13 +6,9 @@ namespace Lockstep.Game
 {
     public class GameConfigSingleton : Singleton<GameConfigSingleton>
     {
-        public bool IsVideoLoading { get; set; }
-        public bool IsVideoMode { get; set; }
-        public bool IsRunVideo { get; set; }
-        public bool IsClientMode { get; set; }
-        public bool IsReconnecting { get; set; }
-        public bool IsPursueFrame { get; set; }
-        public int SnapshotFrameInterval { get; set; }
+        public CollisionConfig CollisionConfig => _config.CollisionConfig;
+        public string RecorderFilePath => _config.RecorderFilePath;
+        public string DumpStrPath => _config.DumpStrPath;
 
         private GameConfig _config;
         public string configPath = "GameConfig";
@@ -46,9 +42,5 @@ namespace Lockstep.Game
         {
             return _config.GetSkillConfig(id - 1);
         }
-
-        public CollisionConfig CollisionConfig => _config.CollisionConfig;
-        public string RecorderFilePath => _config.RecorderFilePath;
-        public string DumpStrPath => _config.DumpStrPath;
     }
 }

@@ -13,25 +13,20 @@ namespace Lockstep.Game
     {
         private static PhysicSystem _instance;
         public static PhysicSystem Instance => _instance;
-        ICollisionSystem collisionSystem;
+        private CollisionSystem _collisionSystem;
         public CollisionConfig config;
 
         static Dictionary<int, ColliderPrefab> _fabId2ColPrefab = new Dictionary<int, ColliderPrefab>();
         static Dictionary<int, int> _fabId2Layer = new Dictionary<int, int>();
 
-        static Dictionary<ILPTriggerEventHandler, ColliderProxy> _mono2ColProxy =
-            new Dictionary<ILPTriggerEventHandler, ColliderProxy>();
-
-        static Dictionary<ColliderProxy, ILPTriggerEventHandler> _colProxy2Mono =
-            new Dictionary<ColliderProxy, ILPTriggerEventHandler>();
+        static Dictionary<ILPTriggerEventHandler, ColliderProxy> _mono2ColProxy = new ();
+        static Dictionary<ColliderProxy, ILPTriggerEventHandler> _colProxy2Mono = new ();
 
         public bool[] collisionMatrix => config.collisionMatrix;
         public LVector3 pos => config.pos;
         public LFloat worldSize => config.worldSize;
         public LFloat minNodeSize => config.minNodeSize;
         public LFloat loosenessval => config.loosenessval;
-
-        private LFloat halfworldSize => worldSize / 2 - 5;
 
         private int[] allTypes = new int[] {0, 1, 2};
 
@@ -48,7 +43,7 @@ namespace Lockstep.Game
                 return;
             }
 
-            var collisionSystem = new CollisionSystem()
+            _collisionSystem = new CollisionSystem()
             {
                 worldSize = worldSize,
                 pos = pos,
@@ -56,16 +51,14 @@ namespace Lockstep.Game
                 loosenessval = loosenessval
             };
 
-            SimulatorService.Instance.Trace($"worldSize:{worldSize} pos:{pos} minNodeSize:{minNodeSize} loosenessval:{loosenessval}");
-            this.collisionSystem = collisionSystem;
-            collisionSystem.DoStart(collisionMatrix, allTypes);
-            collisionSystem.funcGlobalOnTriggerEvent += GlobalOnTriggerEvent;
+            _collisionSystem.Start(collisionMatrix, allTypes);
+            _collisionSystem.funcGlobalOnTriggerEvent += GlobalOnTriggerEvent;
         }
 
         public override void Update(LFloat deltaTime)
         {
-            collisionSystem.ShowTreeId = showTreeId;
-            collisionSystem.DoUpdate(deltaTime);
+            _collisionSystem.ShowTreeId = showTreeId;
+            _collisionSystem.Update(deltaTime);
         }
 
         public static void GlobalOnTriggerEvent(ColliderProxy a, ColliderProxy b, ECollisionEvent type)
@@ -81,10 +74,9 @@ namespace Lockstep.Game
             }
         }
 
-
         public static ColliderProxy GetCollider(int id)
         {
-            return _instance.collisionSystem.GetCollider(id);
+            return _instance._collisionSystem.GetCollider(id);
         }
 
         public static bool Raycast(int layerMask, Ray2D ray, out LRaycastHit2D ret)
@@ -120,22 +112,19 @@ namespace Lockstep.Game
 
         private void _QueryRegion(int layerType, LVector2 pos, LVector2 size, LVector2 forward, FuncCollision callback)
         {
-            collisionSystem.QueryRegion(layerType, pos, size, forward, callback);
+            _collisionSystem.QueryRegion(layerType, pos, size, forward, callback);
         }
 
         private void _QueryRegion(int layerType, LVector2 pos, LFloat radius, FuncCollision callback)
         {
-            collisionSystem.QueryRegion(layerType, pos, radius, callback);
+            _collisionSystem.QueryRegion(layerType, pos, radius, callback);
         }
 
         public bool DoRaycast(int layerMask, Ray2D ray, out LFloat t, out int id, LFloat maxDistance)
         {
-            Profiler.BeginSample("DoRaycast ");
-            var ret = collisionSystem.Raycast(layerMask, ray, out t, out id, maxDistance);
-            Profiler.EndSample();
+            var ret = _collisionSystem.Raycast(layerMask, ray, out t, out id, maxDistance);
             return ret;
         }
-
 
         public void RigisterPrefab(int prefabId, int val)
         {
@@ -197,7 +186,7 @@ namespace Lockstep.Game
                 _colProxy2Mono[proxy] = eventHandler;
             }
 
-            collisionSystem.AddCollider(proxy);
+            _collisionSystem.AddCollider(proxy);
         }
 
         public void RemoveCollider(ILPTriggerEventHandler handler)
@@ -212,12 +201,7 @@ namespace Lockstep.Game
 
         public void RemoveCollider(ColliderProxy collider)
         {
-            collisionSystem.RemoveCollider(collider);
-        }
-
-        void OnDrawGizmos()
-        {
-            collisionSystem?.DrawGizmos();
+            _collisionSystem.RemoveCollider(collider);
         }
     }
 }

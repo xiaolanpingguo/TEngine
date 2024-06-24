@@ -5,7 +5,7 @@ using Lockstep.Framework;
 namespace Lockstep.Game
 {
     [Serializable]
-    public partial class Spawner : BaseEntity, IAfterBackup
+    public partial class Spawner : BaseEntity
     {
         public SpawnerInfo Info = new SpawnerInfo();
         public LFloat Timer;
@@ -27,17 +27,13 @@ namespace Lockstep.Game
 
         public void Spawn()
         {
-            if (GameStateService.Instance.CurEnemyCount >= GameStateService.Instance.MaxEnemyCount)
+            if (World.Instance.CurEnemyCount >= World.Instance.MaxEnemyCount)
             {
                 return;
             }
 
-            GameStateService.Instance.CurEnemyCount++;
-            GameStateService.Instance.CreateEntity<Enemy>(Info.prefabId, Info.spawnPoint);
-        }
-
-        public void OnAfterDeserialize()
-        {
+            World.Instance.CurEnemyCount++;
+            World.Instance.CreateEntity<Enemy>(Info.prefabId, Info.spawnPoint);
         }
     }
 }

@@ -20,7 +20,7 @@ namespace Lockstep.Game
     }
 
     [Serializable]
-    public partial class Skill : INeedBackup, IAfterBackup
+    public partial class Skill : INeedBackup
     {
         private static readonly HashSet<Entity> _tempEntities = new HashSet<Entity>();
 
@@ -160,7 +160,7 @@ namespace Lockstep.Game
             if (col.radius > 0)
             {
                 var colPos = entity.transform.TransformPoint(col.pos);
-                foreach (var e in GameStateService.Instance.GetEnemies())
+                foreach (var e in World.Instance.GetEnemies())
                 {
                     var targetCenter = e.transform.pos;
                     if ((targetCenter - colPos).sqrMagnitude < col.radius * col.radius)
@@ -271,10 +271,6 @@ namespace Lockstep.Game
             //            Vector3.one),
             //        col.size.ToVector3XZ(LFloat.one), Gizmos.color);
             //}
-        }
-
-        public void OnAfterDeserialize()
-        {
         }
     }
 

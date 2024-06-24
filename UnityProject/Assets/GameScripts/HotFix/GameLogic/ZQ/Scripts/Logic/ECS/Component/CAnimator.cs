@@ -8,7 +8,7 @@ namespace Lockstep.Game
 {
 
     [Serializable]
-    public partial class CAnimator : BaseComponent, IAfterBackup
+    public partial class CAnimator : BaseComponent
     {
         public int configId;
 
@@ -90,7 +90,6 @@ namespace Lockstep.Game
                 return;
             }
 
-            SimulatorService.Instance.Trace($"{baseEntity.EntityId} PlayAnim {name} rawName {_curAnimName}");
             var hasChangedAnim = _curAnimName != name;
             _curAnimName = name;
             _curAnimIdx = idx;
@@ -110,7 +109,6 @@ namespace Lockstep.Game
             if (config == null) return;
             var idx = GetTimeIdx(timer);
             _intiPos = transform.Pos3 - curAnimInfo[idx].pos;
-            SimulatorService.Instance.Trace($"{baseEntity.EntityId} SetTime  idx:{idx} intiPos {baseEntity.transform.Pos3}", true);
             this._timer = timer;
         }
 
@@ -126,10 +124,6 @@ namespace Lockstep.Game
             var idx = (int)(timer / AnimatorConfig.FrameInterval);
             idx = System.Math.Min(curAnimInfo.OffsetCount - 1, idx);
             return idx;
-        }
-
-        public void OnAfterDeserialize()
-        {
         }
     }
 }

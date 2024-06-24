@@ -14,7 +14,7 @@ namespace Lockstep.Game
     {
         public override void Update(LFloat deltaTime)
         {
-            foreach (var player in GameStateService.Instance.GetPlayers())
+            foreach (var player in World.Instance.GetPlayers())
             {
                 player.DoUpdate(deltaTime);
             }

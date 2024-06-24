@@ -5,8 +5,8 @@ namespace Lockstep.Game
 {
     public class EnemySystem : IGameSystem
     {
-        private Spawner[] Spawners => GameStateService.Instance.GetSpawners();
-        private Enemy[] AllEnemy => GameStateService.Instance.GetEnemies();
+        private Spawner[] Spawners => World.Instance.GetSpawners();
+        private Enemy[] AllEnemy => World.Instance.GetEnemies();
 
 
         public override void Init()
@@ -15,7 +15,7 @@ namespace Lockstep.Game
             {
                 var configId = 100 + i;
                 var config = GameConfigSingleton.Instance.GetEntityConfig(configId) as SpawnerConfig;
-                GameStateService.Instance.CreateEntity<Spawner>(configId, config.entity.Info.spawnPoint);
+                World.Instance.CreateEntity<Spawner>(configId, config.entity.Info.spawnPoint);
             }
 
             foreach (var spawner in Spawners)

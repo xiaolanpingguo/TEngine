@@ -4,8 +4,8 @@ namespace Lockstep.Framework
 
     public interface ICollisionSystem
     {
-        void DoStart(bool[] interestingMasks, int[] allTypes);
-        void DoUpdate(LFloat deltaTime);
+        void Start(bool[] interestingMasks, int[] allTypes);
+        void Update(LFloat deltaTime);
         ColliderProxy GetCollider(int id);
         void AddCollider(ColliderProxy collider);
         void RemoveCollider(ColliderProxy collider);

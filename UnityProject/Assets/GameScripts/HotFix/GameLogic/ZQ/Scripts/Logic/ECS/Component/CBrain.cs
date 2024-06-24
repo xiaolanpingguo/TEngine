@@ -5,7 +5,7 @@ using Lockstep.Framework;
 namespace Lockstep.Game
 {
     [Serializable]
-    public partial class CBrain : BaseComponent, IAfterBackup
+    public partial class CBrain : BaseComponent
     {
         public Entity entity => (Entity)baseEntity;
         public Entity target { get; private set; }
@@ -17,7 +17,7 @@ namespace Lockstep.Game
         public override void BindEntity(BaseEntity e)
         {
             base.BindEntity(e);
-            target = GameStateService.Instance.GetEntity(targetId) as Entity;
+            target = World.Instance.GetEntity(targetId) as Entity;
         }
 
         public override void DoUpdate(LFloat deltaTime)
@@ -28,7 +28,7 @@ namespace Lockstep.Game
             }
 
             //find target
-            var allPlayer = GameStateService.Instance.GetPlayers();
+            var allPlayer = World.Instance.GetPlayers();
             var minDist = LFloat.MaxValue;
             Entity minTarget = null;
             foreach (var player in allPlayer)
@@ -79,10 +79,6 @@ namespace Lockstep.Game
                     target.TakeDamage(entity, entity.damage, target.transform.Pos3);
                 }
             }
-        }
-
-        public void OnAfterDeserialize()
-        {
         }
     }
 }

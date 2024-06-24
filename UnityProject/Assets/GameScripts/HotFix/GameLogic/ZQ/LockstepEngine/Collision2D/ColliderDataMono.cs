@@ -11,7 +11,7 @@ namespace Lockstep.Framework
 
 
     [Serializable]
-    public partial class ColliderData :IComponent, IAfterBackup
+    public partial class ColliderData :IComponent
     {
         [Header("Offset")]
         public LFloat y;
@@ -23,9 +23,5 @@ namespace Lockstep.Framework
         public LVector2 size;
         public LVector2 up;
         public LFloat deg;
-
-        public void OnAfterDeserialize()
-        {
-        }
     }
 }

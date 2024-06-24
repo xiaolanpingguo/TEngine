@@ -6,7 +6,7 @@ namespace Lockstep.Framework
     public delegate void OnFloorResultCallback(bool isOnFloor);
 
     [Serializable]
-    public partial class CRigidbody : IComponent, IAfterBackup
+    public partial class CRigidbody : IComponent
     {
         public CTransform2D transform { get; private set; }
         public static LFloat G = new LFloat(10);
@@ -130,10 +130,6 @@ namespace Lockstep.Framework
         private bool TestOnWall(ref LVector3 pos)
         {
             return false; //TODO check with scene
-        }
-
-        public void OnAfterDeserialize()
-        {
         }
     }
 }

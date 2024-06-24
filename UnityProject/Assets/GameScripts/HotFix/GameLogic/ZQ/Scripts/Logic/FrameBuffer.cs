@@ -23,23 +23,23 @@ namespace Lockstep.Game
         /// 帧率
         public const int FRAME_RATE = 33;
         public const int UPDATE_DELTATIME = 30;
+
+        public const int PreSendInputCount = 1;
     }
 
     public class FrameBuffer
     {
         public class PredictCountHelper
         {
-            public PredictCountHelper(SimulatorService simulatorService, FrameBuffer cmdBuffer)
+            public PredictCountHelper(FrameBuffer cmdBuffer)
             {
                 this._cmdBuffer = cmdBuffer;
-                this._simulatorService = simulatorService;
             }
 
             public int missTick = -1;
             public int nextCheckMissTick = 0;
             public bool hasMissTick;
 
-            private SimulatorService _simulatorService;
             private FrameBuffer _cmdBuffer;
             private float _timer;
             private float _checkInterval = 0.5f;
@@ -48,47 +48,44 @@ namespace Lockstep.Game
             private float _targetPreSendTick;
             private float _oldPercent = 0.6f;
 
-            public void DoUpdate(float deltaTime)
+            public void Update(float deltaTime)
             {
-                _timer += deltaTime;
-                if (_timer > _checkInterval)
-                {
-                    _timer = 0;
-                    if (!hasMissTick)
-                    {
-                        var preSend = _cmdBuffer._maxPing * 1.0f / NetworkDefine.UPDATE_DELTATIME;
-                        _targetPreSendTick = _targetPreSendTick * _oldPercent + preSend * (1 - _oldPercent);
+                //_timer += deltaTime;
+                //if (_timer > _checkInterval)
+                //{
+                //    _timer = 0;
+                //    if (!hasMissTick)
+                //    {
+                //        var preSend = _cmdBuffer._maxPing * 1.0f / NetworkDefine.UPDATE_DELTATIME;
+                //        _targetPreSendTick = _targetPreSendTick * _oldPercent + preSend * (1 - _oldPercent);
 
-                        var targetPreSendTick = LMath.Clamp((int)System.Math.Ceiling(_targetPreSendTick), 1, 60);
+                //        var targetPreSendTick = LMath.Clamp((int)System.Math.Ceiling(_targetPreSendTick), 1, 60);
 
-                        Log.Warning(
-                            $"Shrink preSend buffer old:{_simulatorService.PreSendInputCount} new:{_targetPreSendTick} " +
-                            $"PING: min:{_cmdBuffer._minPing} max:{_cmdBuffer._maxPing} avg:{_cmdBuffer.PingVal}");
+                //        Log.Warning(
+                //            $"Shrink preSend buffer old:{NetworkDefine.PreSendInputCount} new:{_targetPreSendTick} " +
+                //            $"PING: min:{_cmdBuffer._minPing} max:{_cmdBuffer._maxPing} avg:{_cmdBuffer.PingVal}");
 
-                        _simulatorService.PreSendInputCount = targetPreSendTick;
-                    }
+                //        NetworkDefine.PreSendInputCount = targetPreSendTick;
+                //    }
 
-                    hasMissTick = false;
-                }
+                //    hasMissTick = false;
+                //}
 
-                if (missTick != -1)
-                {
-                    var delayTick = _simulatorService.TargetTick - missTick;
-                    var targetPreSendTick = _simulatorService.PreSendInputCount + (int)System.Math.Ceiling(delayTick * _incPercent);
-                    targetPreSendTick = LMath.Clamp(targetPreSendTick, 1, 60);
+                //if (missTick != -1)
+                //{
+                //    var delayTick = NetworkDefine.TargetTick - missTick;
+                //    var targetPreSendTick = NetworkDefine.PreSendInputCount + (int)System.Math.Ceiling(delayTick * _incPercent);
+                //    targetPreSendTick = LMath.Clamp(targetPreSendTick, 1, 60);
 
-                    Log.Warning($"Expend preSend buffer old:{_simulatorService.PreSendInputCount} new:{targetPreSendTick}");
+                //    Log.Warning($"Expend preSend buffer old:{NetworkDefine.PreSendInputCount} new:{targetPreSendTick}");
 
-                    _simulatorService.PreSendInputCount = targetPreSendTick;
-                    nextCheckMissTick = _simulatorService.TargetTick;
-                    missTick = -1;
-                    hasMissTick = true;
-                }
+                //    NetworkDefine.PreSendInputCount = targetPreSendTick;
+                //    nextCheckMissTick = NetworkDefine.TargetTick;
+                //    missTick = -1;
+                //    hasMissTick = true;
+                //}
             }
         }
-
-        /// for debug
-        public static byte __debugMainActorID;
 
         //buffers
         private int _maxClientPredictFrameCount;
@@ -123,12 +120,10 @@ namespace Lockstep.Game
         public byte LocalId;
 
         private PredictCountHelper _predictHelper;
-        private SimulatorService _simulatorService;
 
-        public FrameBuffer(SimulatorService _simulatorService, int bufferSize, int snapshotFrameInterval, int maxClientPredictFrameCount)
+        public FrameBuffer(int bufferSize, int snapshotFrameInterval, int maxClientPredictFrameCount)
         {
-            this._simulatorService = _simulatorService;
-            _predictHelper = new PredictCountHelper(_simulatorService, this);
+            _predictHelper = new PredictCountHelper(this);
             this._bufferSize = bufferSize;
             this._maxClientPredictFrameCount = maxClientPredictFrameCount;
             _spaceRollbackNeed = snapshotFrameInterval * 2;
@@ -211,11 +206,11 @@ namespace Lockstep.Game
             }
         }
 
-        public void DoUpdate(float deltaTime)
+        public void Update(float deltaTime)
         {
             //_networkService.SendPing(_simulatorService.LocalActorId, LTime.realtimeSinceStartupMS);
-            _predictHelper.DoUpdate(deltaTime);
-            int worldTick = _simulatorService.World.Tick;
+            _predictHelper.Update(deltaTime);
+            int worldTick = World.Instance.Tick;
             UpdatePingVal(deltaTime);
 
             //Debug.Assert(nextTickToCheck <= nextClientTick, "localServerTick <= localClientTick ");
@@ -253,7 +248,11 @@ namespace Lockstep.Game
             }
 
             MaxContinueServerTick = tick - 1;
-            if (MaxContinueServerTick <= 0) return;
+            if (MaxContinueServerTick <= 0)
+            {
+                return;
+            }
+
             if (MaxContinueServerTick < CurTickInServer // has some middle frame pack was lost
                 || _nextClientTick > MaxContinueServerTick + (_maxClientPredictFrameCount - 3) //client has predict too much
             )
@@ -265,27 +264,24 @@ namespace Lockstep.Game
 
         private void UpdatePingVal(float deltaTime)
         {
-            _pingTimer += deltaTime;
-            if (_pingTimer > 0.5f)
-            {
-                _pingTimer = 0;
-                DelayVal = (int)(_delays.Sum() / LMath.Max(_delays.Count, 1));
-                _delays.Clear();
-                PingVal = (int)(_pings.Sum() / LMath.Max(_pings.Count, 1));
-                _pings.Clear();
+            //_pingTimer += deltaTime;
+            //if (_pingTimer > 0.5f)
+            //{
+            //    _pingTimer = 0;
+            //    DelayVal = (int)(_delays.Sum() / LMath.Max(_delays.Count, 1));
+            //    _delays.Clear();
+            //    PingVal = (int)(_pings.Sum() / LMath.Max(_pings.Count, 1));
+            //    _pings.Clear();
 
-                if (_minPing < _historyMinPing && _simulatorService._gameStartTimestampMs != -1)
-                {
-                    _historyMinPing = _minPing;
-#if UNITY_EDITOR
-                    //Debug.LogWarning($"Recalc _gameStartTimestampMs {_simulatorService._gameStartTimestampMs} _guessServerStartTimestamp:{_guessServerStartTimestamp}");
-#endif
-                    _simulatorService._gameStartTimestampMs = LMath.Min(_guessServerStartTimestamp, _simulatorService._gameStartTimestampMs);
-                }
+            //    if (_minPing < _historyMinPing && _simulatorService._gameStartTimestampMs != -1)
+            //    {
+            //        _historyMinPing = _minPing;
+            //        _simulatorService._gameStartTimestampMs = LMath.Min(_guessServerStartTimestamp, _simulatorService._gameStartTimestampMs);
+            //    }
 
-                _minPing = Int64.MaxValue;
-                _maxPing = Int64.MinValue;
-            }
+            //    _minPing = Int64.MaxValue;
+            //    _maxPing = Int64.MinValue;
+            //}
         }
 
         public void SendInput(PlayerCommands input)
