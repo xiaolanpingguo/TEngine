@@ -20,7 +20,7 @@ namespace Lockstep.Game
     }
 
     [Serializable]
-    public partial class Skill : INeedBackup
+    public partial class Skill
     {
         private static readonly HashSet<Entity> _tempEntities = new HashSet<Entity>();
 

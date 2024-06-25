@@ -33,13 +33,13 @@ namespace Lockstep.Game
         public override void DoStart()
         {
             base.DoStart();
-            rigidbody.DoStart();
+            rigidbody.Start();
             curHealth = maxHealth;
         }
 
         public override void DoUpdate(LFloat deltaTime)
         {
-            rigidbody.DoUpdate(deltaTime);
+            rigidbody.Update(deltaTime);
             base.DoUpdate(deltaTime);
         }
 

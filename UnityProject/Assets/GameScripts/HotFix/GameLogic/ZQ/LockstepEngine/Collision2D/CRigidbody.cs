@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 
 
 namespace Lockstep.Framework
@@ -6,7 +7,7 @@ namespace Lockstep.Framework
     public delegate void OnFloorResultCallback(bool isOnFloor);
 
     [Serializable]
-    public partial class CRigidbody : IComponent
+    public class CRigidbody
     {
         public CTransform2D transform { get; private set; }
         public static LFloat G = new LFloat(10);
@@ -30,7 +31,7 @@ namespace Lockstep.Framework
 
         //private int __id;
         //private static int __idCount;
-        public void DoStart()
+        public void Start()
         {
             //__id = __idCount++;
             LFloat y = LFloat.zero;
@@ -39,7 +40,7 @@ namespace Lockstep.Framework
             isSleep = isOnFloor;
         }
 
-        public void DoUpdate(LFloat deltaTime)
+        public void Update(LFloat deltaTime)
         {
             if (!isEnable) return;
             if (!TestOnFloor(transform.Pos3))
@@ -130,6 +131,44 @@ namespace Lockstep.Framework
         private bool TestOnWall(ref LVector3 pos)
         {
             return false; //TODO check with scene
+        }
+
+        public void WriteBackup(Serializer writer)
+        {
+            writer.Write(Mass);
+            writer.Write(Speed);
+            writer.Write(isEnable);
+            writer.Write(isOnFloor);
+            writer.Write(isSleep);
+        }
+
+        public void ReadBackup(Deserializer reader)
+        {
+            Mass = reader.ReadLFloat();
+            Speed = reader.ReadLVector3();
+            isEnable = reader.ReadBoolean();
+            isOnFloor = reader.ReadBoolean();
+            isSleep = reader.ReadBoolean();
+        }
+
+        public int GetHash(ref int idx)
+        {
+            int hash = 1;
+            hash += Mass.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += Speed.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += isEnable.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += isOnFloor.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += isSleep.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            return hash;
+        }
+
+        public void DumpStr(StringBuilder sb, string prefix)
+        {
+            sb.AppendLine(prefix + "Mass" + ":" + Mass.ToString());
+            sb.AppendLine(prefix + "Speed" + ":" + Speed.ToString());
+            sb.AppendLine(prefix + "isEnable" + ":" + isEnable.ToString());
+            sb.AppendLine(prefix + "isOnFloor" + ":" + isOnFloor.ToString());
+            sb.AppendLine(prefix + "isSleep" + ":" + isSleep.ToString());
         }
     }
 }

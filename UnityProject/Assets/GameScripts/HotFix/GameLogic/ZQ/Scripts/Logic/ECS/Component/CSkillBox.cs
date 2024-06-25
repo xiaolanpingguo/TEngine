@@ -7,7 +7,7 @@ using Lockstep.Framework;
 namespace Lockstep.Game
 {
     [Serializable]
-    public partial class CSkillBox : BaseComponent, ISkillEventHandler
+    public partial class CSkillBox : IComponent, ISkillEventHandler
     {
         public Entity entity => (Entity)baseEntity;
         public int configId;

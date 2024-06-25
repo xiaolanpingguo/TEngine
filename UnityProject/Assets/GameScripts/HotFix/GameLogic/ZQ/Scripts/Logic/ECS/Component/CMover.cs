@@ -6,7 +6,7 @@ namespace Lockstep.Game
 {
 
     [Serializable]
-    public partial class CMover : BaseComponent
+    public partial class CMover : IComponent
     {
         public Entity entity => (Entity)baseEntity;
         public Player player => (Player)baseEntity;

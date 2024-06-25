@@ -112,43 +112,6 @@ namespace Lockstep.Game{
     }                                                               
 }                                                              
 
-namespace Lockstep.Framework{                                                                                               
-    public partial class CRigidbody :IBackup{                                                                  
-       public void WriteBackup(Serializer writer){
-            writer.Write(Mass);
-            writer.Write(Speed);
-            writer.Write(isEnable);
-            writer.Write(isOnFloor);
-            writer.Write(isSleep);
-        }                                                                                            
-                                                                                                    
-       public void ReadBackup(Deserializer reader){
-            Mass = reader.ReadLFloat();
-            Speed = reader.ReadLVector3();
-            isEnable = reader.ReadBoolean();
-            isOnFloor = reader.ReadBoolean();
-            isSleep = reader.ReadBoolean();
-        }                                                                                            
-                                                                                                    
-       public int GetHash(ref int idx){                                      
-           int hash = 1;
-            hash += Mass.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += Speed.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += isEnable.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += isOnFloor.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += isSleep.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            return hash;                                                                                    
-       }                                                                                            
-                                                                                                    
-       public void DumpStr(StringBuilder sb,string prefix){
-			sb.AppendLine(prefix + "Mass" + ":" + Mass.ToString());
-			sb.AppendLine(prefix + "Speed" + ":" + Speed.ToString());
-			sb.AppendLine(prefix + "isEnable" + ":" + isEnable.ToString());
-			sb.AppendLine(prefix + "isOnFloor" + ":" + isOnFloor.ToString());
-			sb.AppendLine(prefix + "isSleep" + ":" + isSleep.ToString());
-		}                                                                                            
-    }                                                               
-}                                                              
 
 namespace Lockstep.Game{                                                                                               
     public partial class CSkillBox :IBackup{                                                                  
@@ -180,82 +143,6 @@ namespace Lockstep.Game{
 			sb.AppendLine(prefix + "configId"+":" + configId.ToString());
 			sb.AppendLine(prefix + "isFiring"+":" + isFiring.ToString());
 			BackUpUtil.DumpList("_skills", _skills, sb, prefix);                                                                                     
-       }                                                                                            
-    }                                                               
-}                                                              
-
-namespace Lockstep.Framework{                                                                                               
-    public partial class CTransform2D :IBackup{                                                                  
-       public void WriteBackup(Serializer writer){                                           
-			writer.Write(deg);
-			writer.Write(pos);
-			writer.Write(y);                                                                                     
-       }                                                                                            
-                                                                                                    
-       public void ReadBackup(Deserializer reader){                                       
-			deg = reader.ReadLFloat();
-			pos = reader.ReadLVector2();
-			y = reader.ReadLFloat();                                                                                     
-       }                                                                                            
-                                                                                                    
-       public int GetHash(ref int idx){                                      
-           int hash = 1;                                                                             
-			hash += deg.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-			hash += pos.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-			hash += y.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);                                                                                     
-           return hash;                                                                                    
-       }                                                                                            
-                                                                                                    
-       public void DumpStr(StringBuilder sb,string prefix){                                       
-			sb.AppendLine(prefix + "deg"+":" + deg.ToString());
-			sb.AppendLine(prefix + "pos"+":" + pos.ToString());
-			sb.AppendLine(prefix + "y"+":" + y.ToString());                                                                                     
-       }                                                                                            
-    }                                                               
-}                                                              
-
-namespace Lockstep.Framework{                                                                                               
-    public partial class ColliderData :IBackup{                                                                  
-       public void WriteBackup(Serializer writer){                                           
-			writer.Write(deg);
-			writer.Write(high);
-			writer.Write(pos);
-			writer.Write(radius);
-			writer.Write(size);
-			writer.Write(up);
-			writer.Write(y);                                                                                     
-       }                                                                                            
-                                                                                                    
-       public void ReadBackup(Deserializer reader){                                       
-			deg = reader.ReadLFloat();
-			high = reader.ReadLFloat();
-			pos = reader.ReadLVector2();
-			radius = reader.ReadLFloat();
-			size = reader.ReadLVector2();
-			up = reader.ReadLVector2();
-			y = reader.ReadLFloat();                                                                                     
-       }                                                                                            
-                                                                                                    
-       public int GetHash(ref int idx){                                      
-           int hash = 1;                                                                             
-			hash += deg.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-			hash += high.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-			hash += pos.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-			hash += radius.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-			hash += size.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-			hash += up.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-			hash += y.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);                                                                                     
-           return hash;                                                                                    
-       }                                                                                            
-                                                                                                    
-       public void DumpStr(StringBuilder sb,string prefix){                                       
-			sb.AppendLine(prefix + "deg"+":" + deg.ToString());
-			sb.AppendLine(prefix + "high"+":" + high.ToString());
-			sb.AppendLine(prefix + "pos"+":" + pos.ToString());
-			sb.AppendLine(prefix + "radius"+":" + radius.ToString());
-			sb.AppendLine(prefix + "size"+":" + size.ToString());
-			sb.AppendLine(prefix + "up"+":" + up.ToString());
-			sb.AppendLine(prefix + "y"+":" + y.ToString());                                                                                     
        }                                                                                            
     }                                                               
 }                                                              

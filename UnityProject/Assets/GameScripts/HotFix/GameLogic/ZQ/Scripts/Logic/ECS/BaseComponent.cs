@@ -85,7 +85,7 @@ namespace Lockstep.Game
 
 namespace Lockstep.Game
 {
-    public class BaseComponent : BaseFormater, IComponent
+    public class IComponent : BaseFormater
     {
         public BaseEntity baseEntity { get; private set; }
         public CTransform2D transform { get; private set; }

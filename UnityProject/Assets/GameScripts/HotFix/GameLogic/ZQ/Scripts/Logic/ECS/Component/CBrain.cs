@@ -5,7 +5,7 @@ using Lockstep.Framework;
 namespace Lockstep.Game
 {
     [Serializable]
-    public partial class CBrain : BaseComponent
+    public partial class CBrain : IComponent
     {
         public Entity entity => (Entity)baseEntity;
         public Entity target { get; private set; }

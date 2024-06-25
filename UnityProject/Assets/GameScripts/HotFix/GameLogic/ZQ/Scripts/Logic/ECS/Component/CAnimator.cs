@@ -8,7 +8,7 @@ namespace Lockstep.Game
 {
 
     [Serializable]
-    public partial class CAnimator : BaseComponent
+    public partial class CAnimator : IComponent
     {
         public int configId;
 

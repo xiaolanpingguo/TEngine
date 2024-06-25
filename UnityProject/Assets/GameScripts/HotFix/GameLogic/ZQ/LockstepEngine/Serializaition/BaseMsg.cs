@@ -1,19 +1,8 @@
-
 namespace Lockstep.Framework
 {
-
-    [System.AttributeUsage(
-        System.AttributeTargets.Class |
-        System.AttributeTargets.Field |
-        System.AttributeTargets.Property,
-        AllowMultiple = false
-        )]
-    public class NoGenCodeAttribute : System.Attribute { }
-
-
     [System.Serializable]
     [SelfImplement]
-    public partial class BaseFormater : ISerializable, ISerializablePacket
+    public class BaseFormater : ISerializable, ISerializablePacket
     {
         public virtual void Serialize(Serializer writer) { }
 

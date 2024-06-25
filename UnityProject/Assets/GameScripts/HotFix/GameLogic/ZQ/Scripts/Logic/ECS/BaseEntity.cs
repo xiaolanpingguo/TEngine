@@ -7,13 +7,13 @@ namespace Lockstep.Game
 {
     [Serializable]
     [NoBackup]
-    public partial class BaseEntity : IEntity, ILPTriggerEventHandler
+    public partial class BaseEntity : ILPTriggerEventHandler
     {
         public int EntityId;
         public int PrefabId;
         public CTransform2D transform = new CTransform2D();
         [NoBackup] public object engineTransform;
-        protected List<BaseComponent> allComponents;
+        protected List<IComponent> allComponents;
 
         [ReRefBackup] public IEntityView EntityView;
 
@@ -35,11 +35,11 @@ namespace Lockstep.Game
             allComponents?.Clear();
         }
 
-        protected void RegisterComponent(BaseComponent comp)
+        protected void RegisterComponent(IComponent comp)
         {
             if (allComponents == null)
             {
-                allComponents = new List<BaseComponent>();
+                allComponents = new List<IComponent>();
             }
 
             allComponents.Add(comp);

@@ -22,7 +22,7 @@ namespace Lockstep.Game
             CTransform2D = new CTransform2D();
             CTransform2D.Pos3 = transform.position.ToLVector3();
             CRigidbody.BindRef(CTransform2D);
-            CRigidbody.DoStart();
+            CRigidbody.Start();
         }
 
         private void Update()
@@ -32,7 +32,7 @@ namespace Lockstep.Game
             CRigidbody.FloorFriction = FloorFriction;
 
             CRigidbody.Mass = Mass;
-            CRigidbody.DoUpdate(Time.deltaTime.ToLFloat());
+            CRigidbody.Update(Time.deltaTime.ToLFloat());
             transform.position = CTransform2D.Pos3.ToVector3();
         }
 

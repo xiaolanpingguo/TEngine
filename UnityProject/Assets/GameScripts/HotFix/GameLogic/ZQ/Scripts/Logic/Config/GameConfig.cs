@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using Lockstep.Framework;
+using System.Security.Cryptography;
 
 
 namespace Lockstep.Game 
@@ -23,21 +24,22 @@ namespace Lockstep.Game
             FieldInfo[] fields = dst.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public);
             foreach (var field in fields)
             {
-                var type = field.FieldType;
-                if (typeof(INeedBackup).IsAssignableFrom(type)) 
-                {
-                    CopyTo(field.GetValue(dst), field.GetValue(Entity));
-                }
-                else
-                {
-                    field.SetValue(dst, field.GetValue(Entity));
-                }
+                CopyTo(field.GetValue(dst), field.GetValue(Entity));
+                //var type = field.FieldType;
+                //if (typeof(INeedBackup).IsAssignableFrom(type))
+                //{
+                //    CopyTo(field.GetValue(dst), field.GetValue(Entity));
+                //}
+                //else
+                //{
+                //    field.SetValue(dst, field.GetValue(Entity));
+                //}
             }
         }
 
         void CopyTo(object dst, object src)
         {
-            if (src.GetType() != dst.GetType()) 
+            if (dst == null || src == null || src.GetType() != dst.GetType()) 
             {
                 return;
             }

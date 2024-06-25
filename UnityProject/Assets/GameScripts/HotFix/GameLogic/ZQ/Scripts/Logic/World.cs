@@ -202,6 +202,8 @@ namespace Lockstep.Game
         {
             var baseEntity = new T();
             GameConfigSingleton.Instance.GetEntityConfig(prefabId)?.CopyTo(baseEntity);
+            //EntityConfig config = GameConfigSingleton.Instance.GetEntityConfig(prefabId);
+            //T baseEntity = EntityConfig.DeepCopy(config.Entity) as T;
             baseEntity.EntityId = GenId();
             baseEntity.PrefabId = prefabId;
             baseEntity.transform.Pos3 = position;
