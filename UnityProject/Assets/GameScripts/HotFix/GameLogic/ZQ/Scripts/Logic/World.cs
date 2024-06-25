@@ -204,7 +204,6 @@ namespace Lockstep.Game
             entity.EntityId = GenId();
             entity.PrefabId = prefabId;
             entity.transform.Pos3 = position;
-            entity.BindRef();
             PhysicSystem.Instance.RegisterEntity(prefabId, entity);
 
             entity.Awake();

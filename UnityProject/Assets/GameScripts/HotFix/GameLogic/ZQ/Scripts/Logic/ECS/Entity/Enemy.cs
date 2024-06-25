@@ -10,12 +10,12 @@ namespace Lockstep.Game
     {
         public CBrain brain = new CBrain();
 
-        public override void BindRef()
+        public override void Awake()
         {
-            base.BindRef();
             RegisterComponent(brain);
             moveSpd = 2;
             turnSpd = 150;
+            base.Awake();
         }
 
         public override void WriteBackup(Serializer writer)
@@ -29,11 +29,9 @@ namespace Lockstep.Game
             writer.Write(maxHealth);
             writer.Write(moveSpd);
             writer.Write(turnSpd);
-            animator.WriteBackup(writer);
             brain.WriteBackup(writer);
             colliderData.WriteBackup(writer);
             rigidbody.WriteBackup(writer);
-            skillBox.WriteBackup(writer);
             transform.WriteBackup(writer);
         }
 
@@ -48,11 +46,9 @@ namespace Lockstep.Game
             maxHealth = reader.ReadInt32();
             moveSpd = reader.ReadLFloat();
             turnSpd = reader.ReadLFloat();
-            animator.ReadBackup(reader);
             brain.ReadBackup(reader);
             colliderData.ReadBackup(reader);
             rigidbody.ReadBackup(reader);
-            skillBox.ReadBackup(reader);
             transform.ReadBackup(reader);
         }
 
@@ -68,11 +64,9 @@ namespace Lockstep.Game
             hash += maxHealth.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += moveSpd.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += turnSpd.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += animator.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += brain.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += colliderData.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += rigidbody.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += skillBox.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += transform.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             return hash;
         }
@@ -88,11 +82,9 @@ namespace Lockstep.Game
             sb.AppendLine(prefix + "maxHealth" + ":" + maxHealth.ToString());
             sb.AppendLine(prefix + "moveSpd" + ":" + moveSpd.ToString());
             sb.AppendLine(prefix + "turnSpd" + ":" + turnSpd.ToString());
-            sb.AppendLine(prefix + "animator" + ":"); animator.DumpStr(sb, "\t" + prefix);
             sb.AppendLine(prefix + "brain" + ":"); brain.DumpStr(sb, "\t" + prefix);
             sb.AppendLine(prefix + "colliderData" + ":"); colliderData.DumpStr(sb, "\t" + prefix);
             sb.AppendLine(prefix + "rigidbody" + ":"); rigidbody.DumpStr(sb, "\t" + prefix);
-            sb.AppendLine(prefix + "skillBox" + ":"); skillBox.DumpStr(sb, "\t" + prefix);
             sb.AppendLine(prefix + "transform" + ":"); transform.DumpStr(sb, "\t" + prefix);
         }
     }

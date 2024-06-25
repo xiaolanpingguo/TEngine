@@ -76,7 +76,7 @@ namespace Lockstep.Game
                 }
 
                 State = ESkillState.Firing;
-                entity.animator?.Play(AnimName);
+                //entity.animator?.Play(AnimName);
                 ((Player)entity).mover.needMove = false;
                 OnFire();
                 return true;
@@ -94,7 +94,7 @@ namespace Lockstep.Game
         {
             eventHandler.OnSkillDone(this);
             State = ESkillState.Idle;
-            entity.animator?.Play(AnimDefine.Idle);
+            //entity.animator?.Play(AnimDefine.Idle);
         }
 
         public void Update(LFloat deltaTime)

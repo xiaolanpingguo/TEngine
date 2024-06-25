@@ -12,15 +12,13 @@ namespace Lockstep.Game
         public int PrefabId;
         public CTransform2D transform = new CTransform2D();
         public object engineTransform;
-        protected List<IComponent> allComponents;
+        protected List<IComponent> allComponents = new List<IComponent>();
 
         public IEntityView EntityView;
 
 
         public CRigidbody rigidbody = new CRigidbody();
         public ColliderData colliderData = new ColliderData();
-        public CAnimator animator = new CAnimator();
-        public CSkillBox skillBox = new CSkillBox();
 
         public LFloat moveSpd = 5;
         public LFloat turnSpd = 360;
@@ -40,21 +38,13 @@ namespace Lockstep.Game
             engineTransform = null;
         }
 
-        public virtual void BindRef()
+        public Entity()
         {
-            allComponents?.Clear();
-            RegisterComponent(animator);
-            RegisterComponent(skillBox);
             rigidbody.BindRef(transform);
         }
 
         public virtual void Awake()
         {
-            if (allComponents == null)
-            {
-                return;
-            }
-
             foreach (var comp in allComponents)
             {
                 comp.Awake();
@@ -63,11 +53,6 @@ namespace Lockstep.Game
 
         public virtual void Start()
         {
-            if (allComponents == null)
-            {
-                return;
-            }
-
             foreach (var comp in allComponents)
             {
                 comp.Start();
@@ -80,11 +65,6 @@ namespace Lockstep.Game
         public virtual void Update(LFloat deltaTime)
         {
             rigidbody.Update(deltaTime);
-            if (allComponents == null)
-            {
-                return;
-            }
-
             foreach (var comp in allComponents)
             {
                 comp.Update(deltaTime);
@@ -93,25 +73,10 @@ namespace Lockstep.Game
 
         public virtual void Destroy()
         {
-            if (allComponents == null)
-            {
-                return;
-            }
-
             foreach (var comp in allComponents)
             {
                 comp.Destroy();
             }
-        }
-
-        public bool Fire(int idx = 0)
-        {
-            return skillBox.Fire(idx - 1);
-        }
-
-        public void StopSkill(int idx = -1)
-        {
-            skillBox.ForceStop(idx);
         }
 
         public virtual void TakeDamage(Entity atker, int amount, LVector3 hitPoint)

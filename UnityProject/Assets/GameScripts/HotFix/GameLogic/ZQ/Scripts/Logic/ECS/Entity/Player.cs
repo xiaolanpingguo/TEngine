@@ -11,11 +11,15 @@ namespace Lockstep.Game
         public int localId;
         public PlayerCommands input = new PlayerCommands();
         public CMover mover = new CMover();
+        public CAnimator animator = new CAnimator();
+        public CSkillBox skillBox = new CSkillBox();
 
-        public override void BindRef()
+        public override void Awake()
         {
-            base.BindRef();
+            RegisterComponent(animator);
+            RegisterComponent(skillBox);
             RegisterComponent(mover);
+            base.Awake();
         }
 
         public override void Update(LFloat deltaTime)
@@ -23,8 +27,14 @@ namespace Lockstep.Game
             base.Update(deltaTime);
             if (input.skillId != 0)
             {
-                Fire(input.skillId);
+                skillBox.Fire(input.skillId - 1);
             }
+        }
+
+
+        public void StopSkill(int idx = -1)
+        {
+            skillBox.ForceStop(idx);
         }
 
         public override void WriteBackup(Serializer writer)

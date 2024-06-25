@@ -54,11 +54,11 @@ namespace Lockstep.Game
 
         private void OnDrawGizmos()
         {
-            if (entity.skillBox.isFiring)
-            {
-                var skill = entity.skillBox.curSkill;
-                skill?.OnDrawGizmos();
-            }
+            //if (entity.skillBox.isFiring)
+            //{
+            //    var skill = entity.skillBox.curSkill;
+            //    skill?.OnDrawGizmos();
+            //}
         }
     }
 }
