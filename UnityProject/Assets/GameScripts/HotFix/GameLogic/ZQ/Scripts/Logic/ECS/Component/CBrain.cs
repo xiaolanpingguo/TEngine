@@ -14,11 +14,16 @@ namespace Lockstep.Game
         public LFloat atkInterval = 1;
         private LFloat _atkTimer;
 
-        public override void BindEntity(Entity e)
+        public CBrain(Entity entity) : base(entity)
         {
-            base.BindEntity(e);
             target = World.Instance.GetEntity(targetId) as Entity;
         }
+
+        //public override void BindEntity(Entity e)
+        //{
+        //    base.BindEntity(e);
+        //    target = World.Instance.GetEntity(targetId) as Entity;
+        //}
 
         public override void Update(LFloat deltaTime)
         {

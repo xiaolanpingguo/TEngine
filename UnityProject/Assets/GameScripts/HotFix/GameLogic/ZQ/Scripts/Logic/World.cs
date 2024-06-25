@@ -139,26 +139,26 @@ namespace Lockstep.Game
         {
             int hash = 1;
 
-            hash += _entityIdCounter * PrimerLUT.GetPrimer(idx++);
-            foreach (var entity in GetPlayers())
-            {
-                hash += entity.curHealth.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-                hash += entity.LTrans2D.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-                hash += entity.skillBox.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            }
+            //hash += _entityIdCounter * PrimerLUT.GetPrimer(idx++);
+            //foreach (var entity in GetPlayers())
+            //{
+            //    hash += entity.curHealth.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            //    hash += entity.LTrans2D.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            //    hash += entity.skillBox.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            //}
 
-            foreach (var entity in GetEnemies())
-            {
-                hash += entity.curHealth.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-                hash += entity.LTrans2D.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            }
+            //foreach (var entity in GetEnemies())
+            //{
+            //    hash += entity.curHealth.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            //    hash += entity.LTrans2D.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            //}
 
-            foreach (var entity in GetSpawners())
-            {
-                hash += entity.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            }
+            //foreach (var entity in GetSpawners())
+            //{
+            //    hash += entity.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            //}
 
-            hash += _curGameState.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            //hash += _curGameState.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             return hash;
         }
 

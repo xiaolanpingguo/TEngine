@@ -11,11 +11,17 @@ namespace Lockstep.Game
         public Entity Entity { get; private set; }
         public CTransform2D transform { get; private set; }
 
-        public virtual void BindEntity(Entity entity)
+        public IComponent(Entity entity)
         {
             this.Entity = entity;
-            this.transform = entity.LTrans2D;
+            this.transform = entity?.LTrans2D;
         }
+
+        //public virtual void BindEntity(Entity entity)
+        //{
+        //    this.Entity = entity;
+        //    this.transform = entity.LTrans2D;
+        //}
 
         public virtual void Awake() { }
         public virtual void Start() { }

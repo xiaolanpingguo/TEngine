@@ -11,7 +11,7 @@ namespace Lockstep.Game
     [Serializable]
     public class CAnimator : IComponent
     {
-        public int configId;
+        public int _configId = 1;
 
         [HideInInspector]public AnimatorConfig config;
         [HideInInspector]public IAnimatorView view;
@@ -28,10 +28,14 @@ namespace Lockstep.Game
         private List<AnimInfo> _animInfos => config.anims;
         public AnimInfo curAnimInfo => _curAnimIdx == -1 ? null : _animInfos[_curAnimIdx];
 
-        public override void BindEntity(Entity baseEntity)
+        public CAnimator(Entity entity) : base(entity)
         {
-            base.BindEntity(baseEntity);
-            config = GameConfigSingleton.Instance.GetAnimatorConfig(configId);
+
+        }
+
+        public override void Awake()
+        {
+            config = GameConfigSingleton.Instance.GetAnimatorConfig(_configId);
             if (config == null) return;
             UpdateBindInfo();
             _animNames.Clear();
@@ -133,7 +137,7 @@ namespace Lockstep.Game
             writer.Write(_curAnimIdx);
             writer.Write(_curAnimName);
             writer.Write(_timer);
-            writer.Write(configId);
+            writer.Write(_configId);
         }
 
         public override void ReadBackup(Deserializer reader)
@@ -142,7 +146,7 @@ namespace Lockstep.Game
             _curAnimIdx = reader.ReadInt32();
             _curAnimName = reader.ReadString();
             _timer = reader.ReadLFloat();
-            configId = reader.ReadInt32();
+            _configId = reader.ReadInt32();
         }
 
         public override int GetHash(ref int idx)
@@ -152,7 +156,7 @@ namespace Lockstep.Game
             hash += _curAnimIdx.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += _curAnimName.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += _timer.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += configId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += _configId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             return hash;
         }
 
@@ -162,7 +166,7 @@ namespace Lockstep.Game
             sb.AppendLine(prefix + "_curAnimIdx" + ":" + _curAnimIdx.ToString());
             sb.AppendLine(prefix + "_curAnimName" + ":" + _curAnimName.ToString());
             sb.AppendLine(prefix + "_timer" + ":" + _timer.ToString());
-            sb.AppendLine(prefix + "configId" + ":" + configId.ToString());
+            sb.AppendLine(prefix + "configId" + ":" + _configId.ToString());
         }
     }
 }

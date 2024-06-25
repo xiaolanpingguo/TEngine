@@ -101,13 +101,7 @@ namespace Lockstep.Game
 
         protected void RegisterComponent(IComponent comp)
         {
-            if (allComponents == null)
-            {
-                allComponents = new List<IComponent>();
-            }
-
             allComponents.Add(comp);
-            comp.BindEntity(this);
         }
 
         protected virtual void OnTakeDamage(int amount, LVector3 hitPoint)

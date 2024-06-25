@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using Lockstep.Framework;
+using static UnityEngine.GraphicsBuffer;
 
 
 namespace Lockstep.Game
@@ -15,6 +16,10 @@ namespace Lockstep.Game
         public LFloat speed => player.moveSpd;
         public bool hasReachTarget = false;
         public bool needMove = true;
+
+        public CMover(Entity entity) : base(entity)
+        {
+        }
 
         public override void Update(LFloat deltaTime)
         {

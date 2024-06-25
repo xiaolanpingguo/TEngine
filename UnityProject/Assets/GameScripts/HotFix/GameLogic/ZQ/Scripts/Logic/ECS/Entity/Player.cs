@@ -10,15 +10,19 @@ namespace Lockstep.Game
     {
         public int localId;
         public PlayerCommands input = new PlayerCommands();
-        public CMover mover = new CMover();
-        public CAnimator animator = new CAnimator();
-        public CSkillBox skillBox = new CSkillBox();
+
+        public CMover _mover = null;
+        private CAnimator _animator = null;
+        private CSkillBox _skillBox = null;
 
         public override void Awake()
         {
-            RegisterComponent(animator);
-            RegisterComponent(skillBox);
-            RegisterComponent(mover);
+            _mover = new CMover(this);
+            _animator = new CAnimator(this);
+            _skillBox = new CSkillBox(this);
+            RegisterComponent(_animator);
+            RegisterComponent(_skillBox);
+            RegisterComponent(_mover);
             base.Awake();
         }
 
@@ -27,14 +31,14 @@ namespace Lockstep.Game
             base.Update(deltaTime);
             if (input.skillId != 0)
             {
-                skillBox.Fire(input.skillId - 1);
+                _skillBox.Fire(input.skillId - 1);
             }
         }
 
 
         public void StopSkill(int idx = -1)
         {
-            skillBox.ForceStop(idx);
+            _skillBox.ForceStop(idx);
         }
 
         public override void WriteBackup(Serializer writer)
@@ -49,12 +53,12 @@ namespace Lockstep.Game
             writer.Write(maxHealth);
             writer.Write(moveSpd);
             writer.Write(turnSpd);
-            animator.WriteBackup(writer);
+            _animator.WriteBackup(writer);
             colliderData.WriteBackup(writer);
             //input.WriteBackup(writer);
-            mover.WriteBackup(writer);
+            _mover.WriteBackup(writer);
             rigidbody.WriteBackup(writer);
-            skillBox.WriteBackup(writer);
+            _skillBox.WriteBackup(writer);
             LTrans2D.WriteBackup(writer);
         }
 
@@ -70,12 +74,12 @@ namespace Lockstep.Game
             maxHealth = reader.ReadInt32();
             moveSpd = reader.ReadLFloat();
             turnSpd = reader.ReadLFloat();
-            animator.ReadBackup(reader);
+            _animator.ReadBackup(reader);
             colliderData.ReadBackup(reader);
             //input.ReadBackup(reader);
-            mover.ReadBackup(reader);
+            _mover.ReadBackup(reader);
             rigidbody.ReadBackup(reader);
-            skillBox.ReadBackup(reader);
+            _skillBox.ReadBackup(reader);
             LTrans2D.ReadBackup(reader);
         }
 
@@ -92,12 +96,12 @@ namespace Lockstep.Game
             hash += maxHealth.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += moveSpd.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += turnSpd.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += animator.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += _animator.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += colliderData.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             //hash += input.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += mover.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += _mover.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += rigidbody.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += skillBox.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += _skillBox.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += LTrans2D.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             return hash;
         }
@@ -114,12 +118,12 @@ namespace Lockstep.Game
             sb.AppendLine(prefix + "maxHealth" + ":" + maxHealth.ToString());
             sb.AppendLine(prefix + "moveSpd" + ":" + moveSpd.ToString());
             sb.AppendLine(prefix + "turnSpd" + ":" + turnSpd.ToString());
-            sb.AppendLine(prefix + "animator" + ":"); animator.DumpStr(sb, "\t" + prefix);
+            sb.AppendLine(prefix + "animator" + ":"); _animator.DumpStr(sb, "\t" + prefix);
             sb.AppendLine(prefix + "colliderData" + ":"); colliderData.DumpStr(sb, "\t" + prefix);
             //sb.AppendLine(prefix + "input" +":");  input.DumpStr(sb,"\t" + prefix);
-            sb.AppendLine(prefix + "mover" + ":"); mover.DumpStr(sb, "\t" + prefix);
+            sb.AppendLine(prefix + "mover" + ":"); _mover.DumpStr(sb, "\t" + prefix);
             sb.AppendLine(prefix + "rigidbody" + ":"); rigidbody.DumpStr(sb, "\t" + prefix);
-            sb.AppendLine(prefix + "skillBox" + ":"); skillBox.DumpStr(sb, "\t" + prefix);
+            sb.AppendLine(prefix + "skillBox" + ":"); _skillBox.DumpStr(sb, "\t" + prefix);
             sb.AppendLine(prefix + "transform" + ":"); LTrans2D.DumpStr(sb, "\t" + prefix);
         }
     }

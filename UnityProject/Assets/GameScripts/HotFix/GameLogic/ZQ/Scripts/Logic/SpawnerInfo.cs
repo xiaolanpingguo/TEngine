@@ -12,6 +12,11 @@ namespace Lockstep.Game
         public LVector3 spawnPoint;
         public int prefabId;
 
+        public SpawnerInfo() : base(null)
+        {
+
+        }
+
         public override void WriteBackup(Serializer writer)
         {
             writer.Write(prefabId);

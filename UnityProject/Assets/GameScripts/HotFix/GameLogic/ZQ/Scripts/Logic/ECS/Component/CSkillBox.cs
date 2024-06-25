@@ -10,24 +10,28 @@ namespace Lockstep.Game
     [Serializable]
     public class CSkillBox : IComponent, ISkillEventHandler
     {
-        public int configId;
+        private int _configId = 1;
         public bool isFiring;
         [HideInInspector]public SkillBoxConfig config;
         private int _curSkillIdx = 0;
         private List<Skill> _skills = new List<Skill>();
         public Skill curSkill => (_curSkillIdx >= 0) ? _skills[_curSkillIdx] : null;
 
-        public override void BindEntity(Entity e)
+        public CSkillBox(Entity entity) : base(entity)
         {
-            base.BindEntity(e);
-            config = GameConfigSingleton.Instance.GetSkillConfig(configId);
+            
+        }
+
+        public override void Awake()
+        {
+            config = GameConfigSingleton.Instance.GetSkillConfig(_configId);
             if (config == null) return;
             if (config.skillInfos.Count != _skills.Count)
             {
                 _skills.Clear();
                 foreach (var info in config.skillInfos)
                 {
-                    var skill = new Skill();
+                    var skill = new Skill(Entity);
                     _skills.Add(skill);
                     skill.BindEntity(Entity, info, this);
                     skill.Start();
@@ -94,16 +98,16 @@ namespace Lockstep.Game
 
         public void OnSkillStart(Skill skill)
         {
-            Debug.Log("OnSkillStart " + skill.SkillInfo.animName);
             isFiring = true;
             Entity.isInvincible = true;
+            //entity.animator?.Play(AnimName);
         }
 
         public void OnSkillDone(Skill skill)
         {
-            Debug.Log("OnSkillDone " + skill.SkillInfo.animName);
             isFiring = false;
             Entity.isInvincible = false;
+            //entity.animator?.Play(AnimDefine.Idle);
         }
 
         public void OnSkillPartStart(Skill skill)
@@ -124,7 +128,7 @@ namespace Lockstep.Game
         public override void WriteBackup(Serializer writer)
         {
             writer.Write(_curSkillIdx);
-            writer.Write(configId);
+            writer.Write(_configId);
             writer.Write(isFiring);
             writer.Write(_skills);
         }
@@ -132,16 +136,16 @@ namespace Lockstep.Game
         public override void ReadBackup(Deserializer reader)
         {
             _curSkillIdx = reader.ReadInt32();
-            configId = reader.ReadInt32();
+            _configId = reader.ReadInt32();
             isFiring = reader.ReadBoolean();
-            _skills = reader.ReadList(this._skills);
+            //_skills = reader.ReadList(this._skills);
         }
 
         public override int GetHash(ref int idx)
         {
             int hash = 1;
             hash += _curSkillIdx.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += configId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += _configId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += isFiring.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             if (_skills != null) foreach (var item in _skills) { if (item != default(Skill)) hash += item.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++); }
             return hash;
@@ -150,7 +154,7 @@ namespace Lockstep.Game
         public override void DumpStr(StringBuilder sb, string prefix)
         {
             sb.AppendLine(prefix + "_curSkillIdx" + ":" + _curSkillIdx.ToString());
-            sb.AppendLine(prefix + "configId" + ":" + configId.ToString());
+            sb.AppendLine(prefix + "configId" + ":" + _configId.ToString());
             sb.AppendLine(prefix + "isFiring" + ":" + isFiring.ToString());
             BackUpUtil.DumpList("_skills", _skills, sb, prefix);
         }
