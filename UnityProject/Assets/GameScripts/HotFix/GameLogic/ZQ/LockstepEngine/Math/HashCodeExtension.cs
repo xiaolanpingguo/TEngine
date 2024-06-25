@@ -17,6 +17,7 @@ namespace Lockstep.Framework
         {
             return val;
         }
+
         public static int GetHash(this long val, ref int idx)
         {
             return (int)val;
@@ -46,10 +47,12 @@ namespace Lockstep.Framework
         {
             return val ? 1 : 0;
         }
+
         public static int GetHash(this string val, ref int idx)
         {
             return val?.GetHashCode() ?? 0;
         }
+
         public static int GetHash(this LFloat val, ref int idx)
         {
             return PrimerLUT.GetPrimer(val._val);

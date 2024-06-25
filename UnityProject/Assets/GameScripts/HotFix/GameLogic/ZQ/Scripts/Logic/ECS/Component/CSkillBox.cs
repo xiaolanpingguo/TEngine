@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Lockstep.Framework;
+using System.Text;
 
 
 namespace Lockstep.Game
 {
     [Serializable]
-    public partial class CSkillBox : IComponent, ISkillEventHandler
+    public class CSkillBox : IComponent, ISkillEventHandler
     {
         public int configId;
         public bool isFiring;
@@ -117,6 +118,40 @@ namespace Lockstep.Game
             {
                 skill.OnDrawGizmos();
             }
+        }
+
+        public override void WriteBackup(Serializer writer)
+        {
+            writer.Write(_curSkillIdx);
+            writer.Write(configId);
+            writer.Write(isFiring);
+            writer.Write(_skills);
+        }
+
+        public override void ReadBackup(Deserializer reader)
+        {
+            _curSkillIdx = reader.ReadInt32();
+            configId = reader.ReadInt32();
+            isFiring = reader.ReadBoolean();
+            _skills = reader.ReadList(this._skills);
+        }
+
+        public override int GetHash(ref int idx)
+        {
+            int hash = 1;
+            hash += _curSkillIdx.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += configId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += isFiring.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            if (_skills != null) foreach (var item in _skills) { if (item != default(Skill)) hash += item.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++); }
+            return hash;
+        }
+
+        public override void DumpStr(StringBuilder sb, string prefix)
+        {
+            sb.AppendLine(prefix + "_curSkillIdx" + ":" + _curSkillIdx.ToString());
+            sb.AppendLine(prefix + "configId" + ":" + configId.ToString());
+            sb.AppendLine(prefix + "isFiring" + ":" + isFiring.ToString());
+            BackUpUtil.DumpList("_skills", _skills, sb, prefix);
         }
     }
 }

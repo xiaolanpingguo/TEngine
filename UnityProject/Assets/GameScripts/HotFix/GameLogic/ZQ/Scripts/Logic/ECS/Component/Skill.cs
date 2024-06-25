@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Lockstep.Framework;
+using System.Text;
 
 
 namespace Lockstep.Game
@@ -20,7 +21,7 @@ namespace Lockstep.Game
     }
 
     [Serializable]
-    public partial class Skill
+    public class Skill : IComponent
     {
         private static readonly HashSet<Entity> _tempEntities = new HashSet<Entity>();
 
@@ -271,6 +272,44 @@ namespace Lockstep.Game
             //            Vector3.one),
             //        col.size.ToVector3XZ(LFloat.one), Gizmos.color);
             //}
+        }
+
+        public override void WriteBackup(Serializer writer)
+        {
+            writer.Write(CdTimer);
+            writer.Write(_curPartIdx);
+            writer.Write(skillTimer);
+            writer.Write((int)(State));
+            writer.Write(partCounter);
+        }
+
+        public override void ReadBackup(Deserializer reader)
+        {
+            CdTimer = reader.ReadLFloat();
+            _curPartIdx = reader.ReadInt32();
+            skillTimer = reader.ReadLFloat();
+            State = (ESkillState)reader.ReadInt32();
+            partCounter = reader.ReadArray(this.partCounter);
+        }
+
+        public override int GetHash(ref int idx)
+        {
+            int hash = 1;
+            hash += CdTimer.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += _curPartIdx.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += skillTimer.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += ((int)State) * PrimerLUT.GetPrimer(idx++);
+            if (partCounter != null) foreach (var item in partCounter) { if (item != default(System.Int32)) hash += item.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++); }
+            return hash;
+        }
+
+        public override void DumpStr(StringBuilder sb, string prefix)
+        {
+            sb.AppendLine(prefix + "CdTimer" + ":" + CdTimer.ToString());
+            sb.AppendLine(prefix + "_curPartIdx" + ":" + _curPartIdx.ToString());
+            sb.AppendLine(prefix + "skillTimer" + ":" + skillTimer.ToString());
+            sb.AppendLine(prefix + "State" + ":" + State.ToString());
+            BackUpUtil.DumpList("partCounter", partCounter, sb, prefix);
         }
     }
 

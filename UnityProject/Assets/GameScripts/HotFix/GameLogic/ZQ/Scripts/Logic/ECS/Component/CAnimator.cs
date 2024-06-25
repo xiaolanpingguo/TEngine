@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Lockstep.Framework;
+using System.Text;
 
 
 namespace Lockstep.Game
 {
 
     [Serializable]
-    public partial class CAnimator : IComponent
+    public class CAnimator : IComponent
     {
         public int configId;
 
@@ -124,6 +125,44 @@ namespace Lockstep.Game
             var idx = (int)(timer / AnimatorConfig.FrameInterval);
             idx = System.Math.Min(curAnimInfo.OffsetCount - 1, idx);
             return idx;
+        }
+
+        public override void WriteBackup(Serializer writer)
+        {
+            writer.Write(_animLen);
+            writer.Write(_curAnimIdx);
+            writer.Write(_curAnimName);
+            writer.Write(_timer);
+            writer.Write(configId);
+        }
+
+        public override void ReadBackup(Deserializer reader)
+        {
+            _animLen = reader.ReadLFloat();
+            _curAnimIdx = reader.ReadInt32();
+            _curAnimName = reader.ReadString();
+            _timer = reader.ReadLFloat();
+            configId = reader.ReadInt32();
+        }
+
+        public override int GetHash(ref int idx)
+        {
+            int hash = 1;
+            hash += _animLen.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += _curAnimIdx.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += _curAnimName.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += _timer.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += configId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            return hash;
+        }
+
+        public override void DumpStr(StringBuilder sb, string prefix)
+        {
+            sb.AppendLine(prefix + "_animLen" + ":" + _animLen.ToString());
+            sb.AppendLine(prefix + "_curAnimIdx" + ":" + _curAnimIdx.ToString());
+            sb.AppendLine(prefix + "_curAnimName" + ":" + _curAnimName.ToString());
+            sb.AppendLine(prefix + "_timer" + ":" + _timer.ToString());
+            sb.AppendLine(prefix + "configId" + ":" + configId.ToString());
         }
     }
 }

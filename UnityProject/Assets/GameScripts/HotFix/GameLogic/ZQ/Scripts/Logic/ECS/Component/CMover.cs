@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using Lockstep.Framework;
 
 
@@ -6,7 +7,7 @@ namespace Lockstep.Game
 {
 
     [Serializable]
-    public partial class CMover : IComponent
+    public class CMover : IComponent
     {
         public Player player => (Player)Entity;
         public PlayerCommands input => player.input;
@@ -33,6 +34,32 @@ namespace Lockstep.Game
             }
 
             hasReachTarget = !needChase;
+        }
+
+        public override void WriteBackup(Serializer writer)
+        {
+            writer.Write(hasReachTarget);
+            writer.Write(needMove);
+        }
+
+        public override void ReadBackup(Deserializer reader)
+        {
+            hasReachTarget = reader.ReadBoolean();
+            needMove = reader.ReadBoolean();
+        }
+
+        public override int GetHash(ref int idx)
+        {
+            int hash = 1;
+            hash += hasReachTarget.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += needMove.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            return hash;
+        }
+
+        public override void DumpStr(StringBuilder sb, string prefix)
+        {
+            sb.AppendLine(prefix + "hasReachTarget" + ":" + hasReachTarget.ToString());
+            sb.AppendLine(prefix + "needMove" + ":" + needMove.ToString());
         }
     }
 }

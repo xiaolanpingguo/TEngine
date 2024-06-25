@@ -1,13 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using Lockstep.Framework;
 
 
-namespace Lockstep.Framework
+namespace Lockstep.Game
 {
     public static class BackUpUtil
     {
-        public static void Write<T>(this Serializer writer, IList<T> lst) where T : class, IBackup, new()
+        public static void Write<T>(this Serializer writer, IList<T> lst) where T : IComponent, new()
         {
             writer.Write(lst?.Count ?? 0);
             foreach (var item in lst)
@@ -17,7 +18,7 @@ namespace Lockstep.Framework
             }
         }
 
-        public static T[] ReadArray<T>(this Deserializer reader, T[] _) where T : class, IBackup, new()
+        public static T[] ReadArray<T>(this Deserializer reader, T[] _) where T : IComponent, new()
         {
             var count = reader.ReadInt32();
             var lst = new T[count];
@@ -37,7 +38,7 @@ namespace Lockstep.Framework
             return lst;
         }
 
-        public static List<T> ReadList<T>(this Deserializer reader, IList<T> _) where T : class, IBackup, new()
+        public static List<T> ReadList<T>(this Deserializer reader, IList<T> _) where T : IComponent, new()
         {
             var count = reader.ReadInt32();
             var lst = new List<T>();
@@ -64,14 +65,7 @@ namespace Lockstep.Framework
             for (int i = 0; i < lst.Count; i++)
             {
                 var item = lst[i];
-                if (item is IDumpStr dump)
-                {
-                    dump?.DumpStr(sb, "\t" + prefix);
-                }
-                else
-                {
-                    sb.Append(i + ":" + item.ToString());
-                }
+                sb.Append(i + ":" + item.ToString());
             }
 
             sb.Append("]");

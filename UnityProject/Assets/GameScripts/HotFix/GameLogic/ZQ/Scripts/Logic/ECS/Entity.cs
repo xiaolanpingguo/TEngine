@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using Lockstep.Framework;
 
 
@@ -153,6 +154,26 @@ namespace Lockstep.Game
             EntityView?.OnDead();
             PhysicSystem.Instance.RemoveCollider(this);
             World.Instance.DestroyEntity(this);
+        }
+
+        public virtual void WriteBackup(Serializer writer)
+        {
+
+        }
+
+        public virtual void ReadBackup(Deserializer reader)
+        {
+
+        }
+
+        public virtual int GetHash(ref int idx)
+        {
+            return 0;
+        }
+
+        public virtual void DumpStr(StringBuilder sb, string prefix)
+        {
+
         }
     }
 }

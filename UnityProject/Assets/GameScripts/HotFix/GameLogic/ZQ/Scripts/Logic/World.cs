@@ -202,8 +202,6 @@ namespace Lockstep.Game
         {
             var baseEntity = new T();
             GameConfigSingleton.Instance.GetEntityConfig(prefabId)?.CopyTo(baseEntity);
-            //EntityConfig config = GameConfigSingleton.Instance.GetEntityConfig(prefabId);
-            //T baseEntity = EntityConfig.DeepCopy(config.Entity) as T;
             baseEntity.EntityId = GenId();
             baseEntity.PrefabId = prefabId;
             baseEntity.transform.Pos3 = position;
@@ -286,7 +284,7 @@ namespace Lockstep.Game
         {
         }
 
-        private void BackUpEntities<T>(T[] lst, Serializer writer) where T : Entity, IBackup, new()
+        private void BackUpEntities<T>(T[] lst, Serializer writer) where T : Entity, new()
         {
             writer.Write(lst.Length);
             foreach (var item in lst)
@@ -295,7 +293,7 @@ namespace Lockstep.Game
             }
         }
 
-        private List<T> RecoverEntities<T>(List<T> lst, Deserializer reader) where T : Entity, IBackup, new()
+        private List<T> RecoverEntities<T>(List<T> lst, Deserializer reader) where T : Entity, new()
         {
             var count = reader.ReadInt32();
             for (int i = 0; i < count; i++)
