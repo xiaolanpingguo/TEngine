@@ -36,9 +36,8 @@ namespace Lockstep.Game
         private int _curPartIdx;
 
         public SkillPart CurPart => _curPartIdx == -1 ? null : Parts[_curPartIdx];
-#if DEBUG_SKILL
+
         private float _showTimer;
-#endif
 
         public LFloat CD => SkillInfo.CD;
         public LFloat DoneDelay => SkillInfo.doneDelay;
@@ -56,7 +55,7 @@ namespace Lockstep.Game
             this.eventHandler = eventHandler;
         }
 
-        public void DoStart()
+        public void Start()
         {
             skillTimer = MaxPartTime;
             State = ESkillState.Idle;
@@ -98,7 +97,7 @@ namespace Lockstep.Game
             entity.animator?.Play(AnimDefine.Idle);
         }
 
-        public void DoUpdate(LFloat deltaTime)
+        public void Update(LFloat deltaTime)
         {
             CdTimer -= deltaTime;
             skillTimer += deltaTime;
@@ -139,9 +138,7 @@ namespace Lockstep.Game
         {
             eventHandler.OnSkillPartStart(this);
             _curPartIdx = idx;
-#if DEBUG_SKILL
             _showTimer = Time.realtimeSinceStartup + 0.1f;
-#endif
 
             var col = part.collider;
 #if NO_DEBUG_NO_COLLISION

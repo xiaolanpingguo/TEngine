@@ -38,7 +38,8 @@ namespace Lockstep.Game
         {
             animState = animComp[name];
             var state = animComp[name];
-            if (state != null) {
+            if (state != null) 
+            {
                 if (isCross) 
                 {
                     animComp.CrossFade(name);

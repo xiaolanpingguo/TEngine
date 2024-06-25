@@ -33,7 +33,11 @@ namespace Lockstep.Game
             Entity minTarget = null;
             foreach (var player in allPlayer)
             {
-                if (player.isDead) continue;
+                if (player.isDead)
+                {
+                    continue;
+                }
+
                 var dist = (player.transform.pos - transform.pos).sqrMagnitude;
                 if (dist < minDist)
                 {
@@ -46,7 +50,9 @@ namespace Lockstep.Game
             targetId = target?.EntityId ?? -1;
 
             if (minTarget == null)
+            {
                 return;
+            }
 
             if (minDist > stopDistSqr)
             {
@@ -54,8 +60,7 @@ namespace Lockstep.Game
                 var targetPos = minTarget.transform.pos;
                 var currentPos = transform.pos;
                 var turnVal = Entity.turnSpd * deltaTime;
-                var targetDeg = CTransform2D.TurnToward(targetPos, currentPos, transform.deg, turnVal,
-                    out var isFinishedTurn);
+                var targetDeg = CTransform2D.TurnToward(targetPos, currentPos, transform.deg, turnVal, out var isFinishedTurn);
                 transform.deg = targetDeg;
                 //move to target
                 var distToTarget = (targetPos - currentPos).magnitude;
@@ -75,7 +80,6 @@ namespace Lockstep.Game
                 if (_atkTimer <= 0)
                 {
                     _atkTimer = atkInterval;
-                    //Atk
                     target.TakeDamage(Entity, Entity.damage, target.transform.Pos3);
                 }
             }

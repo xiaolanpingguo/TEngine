@@ -12,7 +12,6 @@ namespace Lockstep.Game
         public Player player => (Player)Entity;
         public PlayerCommands input => player.input;
 
-        static LFloat _sqrStopDist = new LFloat(true, 40);
         public LFloat speed => player.moveSpd;
         public bool hasReachTarget = false;
         public bool needMove = true;

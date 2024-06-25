@@ -87,7 +87,6 @@ namespace Lockstep.Game
         {
             if (typeof(T) == typeof(Player))
             {
-                int i = 0;
                 Log.Info("Add Player");
             }
 
@@ -200,22 +199,19 @@ namespace Lockstep.Game
 
         public T CreateEntity<T>(int prefabId, LVector3 position) where T : Entity, new()
         {
-            var baseEntity = new T();
-            GameConfigSingleton.Instance.GetEntityConfig(prefabId)?.CopyTo(baseEntity);
-            baseEntity.EntityId = GenId();
-            baseEntity.PrefabId = prefabId;
-            baseEntity.transform.Pos3 = position;
-            baseEntity.BindRef();
-            if (baseEntity is Entity entity)
-            {
-                PhysicSystem.Instance.RegisterEntity(prefabId, entity);
-            }
+            var entity = new T();
+            GameConfigSingleton.Instance.GetEntityConfig(prefabId)?.CopyTo(entity);
+            entity.EntityId = GenId();
+            entity.PrefabId = prefabId;
+            entity.transform.Pos3 = position;
+            entity.BindRef();
+            PhysicSystem.Instance.RegisterEntity(prefabId, entity);
 
-            baseEntity.Awake();
-            baseEntity.Start();
-            BindView(baseEntity);
-            AddEntity(baseEntity);
-            return baseEntity;
+            entity.Awake();
+            entity.Start();
+            BindView(entity);
+            AddEntity(entity);
+            return entity;
         }
 
         public void DestroyEntity(Entity entity)
@@ -449,11 +445,11 @@ namespace Lockstep.Game
             else
             {
                 var prefab = World.Instance.LoadPrefab(entity.PrefabId);
-                if (prefab == null) return;
-                var obj = GameObject.Instantiate(prefab,
-                    entity.transform.Pos3.ToVector3(),
-                    Quaternion.Euler(new Vector3(0, entity.transform.deg, 0)));
-
+                if (prefab == null)
+                {
+                    return;
+                }
+                var obj = GameObject.Instantiate(prefab, entity.transform.Pos3.ToVector3(), Quaternion.Euler(new Vector3(0, entity.transform.deg, 0)));
                 entity.engineTransform = obj.transform;
                 var views = obj.GetComponents<IView>();
                 if (views.Length <= 0)

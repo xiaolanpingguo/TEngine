@@ -80,9 +80,10 @@ namespace Lockstep.Game
 
         public void Play(string name, bool isCrossfade = false)
         {
-            if (config == null) return;
-            if (_curAnimName == name)
+            if (config == null || _curAnimName == name)
+            {
                 return;
+            }
 
             var idx = _animNames.IndexOf(name);
             if (idx == -1)
@@ -118,7 +119,6 @@ namespace Lockstep.Game
             _timer = LFloat.zero;
             SetTime(LFloat.zero);
         }
-
 
         private int GetTimeIdx(LFloat timer)
         {

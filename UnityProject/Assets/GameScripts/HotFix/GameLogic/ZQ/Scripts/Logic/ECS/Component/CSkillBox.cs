@@ -30,7 +30,7 @@ namespace Lockstep.Game
                     var skill = new Skill();
                     _skills.Add(skill);
                     skill.BindEntity(Entity, info, this);
-                    skill.DoStart();
+                    skill.Start();
                 }
             }
 
@@ -46,21 +46,22 @@ namespace Lockstep.Game
             if (config == null) return;
             foreach (var skill in _skills)
             {
-                skill.DoUpdate(deltaTime);
+                skill.Update(deltaTime);
             }
         }
 
         public bool Fire(int idx)
         {
-            if (config == null) return false;
-            if (idx < 0 || idx > _skills.Count)
+            if (config == null || idx < 0 || idx > _skills.Count)
             {
                 return false;
             }
 
-            //Debug.Log("TryFire " + idx);
+            if (isFiring)
+            {
+                return false;
+            }
 
-            if (isFiring) return false; //
             var skill = _skills[idx];
             if (skill.Fire())
             {
