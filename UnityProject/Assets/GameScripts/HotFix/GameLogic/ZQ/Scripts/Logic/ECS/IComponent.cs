@@ -14,7 +14,7 @@ namespace Lockstep.Game
         public virtual void BindEntity(Entity entity)
         {
             this.Entity = entity;
-            this.transform = entity.transform;
+            this.transform = entity.LTrans2D;
         }
 
         public virtual void Awake() { }

@@ -38,7 +38,7 @@ namespace Lockstep.Game
                     continue;
                 }
 
-                var dist = (player.transform.pos - transform.pos).sqrMagnitude;
+                var dist = (player.LTrans2D.pos - transform.pos).sqrMagnitude;
                 if (dist < minDist)
                 {
                     minTarget = player;
@@ -57,7 +57,7 @@ namespace Lockstep.Game
             if (minDist > stopDistSqr)
             {
                 // turn to target
-                var targetPos = minTarget.transform.pos;
+                var targetPos = minTarget.LTrans2D.pos;
                 var currentPos = transform.pos;
                 var turnVal = Entity.turnSpd * deltaTime;
                 var targetDeg = CTransform2D.TurnToward(targetPos, currentPos, transform.deg, turnVal, out var isFinishedTurn);
@@ -80,7 +80,7 @@ namespace Lockstep.Game
                 if (_atkTimer <= 0)
                 {
                     _atkTimer = atkInterval;
-                    target.TakeDamage(Entity, Entity.damage, target.transform.Pos3);
+                    target.TakeDamage(Entity, Entity.damage, target.LTrans2D.Pos3);
                 }
             }
         }

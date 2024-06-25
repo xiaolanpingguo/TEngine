@@ -32,7 +32,7 @@ namespace Lockstep.Game
             brain.WriteBackup(writer);
             colliderData.WriteBackup(writer);
             rigidbody.WriteBackup(writer);
-            transform.WriteBackup(writer);
+            LTrans2D.WriteBackup(writer);
         }
 
         public override void ReadBackup(Deserializer reader)
@@ -49,7 +49,7 @@ namespace Lockstep.Game
             brain.ReadBackup(reader);
             colliderData.ReadBackup(reader);
             rigidbody.ReadBackup(reader);
-            transform.ReadBackup(reader);
+            LTrans2D.ReadBackup(reader);
         }
 
         public override int GetHash(ref int idx)
@@ -67,7 +67,7 @@ namespace Lockstep.Game
             hash += brain.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += colliderData.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += rigidbody.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += transform.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += LTrans2D.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             return hash;
         }
 
@@ -85,7 +85,7 @@ namespace Lockstep.Game
             sb.AppendLine(prefix + "brain" + ":"); brain.DumpStr(sb, "\t" + prefix);
             sb.AppendLine(prefix + "colliderData" + ":"); colliderData.DumpStr(sb, "\t" + prefix);
             sb.AppendLine(prefix + "rigidbody" + ":"); rigidbody.DumpStr(sb, "\t" + prefix);
-            sb.AppendLine(prefix + "transform" + ":"); transform.DumpStr(sb, "\t" + prefix);
+            sb.AppendLine(prefix + "transform" + ":"); LTrans2D.DumpStr(sb, "\t" + prefix);
         }
     }
 }

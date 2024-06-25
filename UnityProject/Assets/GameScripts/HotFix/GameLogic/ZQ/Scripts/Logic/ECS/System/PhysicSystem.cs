@@ -176,7 +176,7 @@ namespace Lockstep.Game
         {
             var proxy = new ColliderProxy();
             proxy.EntityObject = entity;
-            proxy.Init(prefab, entity.transform);
+            proxy.Init(prefab, entity.LTrans2D);
             proxy.IsStatic = false;
             proxy.LayerType = layer;
             var eventHandler = entity;

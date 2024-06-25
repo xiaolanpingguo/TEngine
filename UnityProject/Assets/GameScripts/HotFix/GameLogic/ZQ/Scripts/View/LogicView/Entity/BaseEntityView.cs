@@ -14,8 +14,8 @@ namespace Lockstep.Game
             e.EntityView = this;
             this.Entity = e;
             var updateEntity = oldEntity ?? e;
-            transform.position = updateEntity.transform.Pos3.ToVector3();
-            transform.rotation = Quaternion.Euler(0, updateEntity.transform.deg.ToFloat(), 0);
+            transform.position = updateEntity.LTrans2D.Pos3.ToVector3();
+            transform.rotation = Quaternion.Euler(0, updateEntity.LTrans2D.deg.ToFloat(), 0);
         }
 
         public virtual void OnTakeDamage(int amount, LVector3 hitPoint)

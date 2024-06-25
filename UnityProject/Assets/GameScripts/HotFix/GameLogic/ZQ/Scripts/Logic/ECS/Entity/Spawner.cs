@@ -43,7 +43,7 @@ namespace Lockstep.Game
             writer.Write(PrefabId);
             writer.Write(Timer);
             Info.WriteBackup(writer);
-            transform.WriteBackup(writer);
+            LTrans2D.WriteBackup(writer);
         }
 
         public override void ReadBackup(Deserializer reader)
@@ -52,7 +52,7 @@ namespace Lockstep.Game
             PrefabId = reader.ReadInt32();
             Timer = reader.ReadLFloat();
             Info.ReadBackup(reader);
-            transform.ReadBackup(reader);
+            LTrans2D.ReadBackup(reader);
         }
 
         public override int GetHash(ref int idx)
@@ -62,7 +62,7 @@ namespace Lockstep.Game
             hash += PrefabId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += Timer.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += Info.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += transform.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += LTrans2D.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             return hash;
         }
 
@@ -72,7 +72,7 @@ namespace Lockstep.Game
             sb.AppendLine(prefix + "PrefabId" + ":" + PrefabId.ToString());
             sb.AppendLine(prefix + "Timer" + ":" + Timer.ToString());
             sb.AppendLine(prefix + "Info" + ":"); Info.DumpStr(sb, "\t" + prefix);
-            sb.AppendLine(prefix + "transform" + ":"); transform.DumpStr(sb, "\t" + prefix);
+            sb.AppendLine(prefix + "transform" + ":"); LTrans2D.DumpStr(sb, "\t" + prefix);
         }
     }
 }

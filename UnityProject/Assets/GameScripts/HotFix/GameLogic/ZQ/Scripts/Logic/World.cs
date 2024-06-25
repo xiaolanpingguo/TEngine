@@ -143,14 +143,14 @@ namespace Lockstep.Game
             foreach (var entity in GetPlayers())
             {
                 hash += entity.curHealth.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-                hash += entity.transform.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+                hash += entity.LTrans2D.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
                 hash += entity.skillBox.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             }
 
             foreach (var entity in GetEnemies())
             {
                 hash += entity.curHealth.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-                hash += entity.transform.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+                hash += entity.LTrans2D.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             }
 
             foreach (var entity in GetSpawners())
@@ -203,7 +203,7 @@ namespace Lockstep.Game
             GameConfigSingleton.Instance.GetEntityConfig(prefabId)?.CopyTo(entity);
             entity.EntityId = GenId();
             entity.PrefabId = prefabId;
-            entity.transform.Pos3 = position;
+            entity.LTrans2D.Pos3 = position;
             PhysicSystem.Instance.RegisterEntity(prefabId, entity);
 
             entity.Awake();
@@ -448,7 +448,7 @@ namespace Lockstep.Game
                 {
                     return;
                 }
-                var obj = GameObject.Instantiate(prefab, entity.transform.Pos3.ToVector3(), Quaternion.Euler(new Vector3(0, entity.transform.deg, 0)));
+                var obj = GameObject.Instantiate(prefab, entity.LTrans2D.Pos3.ToVector3(), Quaternion.Euler(new Vector3(0, entity.LTrans2D.deg, 0)));
                 entity.engineTransform = obj.transform;
                 var views = obj.GetComponents<IView>();
                 if (views.Length <= 0)

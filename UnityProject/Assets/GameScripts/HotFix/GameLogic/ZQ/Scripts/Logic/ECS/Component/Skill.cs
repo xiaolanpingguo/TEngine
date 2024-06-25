@@ -111,7 +111,7 @@ namespace Lockstep.Game
 
                 if (CurPart != null && CurPart.moveSpd != 0)
                 {
-                    entity.transform.pos += CurPart.moveSpd * deltaTime * entity.transform.forward;
+                    entity.LTrans2D.pos += CurPart.moveSpd * deltaTime * entity.LTrans2D.forward;
                 }
             }
             else
@@ -157,10 +157,10 @@ namespace Lockstep.Game
             //TODO Ignore CollisionSystem
             if (col.radius > 0)
             {
-                var colPos = entity.transform.TransformPoint(col.pos);
+                var colPos = entity.LTrans2D.TransformPoint(col.pos);
                 foreach (var e in World.Instance.GetEnemies())
                 {
-                    var targetCenter = e.transform.pos;
+                    var targetCenter = e.LTrans2D.pos;
                     if ((targetCenter - colPos).sqrMagnitude < col.radius * col.radius)
                     {
                         _tempEntities.Add(e);
@@ -170,14 +170,14 @@ namespace Lockstep.Game
 #endif
             foreach (var other in _tempEntities)
             {
-                other.TakeDamage(entity, CurPart.damage, other.transform.pos.ToLVector3());
+                other.TakeDamage(entity, CurPart.damage, other.LTrans2D.pos.ToLVector3());
             }
 
             //add force
             if (part.needForce)
             {
                 var force = part.impulseForce;
-                var forward = entity.transform.forward;
+                var forward = entity.LTrans2D.forward;
                 var right = forward.RightVec();
                 var z = forward * force.z + right * force.x;
                 force.x = z.x;
@@ -205,8 +205,8 @@ namespace Lockstep.Game
         {
             if (CurPart.collider.IsCircle && CurPart.collider.deg > 0)
             {
-                var deg = (other.Transform2D.pos - entity.transform.pos).ToDeg();
-                var degDiff = entity.transform.deg.Abs() - deg;
+                var deg = (other.Transform2D.pos - entity.LTrans2D.pos).ToDeg();
+                var degDiff = entity.LTrans2D.deg.Abs() - deg;
                 if (LMath.Abs(degDiff) <= CurPart.collider.deg)
                 {
                     _tempEntities.Add((Entity)other.EntityObject);

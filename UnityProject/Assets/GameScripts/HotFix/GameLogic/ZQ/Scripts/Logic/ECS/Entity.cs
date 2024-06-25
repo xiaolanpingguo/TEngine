@@ -10,7 +10,7 @@ namespace Lockstep.Game
     {
         public int EntityId;
         public int PrefabId;
-        public CTransform2D transform = new CTransform2D();
+        public CTransform2D LTrans2D = new CTransform2D();
         public object engineTransform;
         protected List<IComponent> allComponents = new List<IComponent>();
 
@@ -40,7 +40,7 @@ namespace Lockstep.Game
 
         public Entity()
         {
-            rigidbody.BindRef(transform);
+            rigidbody.BindRef(LTrans2D);
         }
 
         public virtual void Awake()
