@@ -20,7 +20,7 @@ namespace Lockstep.Game
 
             foreach (var spawner in Spawners)
             {
-                spawner.DoStart();
+                spawner.Start();
             }
         }
 
@@ -28,12 +28,12 @@ namespace Lockstep.Game
         {
             foreach (var spawner in Spawners)
             {
-                spawner.DoUpdate(deltaTime);
+                spawner.Update(deltaTime);
             }
 
             foreach (var enemy in AllEnemy)
             {
-                enemy.DoUpdate(deltaTime);
+                enemy.Update(deltaTime);
             }
         }
     }

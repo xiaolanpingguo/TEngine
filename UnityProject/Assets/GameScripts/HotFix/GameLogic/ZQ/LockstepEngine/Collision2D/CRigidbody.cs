@@ -16,7 +16,7 @@ namespace Lockstep.Framework
         public static LFloat MinYSpd = new LFloat(-10);
         public static LFloat FloorY = LFloat.zero;
 
-        [ReRefBackup] public OnFloorResultCallback OnFloorEvent;
+        public OnFloorResultCallback OnFloorEvent;
 
         public LVector3 Speed;
         public LFloat Mass = LFloat.one;

@@ -24,15 +24,15 @@ namespace Lockstep.Game
     {
         private static readonly HashSet<Entity> _tempEntities = new HashSet<Entity>();
 
-        [ReRefBackup] public ISkillEventHandler eventHandler;
-        [ReRefBackup] public Entity entity { get; private set; }
-        [ReRefBackup] public SkillInfo SkillInfo;
+        public ISkillEventHandler eventHandler;
+        public Entity entity { get; private set; }
+        public SkillInfo SkillInfo;
 
         public LFloat CdTimer;
         public ESkillState State;
         public LFloat skillTimer;
         public int[] partCounter = new int[0];
-        [Backup] private int _curPartIdx;
+        private int _curPartIdx;
 
         public SkillPart CurPart => _curPartIdx == -1 ? null : Parts[_curPartIdx];
 #if DEBUG_SKILL

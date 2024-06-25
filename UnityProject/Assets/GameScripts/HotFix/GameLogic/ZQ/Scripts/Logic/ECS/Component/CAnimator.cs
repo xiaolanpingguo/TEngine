@@ -12,14 +12,14 @@ namespace Lockstep.Game
     {
         public int configId;
 
-        [HideInInspector][ReRefBackup] public AnimatorConfig config;
-        [HideInInspector][ReRefBackup] public IAnimatorView view;
-        [HideInInspector][ReRefBackup] public AnimBindInfo curAnimBindInfo;
+        [HideInInspector]public AnimatorConfig config;
+        [HideInInspector]public IAnimatorView view;
+        [HideInInspector]public AnimBindInfo curAnimBindInfo;
 
-        [Backup] private LFloat _animLen;
-        [Backup] private LFloat _timer;
-        [Backup] private string _curAnimName = "";
-        [Backup] private int _curAnimIdx = -1;
+        private LFloat _animLen;
+        private LFloat _timer;
+        private string _curAnimName = "";
+        private int _curAnimIdx = -1;
 
         private List<string> _animNames = new List<string>();
         private LVector3 _intiPos;
@@ -27,7 +27,7 @@ namespace Lockstep.Game
         private List<AnimInfo> _animInfos => config.anims;
         public AnimInfo curAnimInfo => _curAnimIdx == -1 ? null : _animInfos[_curAnimIdx];
 
-        public override void BindEntity(BaseEntity baseEntity)
+        public override void BindEntity(Entity baseEntity)
         {
             base.BindEntity(baseEntity);
             config = GameConfigSingleton.Instance.GetAnimatorConfig(configId);
@@ -46,12 +46,12 @@ namespace Lockstep.Game
             if (curAnimBindInfo == null) curAnimBindInfo = AnimBindInfo.Empty;
         }
 
-        public override void DoStart()
+        public override void Start()
         {
             Play(AnimDefine.Idle);
         }
 
-        public override void DoUpdate(LFloat deltaTime)
+        public override void Update(LFloat deltaTime)
         {
             if (config == null) return;
             _animLen = curAnimInfo.length;

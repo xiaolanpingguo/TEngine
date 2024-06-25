@@ -5,17 +5,17 @@ using Lockstep.Framework;
 namespace Lockstep.Game
 {
     [Serializable]
-    public partial class Spawner : BaseEntity
+    public partial class Spawner : Entity
     {
         public SpawnerInfo Info = new SpawnerInfo();
         public LFloat Timer;
 
-        public override void DoStart()
+        public override void Start()
         {
             Timer = Info.spawnTime;
         }
 
-        public override void DoUpdate(LFloat deltaTime)
+        public override void Update(LFloat deltaTime)
         {
             Timer += deltaTime;
             if (Timer > Info.spawnTime)

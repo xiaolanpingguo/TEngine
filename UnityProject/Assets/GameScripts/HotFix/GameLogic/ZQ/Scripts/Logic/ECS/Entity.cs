@@ -1,11 +1,21 @@
 using System;
+using System.Collections.Generic;
 using Lockstep.Framework;
 
 
 namespace Lockstep.Game
 {
-    public class Entity : BaseEntity
+    public class Entity : ILPTriggerEventHandler
     {
+        public int EntityId;
+        public int PrefabId;
+        public CTransform2D transform = new CTransform2D();
+        public object engineTransform;
+        protected List<IComponent> allComponents;
+
+        public IEntityView EntityView;
+
+
         public CRigidbody rigidbody = new CRigidbody();
         public ColliderData colliderData = new ColliderData();
         public CAnimator animator = new CAnimator();
@@ -22,25 +32,75 @@ namespace Lockstep.Game
 
         public bool isDead => curHealth <= 0;
 
-        protected override void BindRef()
+        public virtual void OnRollbackDestroy()
         {
-            base.BindRef();
+            EntityView?.OnRollbackDestroy();
+            EntityView = null;
+            engineTransform = null;
+        }
+
+        public virtual void BindRef()
+        {
+            allComponents?.Clear();
             RegisterComponent(animator);
             RegisterComponent(skillBox);
             rigidbody.BindRef(transform);
         }
 
-        public override void DoStart()
+        public virtual void Awake()
         {
-            base.DoStart();
+            if (allComponents == null)
+            {
+                return;
+            }
+
+            foreach (var comp in allComponents)
+            {
+                comp.Awake();
+            }
+        }
+
+        public virtual void Start()
+        {
+            if (allComponents == null)
+            {
+                return;
+            }
+
+            foreach (var comp in allComponents)
+            {
+                comp.Start();
+            }
+
             rigidbody.Start();
             curHealth = maxHealth;
         }
 
-        public override void DoUpdate(LFloat deltaTime)
+        public virtual void Update(LFloat deltaTime)
         {
             rigidbody.Update(deltaTime);
-            base.DoUpdate(deltaTime);
+            if (allComponents == null)
+            {
+                return;
+            }
+
+            foreach (var comp in allComponents)
+            {
+                comp.Update(deltaTime);
+            }
+        }
+
+        public virtual void Destroy()
+        {
+            if (allComponents == null)
+            {
+                return;
+            }
+
+            foreach (var comp in allComponents)
+            {
+                comp.Destroy();
+            }
         }
 
         public bool Fire(int idx = 0)
@@ -53,7 +113,7 @@ namespace Lockstep.Game
             skillBox.ForceStop(idx);
         }
 
-        public virtual void TakeDamage(BaseEntity atker, int amount, LVector3 hitPoint)
+        public virtual void TakeDamage(Entity atker, int amount, LVector3 hitPoint)
         {
             if (isInvincible || isDead)
             {
@@ -67,6 +127,21 @@ namespace Lockstep.Game
             {
                 OnDead();
             }
+        }
+
+        public virtual void OnLPTriggerEnter(ColliderProxy other) { }
+        public virtual void OnLPTriggerStay(ColliderProxy other) { }
+        public virtual void OnLPTriggerExit(ColliderProxy other) { }
+
+        protected void RegisterComponent(IComponent comp)
+        {
+            if (allComponents == null)
+            {
+                allComponents = new List<IComponent>();
+            }
+
+            allComponents.Add(comp);
+            comp.BindEntity(this);
         }
 
         protected virtual void OnTakeDamage(int amount, LVector3 hitPoint)

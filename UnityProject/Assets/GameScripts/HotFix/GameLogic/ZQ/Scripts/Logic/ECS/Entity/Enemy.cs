@@ -9,7 +9,7 @@ namespace Lockstep.Game
     {
         public CBrain brain = new CBrain();
 
-        protected override void BindRef()
+        public override void BindRef()
         {
             base.BindRef();
             RegisterComponent(brain);

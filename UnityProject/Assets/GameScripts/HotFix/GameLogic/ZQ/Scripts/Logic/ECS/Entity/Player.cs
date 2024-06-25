@@ -11,15 +11,15 @@ namespace Lockstep.Game
         public PlayerCommands input = new PlayerCommands();
         public CMover mover = new CMover();
 
-        protected override void BindRef()
+        public override void BindRef()
         {
             base.BindRef();
             RegisterComponent(mover);
         }
 
-        public override void DoUpdate(LFloat deltaTime)
+        public override void Update(LFloat deltaTime)
         {
-            base.DoUpdate(deltaTime);
+            base.Update(deltaTime);
             if (input.skillId != 0)
             {
                 Fire(input.skillId);

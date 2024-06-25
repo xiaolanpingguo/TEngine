@@ -7,22 +7,21 @@ namespace Lockstep.Game
     [Serializable]
     public partial class CBrain : IComponent
     {
-        public Entity entity => (Entity)baseEntity;
         public Entity target { get; private set; }
         public int targetId;
         public LFloat stopDistSqr = 1 * 1;
         public LFloat atkInterval = 1;
-        [Backup] private LFloat _atkTimer;
+        private LFloat _atkTimer;
 
-        public override void BindEntity(BaseEntity e)
+        public override void BindEntity(Entity e)
         {
             base.BindEntity(e);
             target = World.Instance.GetEntity(targetId) as Entity;
         }
 
-        public override void DoUpdate(LFloat deltaTime)
+        public override void Update(LFloat deltaTime)
         {
-            if (!entity.rigidbody.isOnFloor)
+            if (!Entity.rigidbody.isOnFloor)
             {
                 return;
             }
@@ -53,13 +52,13 @@ namespace Lockstep.Game
                 // turn to target
                 var targetPos = minTarget.transform.pos;
                 var currentPos = transform.pos;
-                var turnVal = entity.turnSpd * deltaTime;
+                var turnVal = Entity.turnSpd * deltaTime;
                 var targetDeg = CTransform2D.TurnToward(targetPos, currentPos, transform.deg, turnVal,
                     out var isFinishedTurn);
                 transform.deg = targetDeg;
                 //move to target
                 var distToTarget = (targetPos - currentPos).magnitude;
-                var movingStep = entity.moveSpd * deltaTime;
+                var movingStep = Entity.moveSpd * deltaTime;
                 if (movingStep > distToTarget)
                 {
                     movingStep = distToTarget;
@@ -76,7 +75,7 @@ namespace Lockstep.Game
                 {
                     _atkTimer = atkInterval;
                     //Atk
-                    target.TakeDamage(entity, entity.damage, target.transform.Pos3);
+                    target.TakeDamage(Entity, Entity.damage, target.transform.Pos3);
                 }
             }
         }

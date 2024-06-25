@@ -5,7 +5,7 @@ namespace Lockstep.Game
 {
     public static class EntityUnityExt
     {
-        public static Transform GetUnityTransform(this BaseEntity value)
+        public static Transform GetUnityTransform(this Entity value)
         {
             return value.engineTransform as Transform;
         }

@@ -8,8 +8,7 @@ namespace Lockstep.Game
     [Serializable]
     public partial class CMover : IComponent
     {
-        public Entity entity => (Entity)baseEntity;
-        public Player player => (Player)baseEntity;
+        public Player player => (Player)Entity;
         public PlayerCommands input => player.input;
 
         static LFloat _sqrStopDist = new LFloat(true, 40);
@@ -17,9 +16,9 @@ namespace Lockstep.Game
         public bool hasReachTarget = false;
         public bool needMove = true;
 
-        public override void DoUpdate(LFloat deltaTime)
+        public override void Update(LFloat deltaTime)
         {
-            if (!entity.rigidbody.isOnFloor)
+            if (!Entity.rigidbody.isOnFloor)
             {
                 return;
             }

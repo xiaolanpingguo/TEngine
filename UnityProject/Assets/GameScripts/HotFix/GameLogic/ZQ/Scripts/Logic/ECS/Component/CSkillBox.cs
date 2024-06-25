@@ -9,15 +9,14 @@ namespace Lockstep.Game
     [Serializable]
     public partial class CSkillBox : IComponent, ISkillEventHandler
     {
-        public Entity entity => (Entity)baseEntity;
         public int configId;
         public bool isFiring;
-        [HideInInspector][ReRefBackup] public SkillBoxConfig config;
-        [Backup] private int _curSkillIdx = 0;
-        [Backup] private List<Skill> _skills = new List<Skill>();
+        [HideInInspector]public SkillBoxConfig config;
+        private int _curSkillIdx = 0;
+        private List<Skill> _skills = new List<Skill>();
         public Skill curSkill => (_curSkillIdx >= 0) ? _skills[_curSkillIdx] : null;
 
-        public override void BindEntity(BaseEntity e)
+        public override void BindEntity(Entity e)
         {
             base.BindEntity(e);
             config = GameConfigSingleton.Instance.GetSkillConfig(configId);
@@ -29,7 +28,7 @@ namespace Lockstep.Game
                 {
                     var skill = new Skill();
                     _skills.Add(skill);
-                    skill.BindEntity(entity, info, this);
+                    skill.BindEntity(Entity, info, this);
                     skill.DoStart();
                 }
             }
@@ -37,11 +36,11 @@ namespace Lockstep.Game
             for (int i = 0; i < _skills.Count; i++)
             {
                 var skill = _skills[i];
-                skill.BindEntity(entity, config.skillInfos[i], this);
+                skill.BindEntity(Entity, config.skillInfos[i], this);
             }
         }
 
-        public override void DoUpdate(LFloat deltaTime)
+        public override void Update(LFloat deltaTime)
         {
             if (config == null) return;
             foreach (var skill in _skills)
@@ -95,14 +94,14 @@ namespace Lockstep.Game
         {
             Debug.Log("OnSkillStart " + skill.SkillInfo.animName);
             isFiring = true;
-            entity.isInvincible = true;
+            Entity.isInvincible = true;
         }
 
         public void OnSkillDone(Skill skill)
         {
             Debug.Log("OnSkillDone " + skill.SkillInfo.animName);
             isFiring = false;
-            entity.isInvincible = false;
+            Entity.isInvincible = false;
         }
 
         public void OnSkillPartStart(Skill skill)

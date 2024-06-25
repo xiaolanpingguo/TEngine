@@ -172,7 +172,7 @@ namespace Lockstep.Game
             return colFab;
         }
 
-        public void AttachToColSystem(int layer, ColliderPrefab prefab, BaseEntity entity)
+        public void AttachToColSystem(int layer, ColliderPrefab prefab, Entity entity)
         {
             var proxy = new ColliderProxy();
             proxy.EntityObject = entity;

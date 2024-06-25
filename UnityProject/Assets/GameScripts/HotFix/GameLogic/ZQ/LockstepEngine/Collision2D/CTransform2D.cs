@@ -30,7 +30,6 @@ namespace Lockstep.Framework
         public LFloat y;
         public LFloat deg; //same as Unity CW deg(up) =0
 
-        [NoBackup]
         public LVector2 forward
         {
             //等同于2D  up
@@ -121,7 +120,6 @@ namespace Lockstep.Framework
             return new LTransform2D { pos = a.pos + b.pos, y = a.y + b.y, deg = a.deg + b.deg };
         }
 
-        [NoBackup]
         public LVector3 Pos3
         {
             get => new LVector3(pos.x, y, pos.y);

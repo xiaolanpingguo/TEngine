@@ -16,7 +16,7 @@ namespace Lockstep.Game
         {
             foreach (var player in World.Instance.GetPlayers())
             {
-                player.DoUpdate(deltaTime);
+                player.Update(deltaTime);
             }
         }
     }

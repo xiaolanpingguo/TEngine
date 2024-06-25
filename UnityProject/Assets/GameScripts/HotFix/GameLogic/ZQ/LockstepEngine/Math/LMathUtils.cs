@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 
 
-namespace Lockstep.Game
+namespace Lockstep.Framework
 {
     public static class LMathUtils
     {
@@ -78,27 +78,5 @@ namespace Lockstep.Game
             return EditorGUILayout.Vector3Field(label, value.ToVector3(), options).ToLVector3();
         }
 #endif
-    }
-}
-
-
-
-namespace Lockstep.Game
-{
-    public class IComponent : BaseFormater
-    {
-        public BaseEntity baseEntity { get; private set; }
-        public CTransform2D transform { get; private set; }
-
-        public virtual void BindEntity(BaseEntity entity)
-        {
-            this.baseEntity = entity;
-            transform = entity.transform;
-        }
-
-        public virtual void DoAwake() { }
-        public virtual void DoStart() { }
-        public virtual void DoUpdate(LFloat deltaTime) { }
-        public virtual void DoDestroy() { }
     }
 }

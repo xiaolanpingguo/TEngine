@@ -45,7 +45,7 @@ namespace Lockstep.Game
         private Dictionary<int, GameState> _tick2State = new Dictionary<int, GameState>();
         private GameState _curGameState;
         private Dictionary<Type, IList> _type2Entities = new Dictionary<Type, IList>();
-        private Dictionary<int, BaseEntity> _id2Entities = new Dictionary<int, BaseEntity>();
+        private Dictionary<int, Entity> _id2Entities = new Dictionary<int, Entity>();
         private Dictionary<int, Serializer> _tick2Backup = new Dictionary<int, Serializer>();
 
         private Dictionary<int, int> _tick2StateHash = new Dictionary<int, int>();
@@ -83,7 +83,7 @@ namespace Lockstep.Game
             set => _curGameState.CurEnemyId = value;
         }
 
-        private void AddEntity<T>(T e) where T : BaseEntity
+        private void AddEntity<T>(T e) where T : Entity
         {
             if (typeof(T) == typeof(Player))
             {
@@ -107,7 +107,7 @@ namespace Lockstep.Game
             _id2Entities[e.EntityId] = e;
         }
 
-        private void RemoveEntity<T>(T e) where T : BaseEntity
+        private void RemoveEntity<T>(T e) where T : Entity
         {
             var t = e.GetType();
             if (_type2Entities.TryGetValue(t, out var lstObj))
@@ -198,7 +198,7 @@ namespace Lockstep.Game
             return null;
         }
 
-        public T CreateEntity<T>(int prefabId, LVector3 position) where T : BaseEntity, new()
+        public T CreateEntity<T>(int prefabId, LVector3 position) where T : Entity, new()
         {
             var baseEntity = new T();
             GameConfigSingleton.Instance.GetEntityConfig(prefabId)?.CopyTo(baseEntity);
@@ -207,20 +207,20 @@ namespace Lockstep.Game
             baseEntity.EntityId = GenId();
             baseEntity.PrefabId = prefabId;
             baseEntity.transform.Pos3 = position;
-            baseEntity.DoBindRef();
+            baseEntity.BindRef();
             if (baseEntity is Entity entity)
             {
                 PhysicSystem.Instance.RegisterEntity(prefabId, entity);
             }
 
-            baseEntity.DoAwake();
-            baseEntity.DoStart();
+            baseEntity.Awake();
+            baseEntity.Start();
             BindView(baseEntity);
             AddEntity(baseEntity);
             return baseEntity;
         }
 
-        public void DestroyEntity(BaseEntity entity)
+        public void DestroyEntity(Entity entity)
         {
             RemoveEntity(entity);
         }
@@ -250,7 +250,7 @@ namespace Lockstep.Game
                 _tick2StateHash[tick] = hash;
 
                 var oldId2Entity = _id2Entities;
-                _id2Entities = new Dictionary<int, BaseEntity>();
+                _id2Entities = new Dictionary<int, Entity>();
                 _type2Entities.Clear();
 
                 //. Recover Entities
@@ -261,7 +261,7 @@ namespace Lockstep.Game
                 //. Rebind Views 
                 foreach (var pair in _id2Entities)
                 {
-                    BaseEntity oldEntity = null;
+                    Entity oldEntity = null;
                     if (oldId2Entity.TryGetValue(pair.Key, out var poldEntity))
                     {
                         oldEntity = poldEntity;
@@ -286,7 +286,7 @@ namespace Lockstep.Game
         {
         }
 
-        private void BackUpEntities<T>(T[] lst, Serializer writer) where T : BaseEntity, IBackup, new()
+        private void BackUpEntities<T>(T[] lst, Serializer writer) where T : Entity, IBackup, new()
         {
             writer.Write(lst.Length);
             foreach (var item in lst)
@@ -295,7 +295,7 @@ namespace Lockstep.Game
             }
         }
 
-        private List<T> RecoverEntities<T>(List<T> lst, Deserializer reader) where T : BaseEntity, IBackup, new()
+        private List<T> RecoverEntities<T>(List<T> lst, Deserializer reader) where T : Entity, IBackup, new()
         {
             var count = reader.ReadInt32();
             for (int i = 0; i < count; i++)
@@ -429,7 +429,7 @@ namespace Lockstep.Game
             return prefab;
         }
 
-        public void BindView(BaseEntity entity, BaseEntity oldEntity = null)
+        public void BindView(Entity entity, Entity oldEntity = null)
         {
             if (oldEntity != null)
             {
@@ -473,7 +473,7 @@ namespace Lockstep.Game
             }
         }
 
-        public void UnbindView(BaseEntity entity)
+        public void UnbindView(Entity entity)
         {
             entity.OnRollbackDestroy();
         }

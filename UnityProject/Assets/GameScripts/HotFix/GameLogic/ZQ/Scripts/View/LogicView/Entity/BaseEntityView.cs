@@ -7,9 +7,9 @@ namespace Lockstep.Game
     public class BaseEntityView : MonoBehaviour, IEntityView
     {
         public const float LerpPercent = 0.3f;
-        public BaseEntity baseEntity;
+        public Entity baseEntity;
 
-        public virtual void BindEntity(BaseEntity e, BaseEntity oldEntity = null)
+        public virtual void BindEntity(Entity e, Entity oldEntity = null)
         {
             e.EntityView = this;
             this.baseEntity = e;
