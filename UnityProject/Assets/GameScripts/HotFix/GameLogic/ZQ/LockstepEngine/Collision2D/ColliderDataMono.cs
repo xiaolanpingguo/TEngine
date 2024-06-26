@@ -5,7 +5,6 @@ using UnityEngine;
 
 namespace Lockstep.Framework 
 {
-    [Serializable]
     public class ColliderData : IComponent
     {
         [Header("Offset")]

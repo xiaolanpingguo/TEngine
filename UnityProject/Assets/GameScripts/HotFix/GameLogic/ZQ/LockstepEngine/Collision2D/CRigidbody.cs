@@ -6,7 +6,6 @@ namespace Lockstep.Framework
 {
     public delegate void OnFloorResultCallback(bool isOnFloor);
 
-    [Serializable]
     public class CRigidbody : IComponent
     {
         public CTransform2D transform { get; private set; }

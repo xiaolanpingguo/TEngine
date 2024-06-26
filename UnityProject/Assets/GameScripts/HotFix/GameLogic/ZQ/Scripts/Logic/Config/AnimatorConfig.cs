@@ -23,6 +23,7 @@ namespace Lockstep.Game
         public bool isMoveByAnim; //default is not
         public List<EventPointInfo> eventPoints = new List<EventPointInfo>();
     }
+
     [Serializable]
     public struct AnimOffsetInfo
     {
@@ -45,6 +46,7 @@ namespace Lockstep.Game
             return new AnimOffsetInfo(a.pos + b.pos, a.deg + b.deg);
         }
     }
+
     [Serializable]
     public class AnimInfo
     {

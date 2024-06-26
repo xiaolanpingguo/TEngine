@@ -13,7 +13,6 @@ namespace Lockstep.Framework
         public LFloat deg;
     }
 
-    [Serializable]
     public class CTransform2D : IComponent
     {
         public CTransform2D() { }

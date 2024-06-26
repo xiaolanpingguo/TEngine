@@ -80,7 +80,7 @@ namespace Lockstep.Game
 
         public int showTreeId = 0;
 
-        public UnityEngine.Vector2 scrollPos;
+        public Vector2 scrollPos;
         public bool isShow = true;
         public bool[] collisionMatrix = new bool[(int) EColliderLayer.EnumCount * (int) EColliderLayer.EnumCount];
 
