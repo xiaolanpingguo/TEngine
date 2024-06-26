@@ -13,16 +13,26 @@ namespace Lockstep.Game
 
         public CMover _mover = null;
         private CAnimator _animator = null;
-        private CSkillBox _skillBox = null;
+        private Skill _skill= null;
 
         public override void Awake()
         {
+            var config = GameConfigSingleton.Instance.GetSkillConfig(1);
+            if (config != null)
+            {
+                var skillInfo = config.skillInfos[0];
+                _skill = new Skill(this, skillInfo);
+                _skill.OnSkillStartHandler = OnSkillStart;
+                _skill.OnSkillPartStartHandler = OnSkillPartStart;
+                _skill.OnSkillDoneHandler = OnSkillDone;
+            }
+
+
             _mover = new CMover(this);
             _animator = new CAnimator(this);
-            _skillBox = new CSkillBox(this);
             RegisterComponent(_animator);
-            RegisterComponent(_skillBox);
             RegisterComponent(_mover);
+            RegisterComponent(_skill);
             base.Awake();
         }
 
@@ -31,14 +41,31 @@ namespace Lockstep.Game
             base.Update(deltaTime);
             if (input.skillId != 0)
             {
-                _skillBox.Fire(input.skillId - 1);
+                _skill.Fire();
             }
         }
 
 
-        public void StopSkill(int idx = -1)
+        public void StopSkill()
         {
-            _skillBox.ForceStop(idx);
+            _skill.ForceStop();
+        }
+
+        public void OnSkillStart(Skill skill)
+        {
+            isInvincible = true;
+            //entity.animator?.Play(AnimName);
+        }
+
+        public void OnSkillPartStart(Skill skill)
+        {
+            //Debug.Log("OnSkillPartStart " + skill.SkillInfo.animName );
+        }
+
+        public void OnSkillDone(Skill skill)
+        {
+            isInvincible = false;
+            //entity.animator?.Play(AnimDefine.Idle);
         }
 
         public override void WriteBackup(Serializer writer)
@@ -58,7 +85,7 @@ namespace Lockstep.Game
             //input.WriteBackup(writer);
             _mover.WriteBackup(writer);
             rigidbody.WriteBackup(writer);
-            _skillBox.WriteBackup(writer);
+            _skill.WriteBackup(writer);
             LTrans2D.WriteBackup(writer);
         }
 
@@ -79,7 +106,7 @@ namespace Lockstep.Game
             //input.ReadBackup(reader);
             _mover.ReadBackup(reader);
             rigidbody.ReadBackup(reader);
-            _skillBox.ReadBackup(reader);
+            _skill.ReadBackup(reader);
             LTrans2D.ReadBackup(reader);
         }
 
@@ -101,7 +128,7 @@ namespace Lockstep.Game
             //hash += input.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += _mover.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += rigidbody.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += _skillBox.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += _skill.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += LTrans2D.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             return hash;
         }
@@ -123,7 +150,7 @@ namespace Lockstep.Game
             //sb.AppendLine(prefix + "input" +":");  input.DumpStr(sb,"\t" + prefix);
             sb.AppendLine(prefix + "mover" + ":"); _mover.DumpStr(sb, "\t" + prefix);
             sb.AppendLine(prefix + "rigidbody" + ":"); rigidbody.DumpStr(sb, "\t" + prefix);
-            sb.AppendLine(prefix + "skillBox" + ":"); _skillBox.DumpStr(sb, "\t" + prefix);
+            sb.AppendLine(prefix + "skillBox" + ":"); _skill.DumpStr(sb, "\t" + prefix);
             sb.AppendLine(prefix + "transform" + ":"); LTrans2D.DumpStr(sb, "\t" + prefix);
         }
     }

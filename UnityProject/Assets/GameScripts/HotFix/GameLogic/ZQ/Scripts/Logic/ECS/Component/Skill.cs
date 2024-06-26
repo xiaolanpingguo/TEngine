@@ -13,20 +13,16 @@ namespace Lockstep.Game
         Firing,
     }
 
-    public interface ISkillEventHandler
-    {
-        void OnSkillStart(Skill skill);
-        void OnSkillDone(Skill skill);
-        void OnSkillPartStart(Skill skill);
-    }
 
     [Serializable]
     public class Skill : IComponent
     {
         private static readonly HashSet<Entity> _tempEntities = new HashSet<Entity>();
 
-        public ISkillEventHandler eventHandler;
-        public Entity entity { get; private set; }
+        public Action<Skill> OnSkillStartHandler;
+        public Action<Skill> OnSkillPartStartHandler;
+        public Action<Skill> OnSkillDoneHandler;
+
         public SkillInfo SkillInfo;
 
         public LFloat CdTimer;
@@ -46,21 +42,13 @@ namespace Lockstep.Game
         public LFloat MaxPartTime => SkillInfo.maxPartTime;
         public string AnimName => SkillInfo.animName;
 
-        public void ForceStop() { }
 
-        public Skill(Entity entity) : base(entity)
+        public Skill(Entity entity, SkillInfo info) : base(entity)
         {
-
-        }
-
-        public void BindEntity(Entity entity, SkillInfo info, ISkillEventHandler eventHandler)
-        {
-            this.entity = entity;
             this.SkillInfo = info;
-            this.eventHandler = eventHandler;
         }
 
-        public void Start()
+        public override void Awake()
         {
             skillTimer = MaxPartTime;
             State = ESkillState.Idle;
@@ -68,39 +56,11 @@ namespace Lockstep.Game
             partCounter = new int[Parts.Count];
         }
 
-
-        public bool Fire()
+        public override void Start()
         {
-            if (CdTimer <= 0 && State == ESkillState.Idle)
-            {
-                CdTimer = CD;
-                skillTimer = LFloat.zero;
-                for (int i = 0; i < partCounter.Length; i++)
-                {
-                    partCounter[i] = 0;
-                }
-
-                State = ESkillState.Firing;
-                ((Player)entity)._mover.needMove = false;
-                OnFire();
-                return true;
-            }
-
-            return false;
         }
 
-        public void OnFire()
-        {
-            eventHandler.OnSkillStart(this);
-        }
-
-        public void Done()
-        {
-            eventHandler.OnSkillDone(this);
-            State = ESkillState.Idle;
-        }
-
-        public void Update(LFloat deltaTime)
+        public override void Update(LFloat deltaTime)
         {
             CdTimer -= deltaTime;
             skillTimer += deltaTime;
@@ -114,7 +74,7 @@ namespace Lockstep.Game
 
                 if (CurPart != null && CurPart.moveSpd != 0)
                 {
-                    entity.LTrans2D.pos += CurPart.moveSpd * deltaTime * entity.LTrans2D.forward;
+                    Entity.LTrans2D.pos += CurPart.moveSpd * deltaTime * Entity.LTrans2D.forward;
                 }
             }
             else
@@ -125,6 +85,41 @@ namespace Lockstep.Game
                     Done();
                 }
             }
+        }
+
+        public bool Fire()
+        {
+            if (CdTimer <= 0 && State == ESkillState.Idle)
+            {
+                CdTimer = CD;
+                skillTimer = LFloat.zero;
+                for (int i = 0; i < partCounter.Length; i++)
+                {
+                    partCounter[i] = 0;
+                }
+
+                State = ESkillState.Firing;
+                ((Player)Entity)._mover.needMove = false;
+                OnFire();
+                return true;
+            }
+
+            return false;
+        }
+
+        public void OnFire()
+        {
+            OnSkillStartHandler?.Invoke(this);
+        }
+
+        public void Done()
+        {
+            OnSkillDoneHandler?.Invoke(this);
+            State = ESkillState.Idle;
+        }
+
+        public void ForceStop()
+        { 
         }
 
         void CheckSkillPart(SkillPart part, int idx)
@@ -139,7 +134,7 @@ namespace Lockstep.Game
 
         void TriggerPart(SkillPart part, int idx)
         {
-            eventHandler.OnSkillPartStart(this);
+            OnSkillPartStartHandler?.Invoke(this);
             _curPartIdx = idx;
             _showTimer = Time.realtimeSinceStartup + 0.1f;
 
@@ -160,7 +155,7 @@ namespace Lockstep.Game
             //TODO Ignore CollisionSystem
             if (col.radius > 0)
             {
-                var colPos = entity.LTrans2D.TransformPoint(col.pos);
+                var colPos = Entity.LTrans2D.TransformPoint(col.pos);
                 foreach (var e in World.Instance.GetEnemies())
                 {
                     var targetCenter = e.LTrans2D.pos;
@@ -173,14 +168,14 @@ namespace Lockstep.Game
 #endif
             foreach (var other in _tempEntities)
             {
-                other.TakeDamage(entity, CurPart.damage, other.LTrans2D.pos.ToLVector3());
+                other.TakeDamage(Entity, CurPart.damage, other.LTrans2D.pos.ToLVector3());
             }
 
             //add force
             if (part.needForce)
             {
                 var force = part.impulseForce;
-                var forward = entity.LTrans2D.forward;
+                var forward = Entity.LTrans2D.forward;
                 var right = forward.RightVec();
                 var z = forward * force.z + right * force.x;
                 force.x = z.x;
@@ -208,8 +203,8 @@ namespace Lockstep.Game
         {
             if (CurPart.collider.IsCircle && CurPart.collider.deg > 0)
             {
-                var deg = (other.Transform2D.pos - entity.LTrans2D.pos).ToDeg();
-                var degDiff = entity.LTrans2D.deg.Abs() - deg;
+                var deg = (other.Transform2D.pos - Entity.LTrans2D.pos).ToDeg();
+                var degDiff = Entity.LTrans2D.deg.Abs() - deg;
                 if (LMath.Abs(degDiff) <= CurPart.collider.deg)
                 {
                     _tempEntities.Add((Entity)other.EntityObject);
