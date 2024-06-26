@@ -4,7 +4,7 @@ using Lockstep.Framework;
 using static UnityEngine.GraphicsBuffer;
 
 
-namespace Lockstep.Game
+namespace Lockstep.Framework
 {
     public abstract class IComponent : BaseFormater
     {

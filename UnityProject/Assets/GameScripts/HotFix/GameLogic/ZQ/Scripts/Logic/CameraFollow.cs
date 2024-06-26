@@ -22,12 +22,13 @@ namespace Lockstep.Game
 
         private void Update()
         {
-            if (_target == null)
+            GameObject obj = World.MyPlayer?.UserData as GameObject;
+            if (obj == null)
             {
-                GameObject obj = World.MyPlayer?.UserData as GameObject;
-                target = obj?.transform;
+                return;
             }
 
+            target = obj.transform;
             if (_target == null)
             {
                 return;

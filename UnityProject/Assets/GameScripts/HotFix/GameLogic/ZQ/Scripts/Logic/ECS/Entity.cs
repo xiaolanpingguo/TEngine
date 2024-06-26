@@ -4,7 +4,7 @@ using System.Text;
 using Lockstep.Framework;
 
 
-namespace Lockstep.Game
+namespace Lockstep.Framework
 {
     public class Entity : ILPTriggerEventHandler
     {
