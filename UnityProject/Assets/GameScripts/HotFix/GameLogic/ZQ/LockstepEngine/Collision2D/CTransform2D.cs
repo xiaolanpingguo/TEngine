@@ -134,14 +134,14 @@ namespace Lockstep.Framework
             return $"(deg:{deg} pos:{pos} y:{y})";
         }
 
-        public override void WriteBackup(Serializer writer)
+        public override void Serialize(Serializer writer)
         {
             writer.Write(deg);
             writer.Write(pos);
             writer.Write(y);
         }
 
-        public override void ReadBackup(Deserializer reader)
+        public override void Deserialize(Deserializer reader)
         {
             deg = reader.ReadLFloat();
             pos = reader.ReadLVector2();

@@ -260,11 +260,12 @@ namespace Lockstep.Framework
             return new LVector3(true, x, y, z);
         }
 
-
-        public T ReadRef<T>(ref T _) where T : BaseFormater, new()
+        public T ReadRef<T>(ref T _) where T : class, ISerializable, new()
         {
             if (ReadBoolean())
+            {
                 return null;
+            }
             var val = new T();
             val.Deserialize(this);
             return val;
@@ -370,16 +371,20 @@ namespace Lockstep.Framework
             return arr;
         }
 
-        public T[] ReadArray<T>(T[] _) where T : BaseFormater, new()
+        public T[] ReadArray<T>(T[] _) where T : class, ISerializable, new()
         {
             ushort len = ReadUInt16();
             if (len == 0)
+            {
                 return null;
+            }
             var formatters = new T[len];
             for (int i = 0; i < len; i++)
             {
                 if (ReadBoolean())
+                {
                     formatters[i] = null;
+                }
                 else
                 {
                     var val = new T();
@@ -391,16 +396,20 @@ namespace Lockstep.Framework
             return formatters;
         }
 
-        public List<T> ReadList<T>(List<T> _) where T : BaseFormater, new()
+        public List<T> ReadList<T>(List<T> _) where T : class, ISerializable, new()
         {
             ushort len = ReadUInt16();
             if (len == 0)
+            {
                 return null;
+            }
             var formatters = new List<T>(len);
             for (int i = 0; i < len; i++)
             {
                 if (ReadBoolean())
+                {
                     formatters[i] = null;
+                }
                 else
                 {
                     var val = new T();

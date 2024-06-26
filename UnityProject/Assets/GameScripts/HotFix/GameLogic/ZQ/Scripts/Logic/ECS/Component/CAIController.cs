@@ -85,7 +85,7 @@ namespace Lockstep.Game
             }
         }
 
-        public override void WriteBackup(Serializer writer)
+        public override void Serialize(Serializer writer)
         {
             writer.Write(_atkTimer);
             writer.Write(_atkInterval);
@@ -93,7 +93,7 @@ namespace Lockstep.Game
             writer.Write(_targetId);
         }
 
-        public override void ReadBackup(Deserializer reader)
+        public override void Deserialize(Deserializer reader)
         {
             _atkTimer = reader.ReadLFloat();
             _atkInterval = reader.ReadLFloat();

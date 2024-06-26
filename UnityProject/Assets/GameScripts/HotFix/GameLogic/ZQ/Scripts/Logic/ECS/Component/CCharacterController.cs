@@ -40,12 +40,12 @@ namespace Lockstep.Game
             _hasReachTarget = !needChase;
         }
 
-        public override void WriteBackup(Serializer writer)
+        public override void Serialize(Serializer writer)
         {
             writer.Write(_hasReachTarget);
         }
 
-        public override void ReadBackup(Deserializer reader)
+        public override void Deserialize(Deserializer reader)
         {
             _hasReachTarget = reader.ReadBoolean();
         }

@@ -271,7 +271,7 @@ namespace Lockstep.Game
             //}
         }
 
-        public override void WriteBackup(Serializer writer)
+        public override void Serialize(Serializer writer)
         {
             writer.Write(_cdTimer);
             writer.Write(_curPartIdx);
@@ -280,7 +280,7 @@ namespace Lockstep.Game
             writer.Write(_partCounter);
         }
 
-        public override void ReadBackup(Deserializer reader)
+        public override void Deserialize(Deserializer reader)
         {
             _cdTimer = reader.ReadLFloat();
             _curPartIdx = reader.ReadInt32();

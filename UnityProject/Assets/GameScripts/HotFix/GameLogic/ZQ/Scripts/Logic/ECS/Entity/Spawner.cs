@@ -38,22 +38,22 @@ namespace Lockstep.Game
             World.Instance.CreateEntity<Enemy>(Info.prefabId, Info.spawnPoint);
         }
 
-        public override void WriteBackup(Serializer writer)
+        public override void Serialize(Serializer writer)
         {
-            writer.Write(EntityId);
-            writer.Write(PrefabId);
-            writer.Write(Timer);
-            Info.WriteBackup(writer);
-            LTrans2D.WriteBackup(writer);
+            //writer.Write(EntityId);
+            //writer.Write(PrefabId);
+            //writer.Write(Timer);
+            //Info.WriteBackup(writer);
+            //LTrans2D.WriteBackup(writer);
         }
 
-        public override void ReadBackup(Deserializer reader)
+        public override void Deserialize(Deserializer reader)
         {
-            EntityId = reader.ReadInt32();
-            PrefabId = reader.ReadInt32();
-            Timer = reader.ReadLFloat();
-            Info.ReadBackup(reader);
-            LTrans2D.ReadBackup(reader);
+            //EntityId = reader.ReadInt32();
+            //PrefabId = reader.ReadInt32();
+            //Timer = reader.ReadLFloat();
+            //Info.ReadBackup(reader);
+            //LTrans2D.ReadBackup(reader);
         }
 
         public override int GetHash(ref int idx)

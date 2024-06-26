@@ -13,14 +13,14 @@ namespace Lockstep.Game
         public int prefabId;
 
 
-        public override void WriteBackup(Serializer writer)
+        public override void Serialize(Serializer writer)
         {
             writer.Write(prefabId);
             writer.Write(spawnPoint);
             writer.Write(spawnTime);
         }
 
-        public override void ReadBackup(Deserializer reader)
+        public override void Deserialize(Deserializer reader)
         {
             prefabId = reader.ReadInt32();
             spawnPoint = reader.ReadLVector3();

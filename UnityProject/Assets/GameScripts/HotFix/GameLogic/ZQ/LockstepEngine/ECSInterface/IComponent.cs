@@ -6,7 +6,7 @@ using static UnityEngine.GraphicsBuffer;
 
 namespace Lockstep.Framework
 {
-    public abstract class IComponent : BaseFormater
+    public abstract class IComponent : ISerializable
     {
         public Entity Entity { get; private set; }
 
@@ -31,8 +31,8 @@ namespace Lockstep.Framework
         {
         }
 
-        public abstract void WriteBackup(Serializer writer);
-        public abstract void ReadBackup(Deserializer reader);
+        public abstract void Serialize(Serializer writer);
+        public abstract void Deserialize(Deserializer reader);
         public abstract int GetHash(ref int idx);
         public abstract void DumpStr(StringBuilder sb, string prefix);
     }

@@ -283,7 +283,7 @@ namespace Lockstep.Game
             writer.Write(lst.Length);
             foreach (var item in lst)
             {
-                item.WriteBackup(writer);
+                item.Serialize(writer);
             }
         }
 
@@ -294,7 +294,7 @@ namespace Lockstep.Game
             {
                 var t = new T();
                 lst.Add(t);
-                t.ReadBackup(reader);
+                t.Deserialize(reader);
             }
 
             _type2Entities[typeof(T)] = lst;

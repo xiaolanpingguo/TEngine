@@ -3,10 +3,6 @@ using System;
 
 namespace Lockstep.Framework
 {
-    public class NoToBytesAttribute : Attribute { }
-
-    public class ToBytesAttribute : Attribute { }
-
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
     public class IndexAttribute : Attribute
     {
@@ -29,13 +25,8 @@ namespace Lockstep.Framework
         }
     }
 
-
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
-    public class ExtFormatAttribute : Attribute { }
-
     public static class NetMsgExtension
     {
-
         public static T Parse<T>(this Deserializer reader) where T : ISerializable, new()
         {
             var val = new T();

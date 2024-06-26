@@ -129,7 +129,7 @@ namespace Lockstep.Framework
             return false; //TODO check with scene
         }
 
-        public override void WriteBackup(Serializer writer)
+        public override void Serialize(Serializer writer)
         {
             writer.Write(Mass);
             writer.Write(Speed);
@@ -138,7 +138,7 @@ namespace Lockstep.Framework
             writer.Write(isSleep);
         }
 
-        public override void ReadBackup(Deserializer reader)
+        public override void Deserialize(Deserializer reader)
         {
             Mass = reader.ReadLFloat();
             Speed = reader.ReadLVector3();

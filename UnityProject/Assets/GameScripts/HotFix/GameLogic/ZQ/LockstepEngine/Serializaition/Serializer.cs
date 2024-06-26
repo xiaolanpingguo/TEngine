@@ -6,48 +6,25 @@ using System.Text;
 
 namespace Lockstep.Framework
 {
-    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public class Limited : Attribute
-    {
-        public bool le255;
-        public bool le65535;
-
-        public Limited()
-        {
-            le255 = false;
-            le65535 = true;
-        }
-
-        public Limited(bool isLess255)
-        {
-            le255 = isLess255;
-            le65535 = !isLess255;
-        }
-    }
-
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
-    public class SelfImplementAttribute : Attribute { }
-
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
-    public class UdpAttribute : Attribute { }
-
-    public interface ISerializablePacket
-    {
-        byte[] ToBytes();
-        void FromBytes(byte[] bytes);
-    }
-
     public interface ISerializable
     {
         void Serialize(Serializer writer);
-
         void Deserialize(Deserializer reader);
     }
 
-    public partial class Serializer
+    public class Serializer
     {
-        //for ext
         protected int[] offsets;
+        protected byte[] _data;
+        protected int _position;
+        private const int InitialSize = 64;
+        private int _capacity;
+
+        public int Position => _position;
+        public int Capacity
+        {
+            get { return _capacity; }
+        }
 
         public void SetPosition(int pos)
         {
@@ -80,17 +57,6 @@ namespace Lockstep.Framework
                 offsets = new int[rawLen];
                 return offsets;
             }
-        }
-
-        protected byte[] _data;
-        protected int _position;
-        private const int InitialSize = 64;
-        private int _capacity;
-
-        public int Position => _position;
-        public int Capacity
-        {
-            get { return _capacity; }
         }
 
         public Serializer() : this(true, InitialSize) { }
@@ -289,13 +255,11 @@ namespace Lockstep.Framework
             _position += bytesCount;
         }
 
-
-        public void Write(BaseFormater value)
+        public void Write(ISerializable value)
         {
             Write(value == null);
             value?.Serialize(this);
         }
-
 
         public void Write(string[] value)
         {
@@ -305,7 +269,7 @@ namespace Lockstep.Framework
                 Write(value[i]);
         }
 
-        /// len should less then ushort.MaxValue
+        // len should less then ushort.MaxValue
         public void Write(byte[] value)
         {
             ushort len = value == null ? (ushort)0 : (ushort)value.Length;
@@ -315,6 +279,7 @@ namespace Lockstep.Framework
                 _Put(value);
             }
         }
+
         public void WriteBytes_255(byte[] value)
         {
             if (value == null)
@@ -331,31 +296,19 @@ namespace Lockstep.Framework
         }
 
         public void Write(float[] value) { _PutArray(value, sizeof(float), FastBitConverter.GetBytes); }
-
         public void Write(double[] value) { _PutArray(value, sizeof(double), FastBitConverter.GetBytes); }
-
         public void Write(long[] value) { _PutArray(value, sizeof(long), FastBitConverter.GetBytes); }
-
         public void Write(ulong[] value) { _PutArray(value, sizeof(ulong), FastBitConverter.GetBytes); }
-
         public void Write(int[] value) { _PutArray(value, sizeof(int), FastBitConverter.GetBytes); }
-
         public void Write(uint[] value) { _PutArray(value, sizeof(uint), FastBitConverter.GetBytes); }
-
         public void Write(ushort[] value) { _PutArray(value, sizeof(ushort), FastBitConverter.GetBytes); }
-
         public void Write(short[] value) { _PutArray(value, sizeof(short), FastBitConverter.GetBytes); }
-
         public void Write(bool[] value) { _PutArray(value, sizeof(bool), FastBitConverter.GetBytes); }
-
         public void Write(LFloat val) { Write(val._val); }
-
         public void Write(LVector2 val) { Write(val._x); Write(val._y); }
-
         public void Write(LVector3 val) { Write(val._x); Write(val._y); Write(val._z); }
 
-
-        public void Write<T>(T[] value) where T : BaseFormater
+        public void Write<T>(T[] value) where T : ISerializable
         {
             ushort len = (ushort)(value?.Length ?? 0);
             Write(len);
@@ -367,7 +320,7 @@ namespace Lockstep.Framework
             }
         }
 
-        public void Write<T>(List<T> value) where T : BaseFormater
+        public void Write<T>(List<T> value) where T : ISerializable
         {
             ushort len = (ushort)(value?.Count ?? 0);
             Write(len);
@@ -378,7 +331,6 @@ namespace Lockstep.Framework
                 val?.Serialize(this);
             }
         }
-
 
         private void _Put(byte[] data, int offset, int length)
         {
@@ -393,7 +345,6 @@ namespace Lockstep.Framework
             Buffer.BlockCopy(data, 0, _data, _position, data.Length);
             _position += data.Length;
         }
-
 
         private void _PutArray<T>(T[] value, int typeSize, Action<byte[], int, T> _func) where T : struct
         {

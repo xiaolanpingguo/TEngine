@@ -96,42 +96,42 @@ namespace Lockstep.Game
             }
         }
 
-        public override void WriteBackup(Serializer writer)
+        public override void Serialize(Serializer writer)
         {
-            writer.Write(EntityId);
-            writer.Write(PrefabId);
-            writer.Write(CurHealth);
-            writer.Write(_damage);
-            writer.Write(_isInvincible);
-            writer.Write(MaxHealth);
-            //writer.Write(_moveSpd);
-            //writer.Write(_turnSpd);
-            _animator.WriteBackup(writer);
-            ColliderData.WriteBackup(writer);
-            //input.WriteBackup(writer);
-            _characterController.WriteBackup(writer);
-            Rigidbody.WriteBackup(writer);
-            _skill.WriteBackup(writer);
-            LTrans2D.WriteBackup(writer);
+            //writer.Write(EntityId);
+            //writer.Write(PrefabId);
+            //writer.Write(CurHealth);
+            //writer.Write(_damage);
+            //writer.Write(_isInvincible);
+            //writer.Write(MaxHealth);
+            ////writer.Write(_moveSpd);
+            ////writer.Write(_turnSpd);
+            //_animator.Serialize(writer);
+            //ColliderData.Serialize(writer);
+            ////input.Serialize(writer);
+            //_characterController.Serialize(writer);
+            //Rigidbody.Serialize(writer);
+            //_skill.WriteBSerializeackup(writer);
+            //LTrans2D.WriteBackup(writer);
         }
 
-        public override void ReadBackup(Deserializer reader)
+        public override void Deserialize(Deserializer reader)
         {
-            EntityId = reader.ReadInt32();
-            PrefabId = reader.ReadInt32();
-            CurHealth = reader.ReadInt32();
-            _damage = reader.ReadInt32();
-            _isInvincible = reader.ReadBoolean();
-            MaxHealth = reader.ReadInt32();
-            //_moveSpd = reader.ReadLFloat();
-            //_turnSpd = reader.ReadLFloat();
-            _animator.ReadBackup(reader);
-            ColliderData.ReadBackup(reader);
-            //input.ReadBackup(reader);
-            _characterController.ReadBackup(reader);
-            Rigidbody.ReadBackup(reader);
-            _skill.ReadBackup(reader);
-            LTrans2D.ReadBackup(reader);
+            //EntityId = reader.ReadInt32();
+            //PrefabId = reader.ReadInt32();
+            //CurHealth = reader.ReadInt32();
+            //_damage = reader.ReadInt32();
+            //_isInvincible = reader.ReadBoolean();
+            //MaxHealth = reader.ReadInt32();
+            ////_moveSpd = reader.ReadLFloat();
+            ////_turnSpd = reader.ReadLFloat();
+            //_animator.ReadBackup(reader);
+            //ColliderData.ReadBackup(reader);
+            ////input.ReadBackup(reader);
+            //_characterController.ReadBackup(reader);
+            //Rigidbody.ReadBackup(reader);
+            //_skill.ReadBackup(reader);
+            //LTrans2D.ReadBackup(reader);
         }
 
         public override int GetHash(ref int idx)

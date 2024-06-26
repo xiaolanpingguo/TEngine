@@ -14,7 +14,7 @@ namespace Lockstep.Game
             foreach (var item in lst)
             {
                 writer.Write(item == null);
-                item?.WriteBackup(writer);
+                item?.Serialize(writer);
             }
         }
 
@@ -29,7 +29,7 @@ namespace Lockstep.Game
                 if (!isNull)
                 {
                     item = new T();
-                    item.ReadBackup(reader);
+                    item.Deserialize(reader);
                 }
 
                 lst[i] = item;
@@ -49,7 +49,7 @@ namespace Lockstep.Game
                 if (!isNull)
                 {
                     item = new T();
-                    item.ReadBackup(reader);
+                    item.Deserialize(reader);
                 }
 
                 lst.Add(item);

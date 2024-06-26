@@ -164,7 +164,7 @@ namespace Lockstep.Game
             return idx;
         }
 
-        public override void WriteBackup(Serializer writer)
+        public override void Serialize(Serializer writer)
         {
             writer.Write(_animLen);
             writer.Write(_curAnimIdx);
@@ -173,7 +173,7 @@ namespace Lockstep.Game
             writer.Write(_configId);
         }
 
-        public override void ReadBackup(Deserializer reader)
+        public override void Deserialize(Deserializer reader)
         {
             _animLen = reader.ReadLFloat();
             _curAnimIdx = reader.ReadInt32();

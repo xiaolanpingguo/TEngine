@@ -18,7 +18,7 @@ namespace Lockstep.Framework
         public LVector2 up;
         public LFloat deg;
 
-        public override void WriteBackup(Serializer writer)
+        public override void Serialize(Serializer writer)
         {
             writer.Write(deg);
             writer.Write(high);
@@ -29,7 +29,7 @@ namespace Lockstep.Framework
             writer.Write(y);
         }
 
-        public override void ReadBackup(Deserializer reader)
+        public override void Deserialize(Deserializer reader)
         {
             deg = reader.ReadLFloat();
             high = reader.ReadLFloat();

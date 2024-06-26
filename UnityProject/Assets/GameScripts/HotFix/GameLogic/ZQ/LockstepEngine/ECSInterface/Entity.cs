@@ -89,19 +89,19 @@ namespace Lockstep.Framework
         {
         }
 
-        public virtual void WriteBackup(Serializer writer)
+        public virtual void Serialize(Serializer writer)
         {
             for (int i = 0; i <  _components.Count; i++) 
             {
-                _components[i].WriteBackup(writer);
+                _components[i].Serialize(writer);
             }
         }
 
-        public virtual void ReadBackup(Deserializer reader)
+        public virtual void Deserialize(Deserializer reader)
         {
             for (int i = 0; i < _components.Count; i++)
             {
-                _components[i].ReadBackup(reader);
+                _components[i].Deserialize(reader);
             }
         }
 

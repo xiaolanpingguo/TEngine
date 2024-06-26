@@ -50,30 +50,30 @@ namespace Lockstep.Game
             UserData = null;
         }
 
-        public override void WriteBackup(Serializer writer)
+        public override void Serialize(Serializer writer)
         {
-            writer.Write(EntityId);
-            writer.Write(PrefabId);
-            writer.Write(CurHealth);
-            writer.Write(_isInvincible);
-            writer.Write(MaxHealth);
-            _aiontroller.WriteBackup(writer);
-            ColliderData.WriteBackup(writer);
-            Rigidbody.WriteBackup(writer);
-            LTrans2D.WriteBackup(writer);
+            //writer.Write(EntityId);
+            //writer.Write(PrefabId);
+            //writer.Write(CurHealth);
+            //writer.Write(_isInvincible);
+            //writer.Write(MaxHealth);
+            //_aiontroller.WriteBackup(writer);
+            //ColliderData.WriteBackup(writer);
+            //Rigidbody.WriteBackup(writer);
+            //LTrans2D.WriteBackup(writer);
         }
 
-        public override void ReadBackup(Deserializer reader)
+        public override void Deserialize(Deserializer reader)
         {
-            EntityId = reader.ReadInt32();
-            PrefabId = reader.ReadInt32();
-            CurHealth = reader.ReadInt32();
-            _isInvincible = reader.ReadBoolean();
-            MaxHealth = reader.ReadInt32();
-            _aiontroller.ReadBackup(reader);
-            ColliderData.ReadBackup(reader);
-            Rigidbody.ReadBackup(reader);
-            LTrans2D.ReadBackup(reader);
+            //EntityId = reader.ReadInt32();
+            //PrefabId = reader.ReadInt32();
+            //CurHealth = reader.ReadInt32();
+            //_isInvincible = reader.ReadBoolean();
+            //MaxHealth = reader.ReadInt32();
+            //_aiontroller.ReadBackup(reader);
+            //ColliderData.ReadBackup(reader);
+            //Rigidbody.ReadBackup(reader);
+            //LTrans2D.ReadBackup(reader);
         }
 
         public override int GetHash(ref int idx)
