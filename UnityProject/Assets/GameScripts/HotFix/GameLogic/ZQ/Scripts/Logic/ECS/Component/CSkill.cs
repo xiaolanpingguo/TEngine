@@ -15,13 +15,13 @@ namespace Lockstep.Game
 
 
     [Serializable]
-    public class Skill : IComponent
+    public class CSkill : IComponent
     {
         private static readonly HashSet<Entity> _tempEntities = new HashSet<Entity>();
 
-        public Action<Skill> OnSkillStartHandler;
-        public Action<Skill> OnSkillPartStartHandler;
-        public Action<Skill> OnSkillDoneHandler;
+        public Action<CSkill> OnSkillStartHandler;
+        public Action<CSkill> OnSkillPartStartHandler;
+        public Action<CSkill> OnSkillDoneHandler;
 
         //public config _config;
 
@@ -42,7 +42,7 @@ namespace Lockstep.Game
         private LFloat _maxPartTime;
 
 
-        public Skill(Entity entity, SkillConfig config) : base(entity)
+        public CSkill(Entity entity, SkillConfig config) : base(entity)
         {
             _cd = config.CD;
             _doneDelay = config.doneDelay;
@@ -99,7 +99,6 @@ namespace Lockstep.Game
                 }
 
                 _state = ESkillState.Firing;
-                ((Player)Entity)._mover.needMove = false;
                 OnFire();
                 return true;
             }

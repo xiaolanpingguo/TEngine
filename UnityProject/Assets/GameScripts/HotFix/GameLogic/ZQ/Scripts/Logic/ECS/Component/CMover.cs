@@ -14,8 +14,7 @@ namespace Lockstep.Game
         public PlayerCommands input => player.input;
 
         public LFloat speed => player.moveSpd;
-        public bool hasReachTarget = false;
-        public bool needMove = true;
+        public bool _hasReachTarget = false;
 
         public CMover(Entity entity) : base(entity)
         {
@@ -37,33 +36,29 @@ namespace Lockstep.Game
                 Entity.LTrans2D.deg = CTransform2D.TurnToward(targetDeg, Entity.LTrans2D.deg, player.turnSpd * deltaTime, out var hasReachDeg);
             }
 
-            hasReachTarget = !needChase;
+            _hasReachTarget = !needChase;
         }
 
         public override void WriteBackup(Serializer writer)
         {
-            writer.Write(hasReachTarget);
-            writer.Write(needMove);
+            writer.Write(_hasReachTarget);
         }
 
         public override void ReadBackup(Deserializer reader)
         {
-            hasReachTarget = reader.ReadBoolean();
-            needMove = reader.ReadBoolean();
+            _hasReachTarget = reader.ReadBoolean();
         }
 
         public override int GetHash(ref int idx)
         {
             int hash = 1;
-            hash += hasReachTarget.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += needMove.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += _hasReachTarget.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             return hash;
         }
 
         public override void DumpStr(StringBuilder sb, string prefix)
         {
-            sb.AppendLine(prefix + "hasReachTarget" + ":" + hasReachTarget.ToString());
-            sb.AppendLine(prefix + "needMove" + ":" + needMove.ToString());
+            sb.AppendLine(prefix + "hasReachTarget" + ":" + _hasReachTarget.ToString());
         }
     }
 }

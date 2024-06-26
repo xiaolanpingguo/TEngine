@@ -8,12 +8,12 @@ namespace Lockstep.Game
     [Serializable]
     public class Enemy : Entity
     {
-        private CBrain _brain = null;
+        private CAIController _aiontroller = null;
 
         public override void Start()
         {
-            _brain = new CBrain(this);
-            RegisterComponent(_brain);
+            _aiontroller = new CAIController(this);
+            RegisterComponent(_aiontroller);
             moveSpd = 2;
             turnSpd = 150;
             base.Start();
@@ -30,7 +30,7 @@ namespace Lockstep.Game
             writer.Write(maxHealth);
             writer.Write(moveSpd);
             writer.Write(turnSpd);
-            _brain.WriteBackup(writer);
+            _aiontroller.WriteBackup(writer);
             colliderData.WriteBackup(writer);
             rigidbody.WriteBackup(writer);
             LTrans2D.WriteBackup(writer);
@@ -47,7 +47,7 @@ namespace Lockstep.Game
             maxHealth = reader.ReadInt32();
             moveSpd = reader.ReadLFloat();
             turnSpd = reader.ReadLFloat();
-            _brain.ReadBackup(reader);
+            _aiontroller.ReadBackup(reader);
             colliderData.ReadBackup(reader);
             rigidbody.ReadBackup(reader);
             LTrans2D.ReadBackup(reader);
@@ -65,7 +65,7 @@ namespace Lockstep.Game
             hash += maxHealth.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += moveSpd.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += turnSpd.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += _brain.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += _aiontroller.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += colliderData.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += rigidbody.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += LTrans2D.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
@@ -83,7 +83,7 @@ namespace Lockstep.Game
             sb.AppendLine(prefix + "maxHealth" + ":" + maxHealth.ToString());
             sb.AppendLine(prefix + "moveSpd" + ":" + moveSpd.ToString());
             sb.AppendLine(prefix + "turnSpd" + ":" + turnSpd.ToString());
-            sb.AppendLine(prefix + "brain" + ":"); _brain.DumpStr(sb, "\t" + prefix);
+            sb.AppendLine(prefix + "brain" + ":"); _aiontroller.DumpStr(sb, "\t" + prefix);
             sb.AppendLine(prefix + "colliderData" + ":"); colliderData.DumpStr(sb, "\t" + prefix);
             sb.AppendLine(prefix + "rigidbody" + ":"); rigidbody.DumpStr(sb, "\t" + prefix);
             sb.AppendLine(prefix + "transform" + ":"); LTrans2D.DumpStr(sb, "\t" + prefix);

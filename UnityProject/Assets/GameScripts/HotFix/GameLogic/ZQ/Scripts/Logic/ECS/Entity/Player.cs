@@ -13,12 +13,12 @@ namespace Lockstep.Game
 
         public CMover _mover = null;
         private CAnimator _animator = null;
-        private Skill _skill= null;
+        private CSkill _skill= null;
 
         public override void Start()
         {
             var config = GameConfigSingleton.Instance.GetSkillConfig();
-            _skill = new Skill(this, config);
+            _skill = new CSkill(this, config);
             _skill.OnSkillStartHandler = OnSkillStart;
             _skill.OnSkillPartStartHandler = OnSkillPartStart;
             _skill.OnSkillDoneHandler = OnSkillDone;
@@ -46,18 +46,18 @@ namespace Lockstep.Game
             _skill.ForceStop();
         }
 
-        public void OnSkillStart(Skill skill)
+        public void OnSkillStart(CSkill skill)
         {
             isInvincible = true;
             //entity.animator?.Play(AnimName);
         }
 
-        public void OnSkillPartStart(Skill skill)
+        public void OnSkillPartStart(CSkill skill)
         {
             //Debug.Log("OnSkillPartStart " + skill.SkillInfo.animName );
         }
 
-        public void OnSkillDone(Skill skill)
+        public void OnSkillDone(CSkill skill)
         {
             isInvincible = false;
             //entity.animator?.Play(AnimDefine.Idle);

@@ -6,17 +6,16 @@ using Lockstep.Framework;
 namespace Lockstep.Game
 {
     [Serializable]
-    public class CBrain : IComponent
+    public class CAIController : IComponent
     {
-        public Entity target { get; private set; }
-        public int targetId;
-        public LFloat stopDistSqr = 1 * 1;
-        public LFloat atkInterval = 1;
+        public Entity _target;
+        public int _targetId;
+        public LFloat _stopDistSqr = 1 * 1;
+        public LFloat _atkInterval = 1;
         private LFloat _atkTimer;
 
-        public CBrain(Entity entity) : base(entity)
+        public CAIController(Entity entity) : base(entity)
         {
-            target = World.Instance.GetEntity(targetId) as Entity;
         }
 
         public override void Update(LFloat deltaTime)
@@ -45,15 +44,15 @@ namespace Lockstep.Game
                 }
             }
 
-            target = minTarget;
-            targetId = target?.EntityId ?? -1;
+            _target = minTarget;
+            _targetId = _target?.EntityId ?? -1;
 
             if (minTarget == null)
             {
                 return;
             }
 
-            if (minDist > stopDistSqr)
+            if (minDist > _stopDistSqr)
             {
                 // turn to target
                 var targetPos = minTarget.LTrans2D.pos;
@@ -78,8 +77,8 @@ namespace Lockstep.Game
                 _atkTimer -= deltaTime;
                 if (_atkTimer <= 0)
                 {
-                    _atkTimer = atkInterval;
-                    target.TakeDamage(Entity, Entity.damage, target.LTrans2D.Pos3);
+                    _atkTimer = _atkInterval;
+                    _target.TakeDamage(Entity, Entity.damage, _target.LTrans2D.Pos3);
                 }
             }
         }
@@ -87,35 +86,35 @@ namespace Lockstep.Game
         public override void WriteBackup(Serializer writer)
         {
             writer.Write(_atkTimer);
-            writer.Write(atkInterval);
-            writer.Write(stopDistSqr);
-            writer.Write(targetId);
+            writer.Write(_atkInterval);
+            writer.Write(_stopDistSqr);
+            writer.Write(_targetId);
         }
 
         public override void ReadBackup(Deserializer reader)
         {
             _atkTimer = reader.ReadLFloat();
-            atkInterval = reader.ReadLFloat();
-            stopDistSqr = reader.ReadLFloat();
-            targetId = reader.ReadInt32();
+            _atkInterval = reader.ReadLFloat();
+            _stopDistSqr = reader.ReadLFloat();
+            _targetId = reader.ReadInt32();
         }
 
         public override int GetHash(ref int idx)
         {
             int hash = 1;
             hash += _atkTimer.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += atkInterval.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += stopDistSqr.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += targetId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += _atkInterval.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += _stopDistSqr.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += _targetId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             return hash;
         }
 
         public override void DumpStr(StringBuilder sb, string prefix)
         {
             sb.AppendLine(prefix + "_atkTimer" + ":" + _atkTimer.ToString());
-            sb.AppendLine(prefix + "atkInterval" + ":" + atkInterval.ToString());
-            sb.AppendLine(prefix + "stopDistSqr" + ":" + stopDistSqr.ToString());
-            sb.AppendLine(prefix + "targetId" + ":" + targetId.ToString());
+            sb.AppendLine(prefix + "atkInterval" + ":" + _atkInterval.ToString());
+            sb.AppendLine(prefix + "stopDistSqr" + ":" + _stopDistSqr.ToString());
+            sb.AppendLine(prefix + "targetId" + ":" + _targetId.ToString());
         }
     }
 }
