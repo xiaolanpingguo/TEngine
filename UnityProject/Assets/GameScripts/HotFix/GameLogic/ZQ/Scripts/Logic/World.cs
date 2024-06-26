@@ -426,8 +426,8 @@ namespace Lockstep.Game
             {
                 if (oldEntity.PrefabId == entity.PrefabId)
                 {
-                    entity.engineTransform = oldEntity.engineTransform;
-                    var obj = (oldEntity.engineTransform as Transform).gameObject;
+                    entity.UserData = oldEntity.UserData;
+                    var obj = (oldEntity.UserData as GameObject).gameObject;
                     var views = obj.GetComponents<EntityView>();
                     foreach (var view in views)
                     {
@@ -447,7 +447,7 @@ namespace Lockstep.Game
                     return;
                 }
                 var obj = GameObject.Instantiate(prefab, entity.LTrans2D.Pos3.ToVector3(), Quaternion.Euler(new Vector3(0, entity.LTrans2D.deg, 0)));
-                entity.engineTransform = obj.transform;
+                entity.UserData = obj;
                 var views = obj.GetComponents<EntityView>();
                 if (views.Length <= 0)
                 {

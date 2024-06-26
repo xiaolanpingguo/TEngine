@@ -76,7 +76,7 @@ namespace Lockstep.Game
         {
             EntityView?.OnRollbackDestroy();
             EntityView = null;
-            engineTransform = null;
+            UserData = null;
         }
 
         public void TakeDamage(Entity atker, int amount, LVector3 hitPoint)

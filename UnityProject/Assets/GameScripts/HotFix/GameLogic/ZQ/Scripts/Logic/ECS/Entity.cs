@@ -11,7 +11,7 @@ namespace Lockstep.Game
         public int EntityId;
         public int PrefabId;
         public CTransform2D LTrans2D = new CTransform2D();
-        public object engineTransform;
+        public object UserData;
 
         private List<IComponent> _components = new List<IComponent>();
         private Dictionary<Type, IComponent> _componentsMap = new();

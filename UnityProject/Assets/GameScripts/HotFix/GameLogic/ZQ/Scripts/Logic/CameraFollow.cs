@@ -20,12 +20,12 @@ namespace Lockstep.Game
             }
         } // The position that that camera will be following.
 
-
-        void Update()
+        private void Update()
         {
             if (_target == null)
             {
-                target = World.MyPlayer?.engineTransform as Transform;
+                GameObject obj = World.MyPlayer?.UserData as GameObject;
+                target = obj?.transform;
             }
 
             if (_target == null)
