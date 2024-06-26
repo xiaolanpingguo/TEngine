@@ -43,7 +43,7 @@ namespace Lockstep.Game
     }
 
     [Serializable]
-    public class SkillInfo
+    public class SkillConfig
     {
         public string animName;
         public LFloat CD;
@@ -52,7 +52,7 @@ namespace Lockstep.Game
         public LFloat maxPartTime;
         public List<SkillPart> parts = new List<SkillPart>();
 
-        public void DoInit()
+        public SkillConfig()
         {
             parts.Sort((a, b) => LMath.Sign(a.startFrame - b.startFrame));
             var time = LFloat.MinValue;

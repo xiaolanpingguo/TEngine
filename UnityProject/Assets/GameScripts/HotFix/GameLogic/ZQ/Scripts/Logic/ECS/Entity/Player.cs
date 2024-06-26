@@ -17,16 +17,11 @@ namespace Lockstep.Game
 
         public override void Awake()
         {
-            var config = GameConfigSingleton.Instance.GetSkillConfig(1);
-            if (config != null)
-            {
-                var skillInfo = config.skillInfos[0];
-                _skill = new Skill(this, skillInfo);
-                _skill.OnSkillStartHandler = OnSkillStart;
-                _skill.OnSkillPartStartHandler = OnSkillPartStart;
-                _skill.OnSkillDoneHandler = OnSkillDone;
-            }
-
+            var config = GameConfigSingleton.Instance.GetSkillConfig();
+            _skill = new Skill(this, config);
+            _skill.OnSkillStartHandler = OnSkillStart;
+            _skill.OnSkillPartStartHandler = OnSkillPartStart;
+            _skill.OnSkillDoneHandler = OnSkillDone;
 
             _mover = new CMover(this);
             _animator = new CAnimator(this);

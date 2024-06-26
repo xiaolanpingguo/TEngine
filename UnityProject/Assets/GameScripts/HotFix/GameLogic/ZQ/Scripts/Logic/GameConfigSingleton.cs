@@ -38,9 +38,9 @@ namespace Lockstep.Game
             return _config.GetAnimatorConfig(id - 1);
         }
 
-        public SkillBoxConfig GetSkillConfig(int id)
+        public SkillConfig GetSkillConfig()
         {
-            return _config.GetSkillConfig(id - 1);
+            return _config.GetSkillConfig();
         }
     }
 }

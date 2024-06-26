@@ -38,7 +38,7 @@ MonoBehaviour:
     - pos:
         _x: 0
         _y: 0
-        _z: -99
+        _z: -97
       deg:
         _val: 0
     - pos:
@@ -50,7 +50,7 @@ MonoBehaviour:
     - pos:
         _x: 0
         _y: 0
-        _z: -94
+        _z: -93
       deg:
         _val: 0
     - pos:
@@ -86,13 +86,13 @@ MonoBehaviour:
     - pos:
         _x: 0
         _y: 0
-        _z: 315
+        _z: 314
       deg:
         _val: 0
     - pos:
         _x: 0
         _y: 0
-        _z: 341
+        _z: 340
       deg:
         _val: 0
     - pos:
@@ -104,7 +104,7 @@ MonoBehaviour:
     - pos:
         _x: 0
         _y: 0
-        _z: 366
+        _z: 365
       deg:
         _val: 0
     - pos:
@@ -905,7 +905,7 @@ MonoBehaviour:
         _val: 0
   - name: AtkNormal03
     length:
-      _val: 2883
+      _val: 2881
     offsets:
     - pos:
         _x: 0
@@ -1437,7 +1437,7 @@ MonoBehaviour:
         _val: 0
   - name: AtkSkill01
     length:
-      _val: 3550
+      _val: 3549
     offsets:
     - pos:
         _x: 0
@@ -2089,7 +2089,7 @@ MonoBehaviour:
         _val: 0
   - name: AtkSkill02
     length:
-      _val: 3333
+      _val: 3332
     offsets:
     - pos:
         _x: 0

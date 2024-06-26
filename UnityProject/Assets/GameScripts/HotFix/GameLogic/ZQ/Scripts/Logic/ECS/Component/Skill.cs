@@ -23,37 +23,41 @@ namespace Lockstep.Game
         public Action<Skill> OnSkillPartStartHandler;
         public Action<Skill> OnSkillDoneHandler;
 
-        public SkillInfo SkillInfo;
+        //public config _config;
 
-        public LFloat CdTimer;
-        public ESkillState State;
-        public LFloat skillTimer;
-        public int[] partCounter = new int[0];
+        private LFloat _cdTimer;
+        private ESkillState _state;
+        private LFloat _skillTimer;
+
+        private int[] _partCounter = new int[0];
         private int _curPartIdx;
-
-        public SkillPart CurPart => _curPartIdx == -1 ? null : Parts[_curPartIdx];
+        private SkillPart _curPart => _curPartIdx == -1 ? null : _parts[_curPartIdx];
 
         private float _showTimer;
 
-        public LFloat CD => SkillInfo.CD;
-        public LFloat DoneDelay => SkillInfo.doneDelay;
-        public List<SkillPart> Parts => SkillInfo.parts;
-        public int TargetLayer => SkillInfo.targetLayer;
-        public LFloat MaxPartTime => SkillInfo.maxPartTime;
-        public string AnimName => SkillInfo.animName;
+        private LFloat _cd;
+        private LFloat _doneDelay;
+        private List<SkillPart> _parts;
+        private int _targetLayer;
+        private LFloat _maxPartTime;
 
 
-        public Skill(Entity entity, SkillInfo info) : base(entity)
+        public Skill(Entity entity, SkillConfig config) : base(entity)
         {
-            this.SkillInfo = info;
+            _cd = config.CD;
+            _doneDelay = config.doneDelay;
+            _parts = config.parts;
+            _targetLayer = config.targetLayer;
+            _maxPartTime = config.maxPartTime;
+
+            _skillTimer = _maxPartTime;
+            _state = ESkillState.Idle;
+            _curPartIdx = -1;
+            _partCounter = new int[_parts.Count];
         }
 
         public override void Awake()
         {
-            skillTimer = MaxPartTime;
-            State = ESkillState.Idle;
-            _curPartIdx = -1;
-            partCounter = new int[Parts.Count];
         }
 
         public override void Start()
@@ -62,25 +66,25 @@ namespace Lockstep.Game
 
         public override void Update(LFloat deltaTime)
         {
-            CdTimer -= deltaTime;
-            skillTimer += deltaTime;
-            if (skillTimer < MaxPartTime)
+            _cdTimer -= deltaTime;
+            _skillTimer += deltaTime;
+            if (_skillTimer < _maxPartTime)
             {
-                for (int i = 0; i < Parts.Count; i++)
+                for (int i = 0; i < _parts.Count; i++)
                 {
-                    var part = Parts[i];
+                    var part = _parts[i];
                     CheckSkillPart(part, i);
                 }
 
-                if (CurPart != null && CurPart.moveSpd != 0)
+                if (_curPart != null && _curPart.moveSpd != 0)
                 {
-                    Entity.LTrans2D.pos += CurPart.moveSpd * deltaTime * Entity.LTrans2D.forward;
+                    Entity.LTrans2D.pos += _curPart.moveSpd * deltaTime * Entity.LTrans2D.forward;
                 }
             }
             else
             {
                 _curPartIdx = -1;
-                if (State == ESkillState.Firing)
+                if (_state == ESkillState.Firing)
                 {
                     Done();
                 }
@@ -89,16 +93,16 @@ namespace Lockstep.Game
 
         public bool Fire()
         {
-            if (CdTimer <= 0 && State == ESkillState.Idle)
+            if (_cdTimer <= 0 && _state == ESkillState.Idle)
             {
-                CdTimer = CD;
-                skillTimer = LFloat.zero;
-                for (int i = 0; i < partCounter.Length; i++)
+                _cdTimer = _cd;
+                _skillTimer = LFloat.zero;
+                for (int i = 0; i < _partCounter.Length; i++)
                 {
-                    partCounter[i] = 0;
+                    _partCounter[i] = 0;
                 }
 
-                State = ESkillState.Firing;
+                _state = ESkillState.Firing;
                 ((Player)Entity)._mover.needMove = false;
                 OnFire();
                 return true;
@@ -115,7 +119,7 @@ namespace Lockstep.Game
         public void Done()
         {
             OnSkillDoneHandler?.Invoke(this);
-            State = ESkillState.Idle;
+            _state = ESkillState.Idle;
         }
 
         public void ForceStop()
@@ -124,11 +128,15 @@ namespace Lockstep.Game
 
         void CheckSkillPart(SkillPart part, int idx)
         {
-            if (partCounter[idx] > part.otherCount) return;
-            if (skillTimer > part.NextTriggerTimer(partCounter[idx]))
+            if (_partCounter[idx] > part.otherCount)
+            {
+                return;
+            }
+
+            if (_skillTimer > part.NextTriggerTimer(_partCounter[idx]))
             {
                 TriggerPart(part, idx);
-                partCounter[idx]++;
+                _partCounter[idx]++;
             }
         }
 
@@ -168,7 +176,7 @@ namespace Lockstep.Game
 #endif
             foreach (var other in _tempEntities)
             {
-                other.TakeDamage(Entity, CurPart.damage, other.LTrans2D.pos.ToLVector3());
+                other.TakeDamage(Entity, _curPart.damage, other.LTrans2D.pos.ToLVector3());
             }
 
             //add force
@@ -201,11 +209,11 @@ namespace Lockstep.Game
         //private static readonly HashSet<Entity> _tempEntities = new HashSet<Entity>();
         private void _OnTriggerEnter(ColliderProxy other)
         {
-            if (CurPart.collider.IsCircle && CurPart.collider.deg > 0)
+            if (_curPart.collider.IsCircle && _curPart.collider.deg > 0)
             {
                 var deg = (other.Transform2D.pos - Entity.LTrans2D.pos).ToDeg();
                 var degDiff = Entity.LTrans2D.deg.Abs() - deg;
-                if (LMath.Abs(degDiff) <= CurPart.collider.deg)
+                if (LMath.Abs(degDiff) <= _curPart.collider.deg)
                 {
                     _tempEntities.Add((Entity)other.EntityObject);
                 }
@@ -271,40 +279,40 @@ namespace Lockstep.Game
 
         public override void WriteBackup(Serializer writer)
         {
-            writer.Write(CdTimer);
+            writer.Write(_cdTimer);
             writer.Write(_curPartIdx);
-            writer.Write(skillTimer);
-            writer.Write((int)(State));
-            writer.Write(partCounter);
+            writer.Write(_skillTimer);
+            writer.Write((int)(_state));
+            writer.Write(_partCounter);
         }
 
         public override void ReadBackup(Deserializer reader)
         {
-            CdTimer = reader.ReadLFloat();
+            _cdTimer = reader.ReadLFloat();
             _curPartIdx = reader.ReadInt32();
-            skillTimer = reader.ReadLFloat();
-            State = (ESkillState)reader.ReadInt32();
-            partCounter = reader.ReadArray(this.partCounter);
+            _skillTimer = reader.ReadLFloat();
+            _state = (ESkillState)reader.ReadInt32();
+            _partCounter = reader.ReadArray(this._partCounter);
         }
 
         public override int GetHash(ref int idx)
         {
             int hash = 1;
-            hash += CdTimer.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += _cdTimer.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += _curPartIdx.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += skillTimer.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += ((int)State) * PrimerLUT.GetPrimer(idx++);
-            if (partCounter != null) foreach (var item in partCounter) { if (item != default(System.Int32)) hash += item.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++); }
+            hash += _skillTimer.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += ((int)_state) * PrimerLUT.GetPrimer(idx++);
+            if (_partCounter != null) foreach (var item in _partCounter) { if (item != default(System.Int32)) hash += item.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++); }
             return hash;
         }
 
         public override void DumpStr(StringBuilder sb, string prefix)
         {
-            sb.AppendLine(prefix + "CdTimer" + ":" + CdTimer.ToString());
+            sb.AppendLine(prefix + "CdTimer" + ":" + _cdTimer.ToString());
             sb.AppendLine(prefix + "_curPartIdx" + ":" + _curPartIdx.ToString());
-            sb.AppendLine(prefix + "skillTimer" + ":" + skillTimer.ToString());
-            sb.AppendLine(prefix + "State" + ":" + State.ToString());
-            BackUpUtil.DumpList("partCounter", partCounter, sb, prefix);
+            sb.AppendLine(prefix + "skillTimer" + ":" + _skillTimer.ToString());
+            sb.AppendLine(prefix + "State" + ":" + _state.ToString());
+            BackUpUtil.DumpList("partCounter", _partCounter, sb, prefix);
         }
     }
 

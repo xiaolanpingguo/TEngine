@@ -25,15 +25,6 @@ namespace Lockstep.Game
             foreach (var field in fields)
             {
                 CopyTo(field.GetValue(dst), field.GetValue(Entity));
-                //var type = field.FieldType;
-                //if (typeof(INeedBackup).IsAssignableFrom(type))
-                //{
-                //    CopyTo(field.GetValue(dst), field.GetValue(Entity));
-                //}
-                //else
-                //{
-                //    field.SetValue(dst, field.GetValue(Entity));
-                //}
             }
         }
 
@@ -75,7 +66,7 @@ namespace Lockstep.Game
         public Spawner entity = new Spawner();
     }
 
-    
+
     [Serializable]
     public class CollisionConfig 
     {
@@ -138,14 +129,15 @@ namespace Lockstep.Game
         public List<EnemyConfig> enemies = new List<EnemyConfig>();
         public List<SpawnerConfig> spawner = new List<SpawnerConfig>();
         public List<AnimatorConfig> animators = new List<AnimatorConfig>();
-        public List<SkillBoxConfig> skills = new List<SkillBoxConfig>();
+        public SkillConfig SkillCofnig = new SkillConfig();
+        //public List<SkillBoxConfig> skills = new List<SkillBoxConfig>();
 
         public void DoAwake()
         {
-            foreach (var skill in skills)
-            {
-                skill.CheckInit();
-            }
+            //foreach (var skill in skills)
+            //{
+            //    skill.CheckInit();
+            //}
         }
 
         private T GetConfig<T>(List<T> lst, int id) where T: EntityConfig
@@ -167,9 +159,10 @@ namespace Lockstep.Game
             return (id < 0 ||id >= animators.Count) ? null : animators[id];
         }
 
-        public SkillBoxConfig GetSkillConfig(int id)
+        public SkillConfig GetSkillConfig()
         {
-            return (id < 0 ||id >= skills.Count) ? null : skills[id];
+            return SkillCofnig;
+            //return (id < 0 ||id >= skills.Count) ? null : skills[id];
         }
     }
 }
