@@ -107,10 +107,10 @@ namespace Lockstep.Game
             //writer.Write(_moveSpd);
             //writer.Write(_turnSpd);
             _animator.WriteBackup(writer);
-            colliderData.WriteBackup(writer);
+            ColliderData.WriteBackup(writer);
             //input.WriteBackup(writer);
             _characterController.WriteBackup(writer);
-            rigidbody.WriteBackup(writer);
+            Rigidbody.WriteBackup(writer);
             _skill.WriteBackup(writer);
             LTrans2D.WriteBackup(writer);
         }
@@ -126,10 +126,10 @@ namespace Lockstep.Game
             //_moveSpd = reader.ReadLFloat();
             //_turnSpd = reader.ReadLFloat();
             _animator.ReadBackup(reader);
-            colliderData.ReadBackup(reader);
+            ColliderData.ReadBackup(reader);
             //input.ReadBackup(reader);
             _characterController.ReadBackup(reader);
-            rigidbody.ReadBackup(reader);
+            Rigidbody.ReadBackup(reader);
             _skill.ReadBackup(reader);
             LTrans2D.ReadBackup(reader);
         }
@@ -146,10 +146,10 @@ namespace Lockstep.Game
             //hash += _moveSpd.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             //hash += _turnSpd.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += _animator.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += colliderData.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += ColliderData.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             //hash += input.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += _characterController.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += rigidbody.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += Rigidbody.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += _skill.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += LTrans2D.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             return hash;
@@ -166,10 +166,10 @@ namespace Lockstep.Game
             //sb.AppendLine(prefix + "moveSpd" + ":" + _moveSpd.ToString());
             //sb.AppendLine(prefix + "turnSpd" + ":" + _turnSpd.ToString());
             sb.AppendLine(prefix + "animator" + ":"); _animator.DumpStr(sb, "\t" + prefix);
-            sb.AppendLine(prefix + "colliderData" + ":"); colliderData.DumpStr(sb, "\t" + prefix);
+            sb.AppendLine(prefix + "colliderData" + ":"); ColliderData.DumpStr(sb, "\t" + prefix);
             //sb.AppendLine(prefix + "input" +":");  input.DumpStr(sb,"\t" + prefix);
             sb.AppendLine(prefix + "mover" + ":"); _characterController.DumpStr(sb, "\t" + prefix);
-            sb.AppendLine(prefix + "rigidbody" + ":"); rigidbody.DumpStr(sb, "\t" + prefix);
+            sb.AppendLine(prefix + "rigidbody" + ":"); Rigidbody.DumpStr(sb, "\t" + prefix);
             sb.AppendLine(prefix + "skillBox" + ":"); _skill.DumpStr(sb, "\t" + prefix);
             sb.AppendLine(prefix + "transform" + ":"); LTrans2D.DumpStr(sb, "\t" + prefix);
         }

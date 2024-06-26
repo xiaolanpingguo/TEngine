@@ -23,7 +23,7 @@ namespace Lockstep.Game
 
         public override void Update(LFloat deltaTime)
         {
-            if (!Entity.rigidbody.isOnFloor)
+            if (!Entity.Rigidbody.isOnFloor)
             {
                 return;
             }

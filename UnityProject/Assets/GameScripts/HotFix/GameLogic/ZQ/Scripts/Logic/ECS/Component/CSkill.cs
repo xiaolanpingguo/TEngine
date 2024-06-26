@@ -184,7 +184,7 @@ namespace Lockstep.Game
                 force.z = z.y;
                 foreach (var other in _tempEntities)
                 {
-                    other.rigidbody.AddImpulse(force);
+                    other.Rigidbody.AddImpulse(force);
                 }
             }
 
@@ -192,7 +192,7 @@ namespace Lockstep.Game
             {
                 foreach (var other in _tempEntities)
                 {
-                    other.rigidbody.ResetSpeed(new LFloat(3));
+                    other.Rigidbody.ResetSpeed(new LFloat(3));
                 }
             }
 

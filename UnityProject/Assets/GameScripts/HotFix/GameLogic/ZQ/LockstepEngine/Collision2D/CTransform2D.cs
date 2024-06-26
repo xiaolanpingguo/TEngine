@@ -14,7 +14,7 @@ namespace Lockstep.Framework
     }
 
     [Serializable]
-    public class CTransform2D
+    public class CTransform2D : IComponent
     {
         public CTransform2D() { }
         public CTransform2D(LVector2 pos, LFloat y) : this(pos, y, LFloat.zero) { }
@@ -135,21 +135,21 @@ namespace Lockstep.Framework
             return $"(deg:{deg} pos:{pos} y:{y})";
         }
 
-        public void WriteBackup(Serializer writer)
+        public override void WriteBackup(Serializer writer)
         {
             writer.Write(deg);
             writer.Write(pos);
             writer.Write(y);
         }
 
-        public void ReadBackup(Deserializer reader)
+        public override void ReadBackup(Deserializer reader)
         {
             deg = reader.ReadLFloat();
             pos = reader.ReadLVector2();
             y = reader.ReadLFloat();
         }
 
-        public int GetHash(ref int idx)
+        public override int GetHash(ref int idx)
         {
             int hash = 1;
             hash += deg.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
@@ -158,7 +158,7 @@ namespace Lockstep.Framework
             return hash;
         }
 
-        public void DumpStr(StringBuilder sb, string prefix)
+        public override void DumpStr(StringBuilder sb, string prefix)
         {
             sb.AppendLine(prefix + "deg" + ":" + deg.ToString());
             sb.AppendLine(prefix + "pos" + ":" + pos.ToString());

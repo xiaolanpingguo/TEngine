@@ -10,6 +10,10 @@ namespace Lockstep.Framework
     {
         public Entity Entity { get; private set; }
 
+        public IComponent()
+        {
+        }
+
         public IComponent(Entity entity)
         {
             this.Entity = entity;

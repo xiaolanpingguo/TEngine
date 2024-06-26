@@ -8,20 +8,26 @@ namespace Lockstep.Framework
 {
     public class Entity : ILPTriggerEventHandler
     {
-        public int EntityId;
-        public int PrefabId;
-        public CTransform2D LTrans2D = new CTransform2D();
-        public object UserData;
-
         private List<IComponent> _components = new List<IComponent>();
         private Dictionary<Type, IComponent> _componentsMap = new();
 
-        public CRigidbody rigidbody = new CRigidbody();
-        public ColliderData colliderData = new ColliderData();
+        public int EntityId;
+        public int PrefabId;
+        public object UserData;
+
+        public CTransform2D LTrans2D = null;
+        public CRigidbody Rigidbody = null;
+        public ColliderData ColliderData = null;
 
         public Entity()
         {
-            rigidbody.BindRef(LTrans2D);
+            LTrans2D = new CTransform2D();
+            Rigidbody = new CRigidbody();
+            Rigidbody.BindRef(LTrans2D);
+            ColliderData = new ColliderData();
+            RegisterComponent(LTrans2D);
+            RegisterComponent(Rigidbody);
+            RegisterComponent(ColliderData);
         }
 
         public virtual void Start()
@@ -30,13 +36,10 @@ namespace Lockstep.Framework
             {
                 comp.Start();
             }
-
-            rigidbody.Start();
         }
 
         public virtual void Update(LFloat deltaTime)
         {
-            rigidbody.Update(deltaTime);
             foreach (var comp in _components)
             {
                 comp.Update(deltaTime);

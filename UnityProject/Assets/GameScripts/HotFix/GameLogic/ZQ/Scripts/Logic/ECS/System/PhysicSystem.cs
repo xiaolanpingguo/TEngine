@@ -137,7 +137,7 @@ namespace Lockstep.Game
             var fab = World.Instance.LoadPrefab(prefabId);
             if (!_fabId2ColPrefab.TryGetValue(prefabId, out prefab)) 
             {
-                prefab = CreateColliderPrefab(fab, entity.colliderData);
+                prefab = CreateColliderPrefab(fab, entity.ColliderData);
             }
 
             AttachToColSystem(_fabId2Layer[prefabId], prefab,  entity);

@@ -58,8 +58,8 @@ namespace Lockstep.Game
             writer.Write(_isInvincible);
             writer.Write(MaxHealth);
             _aiontroller.WriteBackup(writer);
-            colliderData.WriteBackup(writer);
-            rigidbody.WriteBackup(writer);
+            ColliderData.WriteBackup(writer);
+            Rigidbody.WriteBackup(writer);
             LTrans2D.WriteBackup(writer);
         }
 
@@ -71,8 +71,8 @@ namespace Lockstep.Game
             _isInvincible = reader.ReadBoolean();
             MaxHealth = reader.ReadInt32();
             _aiontroller.ReadBackup(reader);
-            colliderData.ReadBackup(reader);
-            rigidbody.ReadBackup(reader);
+            ColliderData.ReadBackup(reader);
+            Rigidbody.ReadBackup(reader);
             LTrans2D.ReadBackup(reader);
         }
 
@@ -85,8 +85,8 @@ namespace Lockstep.Game
             hash += _isInvincible.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += MaxHealth.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += _aiontroller.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += colliderData.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += rigidbody.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += ColliderData.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += Rigidbody.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += LTrans2D.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             return hash;
         }
@@ -99,8 +99,8 @@ namespace Lockstep.Game
             sb.AppendLine(prefix + "isInvincible" + ":" + _isInvincible.ToString());
             sb.AppendLine(prefix + "maxHealth" + ":" + MaxHealth.ToString());
             sb.AppendLine(prefix + "brain" + ":"); _aiontroller.DumpStr(sb, "\t" + prefix);
-            sb.AppendLine(prefix + "colliderData" + ":"); colliderData.DumpStr(sb, "\t" + prefix);
-            sb.AppendLine(prefix + "rigidbody" + ":"); rigidbody.DumpStr(sb, "\t" + prefix);
+            sb.AppendLine(prefix + "colliderData" + ":"); ColliderData.DumpStr(sb, "\t" + prefix);
+            sb.AppendLine(prefix + "rigidbody" + ":"); Rigidbody.DumpStr(sb, "\t" + prefix);
             sb.AppendLine(prefix + "transform" + ":"); LTrans2D.DumpStr(sb, "\t" + prefix);
         }
     }

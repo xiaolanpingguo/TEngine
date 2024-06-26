@@ -5,14 +5,8 @@ using UnityEngine;
 
 namespace Lockstep.Framework 
 {
-    public class ColliderDataMono : UnityEngine.MonoBehaviour 
-    {
-        public ColliderData colliderData;
-    }
-
-
     [Serializable]
-    public class ColliderData
+    public class ColliderData : IComponent
     {
         [Header("Offset")]
         public LFloat y;
@@ -25,7 +19,7 @@ namespace Lockstep.Framework
         public LVector2 up;
         public LFloat deg;
 
-        public void WriteBackup(Serializer writer)
+        public override void WriteBackup(Serializer writer)
         {
             writer.Write(deg);
             writer.Write(high);
@@ -36,7 +30,7 @@ namespace Lockstep.Framework
             writer.Write(y);
         }
 
-        public void ReadBackup(Deserializer reader)
+        public override void ReadBackup(Deserializer reader)
         {
             deg = reader.ReadLFloat();
             high = reader.ReadLFloat();
@@ -47,7 +41,7 @@ namespace Lockstep.Framework
             y = reader.ReadLFloat();
         }
 
-        public int GetHash(ref int idx)
+        public override int GetHash(ref int idx)
         {
             int hash = 1;
             hash += deg.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
@@ -60,7 +54,7 @@ namespace Lockstep.Framework
             return hash;
         }
 
-        public void DumpStr(StringBuilder sb, string prefix)
+        public override void DumpStr(StringBuilder sb, string prefix)
         {
             sb.AppendLine(prefix + "deg" + ":" + deg.ToString());
             sb.AppendLine(prefix + "high" + ":" + high.ToString());

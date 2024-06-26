@@ -7,7 +7,7 @@ namespace Lockstep.Framework
     public delegate void OnFloorResultCallback(bool isOnFloor);
 
     [Serializable]
-    public class CRigidbody
+    public class CRigidbody : IComponent
     {
         public CTransform2D transform { get; private set; }
         public static LFloat G = new LFloat(10);
@@ -29,18 +29,15 @@ namespace Lockstep.Framework
             this.transform = transform2D;
         }
 
-        //private int __id;
-        //private static int __idCount;
-        public void Start()
+        public override void Start()
         {
-            //__id = __idCount++;
             LFloat y = LFloat.zero;
             isOnFloor = TestOnFloor(transform.Pos3, ref y);
             Speed = LVector3.zero;
             isSleep = isOnFloor;
         }
 
-        public void Update(LFloat deltaTime)
+        public override void Update(LFloat deltaTime)
         {
             if (!isEnable) return;
             if (!TestOnFloor(transform.Pos3))
@@ -133,7 +130,7 @@ namespace Lockstep.Framework
             return false; //TODO check with scene
         }
 
-        public void WriteBackup(Serializer writer)
+        public override void WriteBackup(Serializer writer)
         {
             writer.Write(Mass);
             writer.Write(Speed);
@@ -142,7 +139,7 @@ namespace Lockstep.Framework
             writer.Write(isSleep);
         }
 
-        public void ReadBackup(Deserializer reader)
+        public override void ReadBackup(Deserializer reader)
         {
             Mass = reader.ReadLFloat();
             Speed = reader.ReadLVector3();
@@ -151,7 +148,7 @@ namespace Lockstep.Framework
             isSleep = reader.ReadBoolean();
         }
 
-        public int GetHash(ref int idx)
+        public override int GetHash(ref int idx)
         {
             int hash = 1;
             hash += Mass.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
@@ -162,7 +159,7 @@ namespace Lockstep.Framework
             return hash;
         }
 
-        public void DumpStr(StringBuilder sb, string prefix)
+        public override void DumpStr(StringBuilder sb, string prefix)
         {
             sb.AppendLine(prefix + "Mass" + ":" + Mass.ToString());
             sb.AppendLine(prefix + "Speed" + ":" + Speed.ToString());
