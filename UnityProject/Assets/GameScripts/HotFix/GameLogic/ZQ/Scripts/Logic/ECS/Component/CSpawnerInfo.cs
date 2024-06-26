@@ -6,16 +6,12 @@ using Lockstep.Framework;
 namespace Lockstep.Game
 {
     [Serializable]
-    public class SpawnerInfo : IComponent
+    public class CSpawnerInfo : IComponent
     {
         public LFloat spawnTime;
         public LVector3 spawnPoint;
         public int prefabId;
 
-        public SpawnerInfo() : base(null)
-        {
-
-        }
 
         public override void WriteBackup(Serializer writer)
         {

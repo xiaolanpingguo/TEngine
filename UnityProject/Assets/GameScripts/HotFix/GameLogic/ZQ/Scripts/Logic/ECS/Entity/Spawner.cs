@@ -8,7 +8,7 @@ namespace Lockstep.Game
     [Serializable]
     public class Spawner : Entity
     {
-        public SpawnerInfo Info = new SpawnerInfo();
+        public CSpawnerInfo Info = new CSpawnerInfo();
         public LFloat Timer;
 
         public override void Start()
