@@ -9,12 +9,10 @@ namespace Lockstep.Game
     public abstract class IComponent : BaseFormater
     {
         public Entity Entity { get; private set; }
-        public CTransform2D transform { get; private set; }
 
         public IComponent(Entity entity)
         {
             this.Entity = entity;
-            this.transform = entity?.LTrans2D;
         }
 
         public virtual void Start() 

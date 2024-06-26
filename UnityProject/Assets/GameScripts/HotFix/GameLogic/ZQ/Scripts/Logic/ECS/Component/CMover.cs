@@ -32,9 +32,9 @@ namespace Lockstep.Game
             if (needChase)
             {
                 var dir = input.inputUV.normalized;
-                transform.pos = transform.pos + dir * speed * deltaTime;
+                Entity.LTrans2D.pos = Entity.LTrans2D.pos + dir * speed * deltaTime;
                 var targetDeg = dir.ToDeg();
-                transform.deg = CTransform2D.TurnToward(targetDeg, transform.deg, player.turnSpd * deltaTime, out var hasReachDeg);
+                Entity.LTrans2D.deg = CTransform2D.TurnToward(targetDeg, Entity.LTrans2D.deg, player.turnSpd * deltaTime, out var hasReachDeg);
             }
 
             hasReachTarget = !needChase;
