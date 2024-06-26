@@ -15,7 +15,7 @@ namespace Lockstep.Game
         private CAnimator _animator = null;
         private Skill _skill= null;
 
-        public override void Awake()
+        public override void Start()
         {
             var config = GameConfigSingleton.Instance.GetSkillConfig();
             _skill = new Skill(this, config);
@@ -28,7 +28,7 @@ namespace Lockstep.Game
             RegisterComponent(_animator);
             RegisterComponent(_mover);
             RegisterComponent(_skill);
-            base.Awake();
+            base.Start();
         }
 
         public override void Update(LFloat deltaTime)

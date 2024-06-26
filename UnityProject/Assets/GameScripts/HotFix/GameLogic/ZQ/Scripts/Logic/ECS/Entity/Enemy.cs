@@ -10,13 +10,13 @@ namespace Lockstep.Game
     {
         private CBrain _brain = null;
 
-        public override void Awake()
+        public override void Start()
         {
             _brain = new CBrain(this);
             RegisterComponent(_brain);
             moveSpd = 2;
             turnSpd = 150;
-            base.Awake();
+            base.Start();
         }
 
         public override void WriteBackup(Serializer writer)

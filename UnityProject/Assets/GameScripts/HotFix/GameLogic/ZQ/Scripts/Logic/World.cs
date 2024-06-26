@@ -206,7 +206,6 @@ namespace Lockstep.Game
             entity.LTrans2D.Pos3 = position;
             PhysicSystem.Instance.RegisterEntity(prefabId, entity);
 
-            entity.Awake();
             entity.Start();
             BindView(entity);
             AddEntity(entity);

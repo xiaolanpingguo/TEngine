@@ -17,16 +17,17 @@ namespace Lockstep.Game
             this.transform = entity?.LTrans2D;
         }
 
-        //public virtual void BindEntity(Entity entity)
-        //{
-        //    this.Entity = entity;
-        //    this.transform = entity.LTrans2D;
-        //}
+        public virtual void Start() 
+        { 
+        }
 
-        public virtual void Awake() { }
-        public virtual void Start() { }
-        public virtual void Update(LFloat deltaTime) { }
-        public virtual void Destroy() { }
+        public virtual void Update(LFloat deltaTime) 
+        { 
+        }
+
+        public virtual void Destroy()
+        {
+        }
 
         public abstract void WriteBackup(Serializer writer);
         public abstract void ReadBackup(Deserializer reader);

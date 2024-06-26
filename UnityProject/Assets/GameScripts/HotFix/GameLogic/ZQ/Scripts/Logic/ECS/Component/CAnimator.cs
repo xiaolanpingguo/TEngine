@@ -68,7 +68,7 @@ namespace Lockstep.Game
 
         }
 
-        public override void Awake()
+        public override void Start()
         {
             config = GameConfigSingleton.Instance.GetAnimatorConfig(_configId);
             if (config == null) return;
@@ -78,17 +78,14 @@ namespace Lockstep.Game
             {
                 _animNames.Add(info.name);
             }
+
+            Play(AnimDefine.Idle);
         }
 
         void UpdateBindInfo()
         {
             curAnimBindInfo = config.events.Find((a) => a.name == _curAnimName);
             if (curAnimBindInfo == null) curAnimBindInfo = AnimBindInfo.Empty;
-        }
-
-        public override void Start()
-        {
-            Play(AnimDefine.Idle);
         }
 
         public override void Update(LFloat deltaTime)

@@ -19,12 +19,6 @@ namespace Lockstep.Game
             target = World.Instance.GetEntity(targetId) as Entity;
         }
 
-        //public override void BindEntity(Entity e)
-        //{
-        //    base.BindEntity(e);
-        //    target = World.Instance.GetEntity(targetId) as Entity;
-        //}
-
         public override void Update(LFloat deltaTime)
         {
             if (!Entity.rigidbody.isOnFloor)

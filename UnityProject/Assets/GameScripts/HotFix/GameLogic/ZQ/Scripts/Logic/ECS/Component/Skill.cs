@@ -56,10 +56,6 @@ namespace Lockstep.Game
             _partCounter = new int[_parts.Count];
         }
 
-        public override void Awake()
-        {
-        }
-
         public override void Start()
         {
         }

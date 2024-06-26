@@ -43,14 +43,6 @@ namespace Lockstep.Game
             rigidbody.BindRef(LTrans2D);
         }
 
-        public virtual void Awake()
-        {
-            foreach (var comp in allComponents)
-            {
-                comp.Awake();
-            }
-        }
-
         public virtual void Start()
         {
             foreach (var comp in allComponents)

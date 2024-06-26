@@ -14,6 +14,7 @@ namespace Lockstep.Game
         public override void Start()
         {
             Timer = Info.spawnTime;
+            base.Start();
         }
 
         public override void Update(LFloat deltaTime)
