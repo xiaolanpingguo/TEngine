@@ -8,11 +8,14 @@ namespace Lockstep.Game
     [Serializable]
     public class CAIController : IComponent
     {
-        public Entity _target;
         public int _targetId;
         public LFloat _stopDistSqr = 1 * 1;
         public LFloat _atkInterval = 1;
         private LFloat _atkTimer;
+
+        private int _damage = 10;
+        private LFloat _moveSpd = 2;
+        private LFloat _turnSpd = 150;
 
         public CAIController(Entity entity) : base(entity)
         {
@@ -28,10 +31,10 @@ namespace Lockstep.Game
             //find target
             var allPlayer = World.Instance.GetPlayers();
             var minDist = LFloat.MaxValue;
-            Entity minTarget = null;
+            Player minTarget = null;
             foreach (var player in allPlayer)
             {
-                if (player.isDead)
+                if (player.IsDead)
                 {
                     continue;
                 }
@@ -44,25 +47,24 @@ namespace Lockstep.Game
                 }
             }
 
-            _target = minTarget;
-            _targetId = _target?.EntityId ?? -1;
-
             if (minTarget == null)
             {
                 return;
             }
 
+            _targetId = minTarget.EntityId;
             if (minDist > _stopDistSqr)
             {
                 // turn to target
                 var targetPos = minTarget.LTrans2D.pos;
                 var currentPos = Entity.LTrans2D.pos;
-                var turnVal = Entity.turnSpd * deltaTime;
+                var turnVal = _turnSpd * deltaTime;
                 var targetDeg = CTransform2D.TurnToward(targetPos, currentPos, Entity.LTrans2D.deg, turnVal, out var isFinishedTurn);
                 Entity.LTrans2D.deg = targetDeg;
-                //move to target
+
+                // move to target
                 var distToTarget = (targetPos - currentPos).magnitude;
-                var movingStep = Entity.moveSpd * deltaTime;
+                var movingStep = _moveSpd * deltaTime;
                 if (movingStep > distToTarget)
                 {
                     movingStep = distToTarget;
@@ -73,12 +75,12 @@ namespace Lockstep.Game
             }
             else
             {
-                //atk target
+                // take damage
                 _atkTimer -= deltaTime;
                 if (_atkTimer <= 0)
                 {
                     _atkTimer = _atkInterval;
-                    _target.TakeDamage(Entity, Entity.damage, _target.LTrans2D.Pos3);
+                    minTarget.TakeDamage(Entity, _damage, minTarget.LTrans2D.Pos3);
                 }
             }
         }

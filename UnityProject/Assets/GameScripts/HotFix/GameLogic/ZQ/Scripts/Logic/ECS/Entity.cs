@@ -14,29 +14,10 @@ namespace Lockstep.Game
         public object engineTransform;
         protected List<IComponent> allComponents = new List<IComponent>();
 
-        public IEntityView EntityView;
-
+        public EntityView EntityView;
 
         public CRigidbody rigidbody = new CRigidbody();
         public ColliderData colliderData = new ColliderData();
-
-        public LFloat moveSpd = 5;
-        public LFloat turnSpd = 360;
-        public int curHealth;
-        public int maxHealth = 100;
-        public int damage = 10;
-
-        public bool isInvincible;
-        public bool isFire;
-
-        public bool isDead => curHealth <= 0;
-
-        public virtual void OnRollbackDestroy()
-        {
-            EntityView?.OnRollbackDestroy();
-            EntityView = null;
-            engineTransform = null;
-        }
 
         public Entity()
         {
@@ -51,7 +32,6 @@ namespace Lockstep.Game
             }
 
             rigidbody.Start();
-            curHealth = maxHealth;
         }
 
         public virtual void Update(LFloat deltaTime)
@@ -71,40 +51,21 @@ namespace Lockstep.Game
             }
         }
 
-        public virtual void TakeDamage(Entity atker, int amount, LVector3 hitPoint)
+        public virtual void OnLPTriggerEnter(ColliderProxy other)
         {
-            if (isInvincible || isDead)
-            {
-                return;
-            }
-
-            curHealth -= amount;
-            EntityView?.OnTakeDamage(amount, hitPoint);
-            OnTakeDamage(amount, hitPoint);
-            if (isDead)
-            {
-                OnDead();
-            }
         }
 
-        public virtual void OnLPTriggerEnter(ColliderProxy other) { }
-        public virtual void OnLPTriggerStay(ColliderProxy other) { }
-        public virtual void OnLPTriggerExit(ColliderProxy other) { }
+        public virtual void OnLPTriggerStay(ColliderProxy other)
+        { 
+        }
+
+        public virtual void OnLPTriggerExit(ColliderProxy other) 
+        {
+        }
 
         protected void RegisterComponent(IComponent comp)
         {
             allComponents.Add(comp);
-        }
-
-        protected virtual void OnTakeDamage(int amount, LVector3 hitPoint)
-        {
-        }
-
-        protected virtual void OnDead()
-        {
-            EntityView?.OnDead();
-            PhysicSystem.Instance.RemoveCollider(this);
-            World.Instance.DestroyEntity(this);
         }
 
         public virtual void WriteBackup(Serializer writer)
@@ -125,6 +86,13 @@ namespace Lockstep.Game
         public virtual void DumpStr(StringBuilder sb, string prefix)
         {
 
+        }
+
+        public virtual void OnRollbackDestroy()
+        {
+            EntityView?.OnRollbackDestroy();
+            EntityView = null;
+            engineTransform = null;
         }
     }
 }

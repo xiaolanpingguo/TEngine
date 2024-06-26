@@ -4,61 +4,33 @@ using UnityEngine;
 
 namespace Lockstep.Game
 {
-    public class EntityView : BaseEntityView, IEntityView
+    public class EntityView : MonoBehaviour
     {
-        public UIFloatBar uiFloatBar;
-        public Entity entity;
-        protected bool isDead => entity?.isDead ?? true;
+        public const float LerpPercent = 0.3f;
+        public Entity Entity;
 
-        public override void BindEntity(Entity e, Entity oldEntity = null)
+        public virtual void BindEntity(Entity e, Entity oldEntity = null)
         {
-            base.BindEntity(e, oldEntity);
             e.EntityView = this;
-            this.entity = e as Entity;
-            if (oldEntity != null)
-            {
-                uiFloatBar = (oldEntity.EntityView as EntityView).uiFloatBar;
-            }
-            else
-            {
-                uiFloatBar = FloatBarManager.CreateFloatBar(transform, this.entity.curHealth, this.entity.maxHealth);
-            }
+            this.Entity = e;
+            var updateEntity = oldEntity ?? e;
+            transform.position = updateEntity.LTrans2D.Pos3.ToVector3();
+            transform.rotation = Quaternion.Euler(0, updateEntity.LTrans2D.deg.ToFloat(), 0);
         }
 
-        public override void OnTakeDamage(int amount, LVector3 hitPoint)
+        public virtual void OnTakeDamage(int amount, LVector3 hitPoint)
         {
-            uiFloatBar.UpdateHp(entity.curHealth, entity.maxHealth);
             FloatTextManager.CreateFloatText(hitPoint.ToVector3(), -amount);
         }
 
-        public override void OnDead()
+        public virtual void OnDead()
         {
-            if (uiFloatBar != null) FloatBarManager.DestroyText(uiFloatBar);
             GameObject.Destroy(gameObject);
         }
 
-        public override void OnRollbackDestroy()
+        public virtual void OnRollbackDestroy()
         {
-            if (uiFloatBar != null) FloatBarManager.DestroyText(uiFloatBar);
             GameObject.Destroy(gameObject);
-        }
-
-        private void Update()
-        {
-            var pos = entity.LTrans2D.Pos3.ToVector3();
-            transform.position = Vector3.Lerp(transform.position, pos, 0.3f);
-            var deg = entity.LTrans2D.deg.ToFloat();
-            //deg = Mathf.Lerp(transform.rotation.eulerAngles.y, deg, 0.3f);
-            transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0, deg, 0), 0.3f);
-        }
-
-        private void OnDrawGizmos()
-        {
-            //if (entity.skillBox.isFiring)
-            //{
-            //    var skill = entity.skillBox.curSkill;
-            //    skill?.OnDrawGizmos();
-            //}
         }
     }
 }

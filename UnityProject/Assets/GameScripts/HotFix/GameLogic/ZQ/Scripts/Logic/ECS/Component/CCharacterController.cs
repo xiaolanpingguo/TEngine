@@ -8,35 +8,36 @@ namespace Lockstep.Game
 {
 
     [Serializable]
-    public class CMover : IComponent
+    public class CCharacterController : IComponent
     {
         public Player player => (Player)Entity;
         public PlayerCommands input => player.input;
 
-        public LFloat speed => player.moveSpd;
+        private LFloat _moveSpd = 5;
+        private LFloat _turnSpd = 360;
         public bool _hasReachTarget = false;
 
-        public CMover(Entity entity) : base(entity)
+        public CCharacterController(Entity entity) : base(entity)
         {
         }
 
         public override void Update(LFloat deltaTime)
         {
-            if (!Entity.rigidbody.isOnFloor)
-            {
-                return;
-            }
+            //if (!Entity.rigidbody.isOnFloor)
+            //{
+            //    return;
+            //}
 
-            var needChase = input.inputUV.sqrMagnitude > new LFloat(true, 10);
-            if (needChase)
-            {
-                var dir = input.inputUV.normalized;
-                Entity.LTrans2D.pos = Entity.LTrans2D.pos + dir * speed * deltaTime;
-                var targetDeg = dir.ToDeg();
-                Entity.LTrans2D.deg = CTransform2D.TurnToward(targetDeg, Entity.LTrans2D.deg, player.turnSpd * deltaTime, out var hasReachDeg);
-            }
+            //var needChase = input.inputUV.sqrMagnitude > new LFloat(true, 10);
+            //if (needChase)
+            //{
+            //    var dir = input.inputUV.normalized;
+            //    Entity.LTrans2D.pos = Entity.LTrans2D.pos + dir * _moveSpd * deltaTime;
+            //    var targetDeg = dir.ToDeg();
+            //    Entity.LTrans2D.deg = CTransform2D.TurnToward(targetDeg, Entity.LTrans2D.deg, _turnSpd * deltaTime, out var hasReachDeg);
+            //}
 
-            _hasReachTarget = !needChase;
+            //_hasReachTarget = !needChase;
         }
 
         public override void WriteBackup(Serializer writer)

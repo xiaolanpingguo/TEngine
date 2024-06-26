@@ -13,7 +13,6 @@ namespace Lockstep.Game
         Firing,
     }
 
-
     [Serializable]
     public class CSkill : IComponent
     {
@@ -171,7 +170,7 @@ namespace Lockstep.Game
 #endif
             foreach (var other in _tempEntities)
             {
-                other.TakeDamage(Entity, _curPart.damage, other.LTrans2D.pos.ToLVector3());
+                //other.TakeDamage(Entity, _curPart.damage, other.LTrans2D.pos.ToLVector3());
             }
 
             //add force

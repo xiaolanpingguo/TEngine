@@ -10,26 +10,44 @@ namespace Lockstep.Game
     {
         private CAIController _aiontroller = null;
 
+        private bool _isInvincible = false;
+
+        public int CurHealth;
+        public int MaxHealth = 100;
+        public bool IsDead => CurHealth <= 0;
+
         public override void Start()
         {
             _aiontroller = new CAIController(this);
             RegisterComponent(_aiontroller);
-            moveSpd = 2;
-            turnSpd = 150;
+            CurHealth = MaxHealth;
             base.Start();
+        }
+
+        public void TakeDamage(Entity atker, int amount, LVector3 hitPoint)
+        {
+            if (_isInvincible || IsDead)
+            {
+                return;
+            }
+
+            CurHealth -= amount;
+            EntityView?.OnTakeDamage(amount, hitPoint);
+            if (IsDead)
+            {
+                EntityView?.OnDead();
+                PhysicSystem.Instance.RemoveCollider(this);
+                World.Instance.DestroyEntity(this);
+            }
         }
 
         public override void WriteBackup(Serializer writer)
         {
             writer.Write(EntityId);
             writer.Write(PrefabId);
-            writer.Write(curHealth);
-            writer.Write(damage);
-            writer.Write(isFire);
-            writer.Write(isInvincible);
-            writer.Write(maxHealth);
-            writer.Write(moveSpd);
-            writer.Write(turnSpd);
+            writer.Write(CurHealth);
+            writer.Write(_isInvincible);
+            writer.Write(MaxHealth);
             _aiontroller.WriteBackup(writer);
             colliderData.WriteBackup(writer);
             rigidbody.WriteBackup(writer);
@@ -40,13 +58,9 @@ namespace Lockstep.Game
         {
             EntityId = reader.ReadInt32();
             PrefabId = reader.ReadInt32();
-            curHealth = reader.ReadInt32();
-            damage = reader.ReadInt32();
-            isFire = reader.ReadBoolean();
-            isInvincible = reader.ReadBoolean();
-            maxHealth = reader.ReadInt32();
-            moveSpd = reader.ReadLFloat();
-            turnSpd = reader.ReadLFloat();
+            CurHealth = reader.ReadInt32();
+            _isInvincible = reader.ReadBoolean();
+            MaxHealth = reader.ReadInt32();
             _aiontroller.ReadBackup(reader);
             colliderData.ReadBackup(reader);
             rigidbody.ReadBackup(reader);
@@ -58,13 +72,9 @@ namespace Lockstep.Game
             int hash = 1;
             hash += EntityId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += PrefabId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += curHealth.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += damage.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += isFire.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += isInvincible.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += maxHealth.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += moveSpd.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += turnSpd.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += CurHealth.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += _isInvincible.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += MaxHealth.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += _aiontroller.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += colliderData.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             hash += rigidbody.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
@@ -76,13 +86,9 @@ namespace Lockstep.Game
         {
             sb.AppendLine(prefix + "EntityId" + ":" + EntityId.ToString());
             sb.AppendLine(prefix + "PrefabId" + ":" + PrefabId.ToString());
-            sb.AppendLine(prefix + "curHealth" + ":" + curHealth.ToString());
-            sb.AppendLine(prefix + "damage" + ":" + damage.ToString());
-            sb.AppendLine(prefix + "isFire" + ":" + isFire.ToString());
-            sb.AppendLine(prefix + "isInvincible" + ":" + isInvincible.ToString());
-            sb.AppendLine(prefix + "maxHealth" + ":" + maxHealth.ToString());
-            sb.AppendLine(prefix + "moveSpd" + ":" + moveSpd.ToString());
-            sb.AppendLine(prefix + "turnSpd" + ":" + turnSpd.ToString());
+            sb.AppendLine(prefix + "curHealth" + ":" + CurHealth.ToString());
+            sb.AppendLine(prefix + "isInvincible" + ":" + _isInvincible.ToString());
+            sb.AppendLine(prefix + "maxHealth" + ":" + MaxHealth.ToString());
             sb.AppendLine(prefix + "brain" + ":"); _aiontroller.DumpStr(sb, "\t" + prefix);
             sb.AppendLine(prefix + "colliderData" + ":"); colliderData.DumpStr(sb, "\t" + prefix);
             sb.AppendLine(prefix + "rigidbody" + ":"); rigidbody.DumpStr(sb, "\t" + prefix);

@@ -46,11 +46,10 @@ namespace Lockstep.Game
     [Serializable]
     public class CAnimator : IComponent
     {
-        public int _configId = 1;
+        private int _configId = 1;
 
-        [HideInInspector]public AnimatorConfig config;
-        [HideInInspector]public IAnimatorView view;
-        [HideInInspector]public AnimBindInfo curAnimBindInfo;
+        private AnimatorConfig _config;
+        private AnimatorView _view;
 
         private LFloat _animLen;
         private LFloat _timer;
@@ -60,7 +59,9 @@ namespace Lockstep.Game
         private List<string> _animNames = new List<string>();
         private LVector3 _intiPos;
 
-        private List<AnimInfo> _animInfos => config.anims;
+        private List<AnimInfo> _animInfos => _config.anims;
+
+        public AnimBindInfo CurAnimBindInfo;
         public AnimInfo curAnimInfo => _curAnimIdx == -1 ? null : _animInfos[_curAnimIdx];
 
         public CAnimator(Entity entity) : base(entity)
@@ -70,8 +71,7 @@ namespace Lockstep.Game
 
         public override void Start()
         {
-            config = GameConfigSingleton.Instance.GetAnimatorConfig(_configId);
-            if (config == null) return;
+            _config = GameConfigSingleton.Instance.GetAnimatorConfig(_configId);
             UpdateBindInfo();
             _animNames.Clear();
             foreach (var info in _animInfos)
@@ -84,13 +84,15 @@ namespace Lockstep.Game
 
         void UpdateBindInfo()
         {
-            curAnimBindInfo = config.events.Find((a) => a.name == _curAnimName);
-            if (curAnimBindInfo == null) curAnimBindInfo = AnimBindInfo.Empty;
+            CurAnimBindInfo = _config.events.Find((a) => a.name == _curAnimName);
+            if (CurAnimBindInfo == null)
+            {
+                CurAnimBindInfo = AnimBindInfo.Empty;
+            }
         }
 
         public override void Update(LFloat deltaTime)
         {
-            if (config == null) return;
             _animLen = curAnimInfo.length;
             _timer += deltaTime;
             if (_timer > _animLen)
@@ -98,10 +100,10 @@ namespace Lockstep.Game
                 ResetAnim();
             }
 
-            view?.Sample(_timer);
+            _view?.Sample(_timer);
 
             var idx = GetTimeIdx(_timer);
-            if (curAnimBindInfo.isMoveByAnim)
+            if (CurAnimBindInfo.isMoveByAnim)
             {
                 var animOffset = curAnimInfo[idx].pos;
                 var pos = Entity.LTrans2D.TransformDirection(animOffset.ToLVector2XZ());
@@ -116,7 +118,7 @@ namespace Lockstep.Game
 
         public void Play(string name, bool isCrossfade = false)
         {
-            if (config == null || _curAnimName == name)
+            if (_curAnimName == name)
             {
                 return;
             }
@@ -139,12 +141,11 @@ namespace Lockstep.Game
                 ResetAnim();
             }
 
-            view?.Play(_curAnimName, isCrossfade);
+            _view?.Play(_curAnimName, isCrossfade);
         }
 
         public void SetTime(LFloat timer)
         {
-            if (config == null) return;
             var idx = GetTimeIdx(timer);
             _intiPos = Entity.LTrans2D.Pos3 - curAnimInfo[idx].pos;
             this._timer = timer;

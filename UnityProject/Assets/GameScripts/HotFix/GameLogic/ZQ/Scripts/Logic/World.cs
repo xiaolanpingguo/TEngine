@@ -350,7 +350,6 @@ namespace Lockstep.Game
                 var PrefabId = 0; //TODO
                 var initPos = LVector2.zero; //TODO
                 var player = CreateEntity<Player>(PrefabId, initPos);
-                player.localId = i;
             }
 
             var allPlayers = GetPlayers();
@@ -429,7 +428,7 @@ namespace Lockstep.Game
                 {
                     entity.engineTransform = oldEntity.engineTransform;
                     var obj = (oldEntity.engineTransform as Transform).gameObject;
-                    var views = obj.GetComponents<IView>();
+                    var views = obj.GetComponents<EntityView>();
                     foreach (var view in views)
                     {
                         view.BindEntity(entity, oldEntity);
@@ -449,10 +448,10 @@ namespace Lockstep.Game
                 }
                 var obj = GameObject.Instantiate(prefab, entity.LTrans2D.Pos3.ToVector3(), Quaternion.Euler(new Vector3(0, entity.LTrans2D.deg, 0)));
                 entity.engineTransform = obj.transform;
-                var views = obj.GetComponents<IView>();
+                var views = obj.GetComponents<EntityView>();
                 if (views.Length <= 0)
                 {
-                    var view = obj.AddComponent<BaseEntityView>();
+                    var view = obj.AddComponent<EntityView>();
                     view.BindEntity(entity);
                 }
                 else

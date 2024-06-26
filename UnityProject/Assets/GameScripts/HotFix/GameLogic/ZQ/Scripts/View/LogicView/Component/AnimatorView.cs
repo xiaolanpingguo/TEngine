@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Lockstep.Game
 {
-    public class AnimatorView : MonoBehaviour, IAnimatorView 
+    public class AnimatorView : MonoBehaviour
     {
         public Animation animComp;
         public Transform rootTrans;
@@ -53,7 +53,7 @@ namespace Lockstep.Game
 
         public void LateUpdate()
         {
-            if (cAnim.curAnimBindInfo != null && cAnim.curAnimBindInfo.isMoveByAnim) 
+            if (cAnim.CurAnimBindInfo != null && cAnim.CurAnimBindInfo.isMoveByAnim) 
             {
                 rootTrans.localPosition = Vector3.zero;
             }
