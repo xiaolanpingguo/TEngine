@@ -11,7 +11,6 @@ namespace Lockstep.Game
 
         public virtual void BindEntity(Entity e, Entity oldEntity = null)
         {
-            e.EntityView = this;
             this.Entity = e;
             var updateEntity = oldEntity ?? e;
             transform.position = updateEntity.LTrans2D.Pos3.ToVector3();

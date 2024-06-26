@@ -14,9 +14,11 @@ namespace Lockstep.Game
         {
             base.BindEntity(e, oldEntity);
             _player = e as Player;
+            _player.EntityView = this;
             if (oldEntity != null)
             {
-                _uiFloatBar = (oldEntity.EntityView as PlayerView)._uiFloatBar;
+                Player oldPlayer = oldEntity as Player;
+                _uiFloatBar = oldPlayer.EntityView._uiFloatBar;
             }
             else
             {

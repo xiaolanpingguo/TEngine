@@ -10,6 +10,8 @@ namespace Lockstep.Game
     {
         private CAIController _aiontroller = null;
 
+        public EnemyView EntityView = null;
+
         private bool _isInvincible = false;
 
         public int CurHealth;
@@ -39,6 +41,13 @@ namespace Lockstep.Game
                 PhysicSystem.Instance.RemoveCollider(this);
                 World.Instance.DestroyEntity(this);
             }
+        }
+
+        public override void OnRollbackDestroy()
+        {
+            EntityView?.OnRollbackDestroy();
+            EntityView = null;
+            engineTransform = null;
         }
 
         public override void WriteBackup(Serializer writer)

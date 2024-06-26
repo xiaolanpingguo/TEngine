@@ -14,6 +14,8 @@ namespace Lockstep.Game
         private CAnimator _animator = null;
         private CSkill _skill= null;
 
+        public PlayerView EntityView = null;
+
         private int _damage = 10;
         private bool _isInvincible = false;
 
@@ -68,6 +70,13 @@ namespace Lockstep.Game
         public void OnSkillDone(CSkill skill)
         {
             //_animator?.Play(AnimDefine.Idle);
+        }
+
+        public override void OnRollbackDestroy()
+        {
+            EntityView?.OnRollbackDestroy();
+            EntityView = null;
+            engineTransform = null;
         }
 
         public void TakeDamage(Entity atker, int amount, LVector3 hitPoint)

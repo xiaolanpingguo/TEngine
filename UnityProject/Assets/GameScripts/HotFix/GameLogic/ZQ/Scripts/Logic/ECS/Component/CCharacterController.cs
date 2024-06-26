@@ -23,21 +23,21 @@ namespace Lockstep.Game
 
         public override void Update(LFloat deltaTime)
         {
-            //if (!Entity.rigidbody.isOnFloor)
-            //{
-            //    return;
-            //}
+            if (!Entity.rigidbody.isOnFloor)
+            {
+                return;
+            }
 
-            //var needChase = input.inputUV.sqrMagnitude > new LFloat(true, 10);
-            //if (needChase)
-            //{
-            //    var dir = input.inputUV.normalized;
-            //    Entity.LTrans2D.pos = Entity.LTrans2D.pos + dir * _moveSpd * deltaTime;
-            //    var targetDeg = dir.ToDeg();
-            //    Entity.LTrans2D.deg = CTransform2D.TurnToward(targetDeg, Entity.LTrans2D.deg, _turnSpd * deltaTime, out var hasReachDeg);
-            //}
+            var needChase = input.inputUV.sqrMagnitude > new LFloat(true, 10);
+            if (needChase)
+            {
+                var dir = input.inputUV.normalized;
+                Entity.LTrans2D.pos = Entity.LTrans2D.pos + dir * _moveSpd * deltaTime;
+                var targetDeg = dir.ToDeg();
+                Entity.LTrans2D.deg = CTransform2D.TurnToward(targetDeg, Entity.LTrans2D.deg, _turnSpd * deltaTime, out var hasReachDeg);
+            }
 
-            //_hasReachTarget = !needChase;
+            _hasReachTarget = !needChase;
         }
 
         public override void WriteBackup(Serializer writer)
