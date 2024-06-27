@@ -21,13 +21,15 @@ namespace Lockstep.Game
             }
             else
             {
-                _uiFloatBar = FloatBarManager.CreateFloatBar(transform, _enemy.CurHealth, _enemy.MaxHealth);
+                CHealth health = _enemy.GetComponent<CHealth>();
+                _uiFloatBar = FloatBarManager.CreateFloatBar(transform, health.CurHealth, health.MaxHealth);
             }
         }
 
         public override void OnTakeDamage(int amount, LVector3 hitPoint)
         {
-            _uiFloatBar.UpdateHp(_enemy.CurHealth, _enemy.MaxHealth);
+            CHealth health = _enemy.GetComponent<CHealth>();
+            _uiFloatBar.UpdateHp(health.CurHealth, health.MaxHealth);
             FloatTextManager.CreateFloatText(hitPoint.ToVector3(), -amount);
         }
 

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Policy;
 using System.Text;
 using Lockstep.Framework;
+using Lockstep.Game;
 
 
 namespace Lockstep.Framework
@@ -11,20 +13,33 @@ namespace Lockstep.Framework
         private List<IComponent> _components = new List<IComponent>();
         private Dictionary<Type, IComponent> _componentsMap = new();
 
-        public int EntityId;
-        public int PrefabId;
+        public int EntityId
+        {
+            get { return EntityBase.EntityId; }
+            set{ EntityBase.EntityId = value; }
+        }
+
+        public int PrefabId
+        {
+            get { return EntityBase.PrefabId; }
+            set {  EntityBase.PrefabId = value; }
+        }
+
         public object UserData;
 
+        public CEntityBase EntityBase = null;
         public CTransform2D LTrans2D = null;
         public CRigidbody Rigidbody = null;
         public ColliderData ColliderData = null;
 
         public Entity()
         {
+            EntityBase = new CEntityBase(this);
             LTrans2D = new CTransform2D();
             Rigidbody = new CRigidbody();
             Rigidbody.BindRef(LTrans2D);
             ColliderData = new ColliderData();
+            RegisterComponent(EntityBase);
             RegisterComponent(LTrans2D);
             RegisterComponent(Rigidbody);
             RegisterComponent(ColliderData);
@@ -54,19 +69,7 @@ namespace Lockstep.Framework
             }
         }
 
-        protected void RegisterComponent(IComponent comp)
-        {
-            Type type = comp.GetType();
-            if (_componentsMap.ContainsKey(type))
-            {
-                return;
-            }
-
-            _componentsMap.Add(type, comp);
-            _components.Add(comp);
-        }
-
-        protected T GetComponent<T>() where T : IComponent
+        public T GetComponent<T>() where T : IComponent
         {
             Type type = typeof(T);
             if (_componentsMap.TryGetValue(type, out var v))
@@ -126,6 +129,18 @@ namespace Lockstep.Framework
 
         public virtual void OnRollbackDestroy()
         {
+        }
+
+        protected void RegisterComponent(IComponent comp)
+        {
+            Type type = comp.GetType();
+            if (_componentsMap.ContainsKey(type))
+            {
+                return;
+            }
+
+            _componentsMap.Add(type, comp);
+            _components.Add(comp);
         }
     }
 }

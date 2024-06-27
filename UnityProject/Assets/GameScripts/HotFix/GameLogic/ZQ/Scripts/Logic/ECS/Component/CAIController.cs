@@ -8,10 +8,11 @@ namespace Lockstep.Game
     [Serializable]
     public class CAIController : IComponent
     {
-        public int _targetId;
-        public LFloat _stopDistSqr = 1 * 1;
-        public LFloat _atkInterval = 1;
         private LFloat _atkTimer;
+
+        private int _targetId;
+        private LFloat _stopDistSqr = 1 * 1;
+        private LFloat _atkInterval = 1;
 
         private int _damage = 10;
         private LFloat _moveSpd = 2;
@@ -31,14 +32,9 @@ namespace Lockstep.Game
             //find target
             var allPlayer = World.Instance.GetPlayers();
             var minDist = LFloat.MaxValue;
-            Player minTarget = null;
+            Entity minTarget = null;
             foreach (var player in allPlayer)
             {
-                if (player.IsDead)
-                {
-                    continue;
-                }
-
                 var dist = (player.LTrans2D.pos - Entity.LTrans2D.pos).sqrMagnitude;
                 if (dist < minDist)
                 {
@@ -80,7 +76,11 @@ namespace Lockstep.Game
                 if (_atkTimer <= 0)
                 {
                     _atkTimer = _atkInterval;
-                    minTarget.TakeDamage(Entity, _damage, minTarget.LTrans2D.Pos3);
+                    CHealth health = minTarget.GetComponent<CHealth>();
+                    if (health != null)
+                    {
+                        health.TakeDamage(Entity, _damage, minTarget.LTrans2D.Pos3);
+                    }
                 }
             }
         }

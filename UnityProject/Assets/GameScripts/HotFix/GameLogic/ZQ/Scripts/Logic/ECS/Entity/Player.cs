@@ -11,34 +11,27 @@ namespace Lockstep.Game
         public PlayerCommands input = new PlayerCommands();
 
         private CCharacterController _characterController = null;
-        private CAnimator _animator = null;
         private CSkill _skill= null;
+        private CHealth _health = null;
 
         public PlayerView EntityView = null;
 
         private int _damage = 10;
-        private bool _isInvincible = false;
-
-        public int CurHealth;
-        public int MaxHealth = 100;
-        public bool IsDead => CurHealth <= 0;
 
         public override void Start()
         {
+            _health = new CHealth(this);
+            _health.OnDamage += OnTakeDamage;
+
+            _characterController = new CCharacterController(this);
             var config = GameConfigSingleton.Instance.GetSkillConfig();
             _skill = new CSkill(this, config);
             _skill.OnSkillStartHandler = OnSkillStart;
             _skill.OnSkillPartStartHandler = OnSkillPartStart;
             _skill.OnSkillDoneHandler = OnSkillDone;
-
-            _characterController = new CCharacterController(this);
-            _animator = new CAnimator(this);
-            RegisterComponent(_animator);
+            RegisterComponent(_health);
             RegisterComponent(_characterController);
             RegisterComponent(_skill);
-
-            CurHealth = MaxHealth;
-
             base.Start();
         }
 
@@ -59,17 +52,14 @@ namespace Lockstep.Game
 
         public void OnSkillStart(CSkill skill)
         {
-            //_animator?.Play(AnimName);
         }
 
         public void OnSkillPartStart(CSkill skill)
         {
-            //Debug.Log("OnSkillPartStart " + skill.SkillInfo.animName );
         }
 
         public void OnSkillDone(CSkill skill)
         {
-            //_animator?.Play(AnimDefine.Idle);
         }
 
         public override void OnRollbackDestroy()
@@ -79,99 +69,20 @@ namespace Lockstep.Game
             UserData = null;
         }
 
-        public void TakeDamage(Entity atker, int amount, LVector3 hitPoint)
+        public void OnTakeDamage(Entity attacker, int amount, LVector3 hitPoint)
         {
-            if (_isInvincible || IsDead)
+            if (_health.IsDead)
             {
                 return;
             }
 
-            CurHealth -= amount;
             EntityView?.OnTakeDamage(amount, hitPoint);
-            if (IsDead)
+            if (_health.IsDead)
             {
                 EntityView?.OnDead();
                 PhysicSystem.Instance.RemoveCollider(this);
                 World.Instance.DestroyEntity(this);
             }
-        }
-
-        public override void Serialize(Serializer writer)
-        {
-            //writer.Write(EntityId);
-            //writer.Write(PrefabId);
-            //writer.Write(CurHealth);
-            //writer.Write(_damage);
-            //writer.Write(_isInvincible);
-            //writer.Write(MaxHealth);
-            ////writer.Write(_moveSpd);
-            ////writer.Write(_turnSpd);
-            //_animator.Serialize(writer);
-            //ColliderData.Serialize(writer);
-            ////input.Serialize(writer);
-            //_characterController.Serialize(writer);
-            //Rigidbody.Serialize(writer);
-            //_skill.WriteBSerializeackup(writer);
-            //LTrans2D.WriteBackup(writer);
-        }
-
-        public override void Deserialize(Deserializer reader)
-        {
-            //EntityId = reader.ReadInt32();
-            //PrefabId = reader.ReadInt32();
-            //CurHealth = reader.ReadInt32();
-            //_damage = reader.ReadInt32();
-            //_isInvincible = reader.ReadBoolean();
-            //MaxHealth = reader.ReadInt32();
-            ////_moveSpd = reader.ReadLFloat();
-            ////_turnSpd = reader.ReadLFloat();
-            //_animator.ReadBackup(reader);
-            //ColliderData.ReadBackup(reader);
-            ////input.ReadBackup(reader);
-            //_characterController.ReadBackup(reader);
-            //Rigidbody.ReadBackup(reader);
-            //_skill.ReadBackup(reader);
-            //LTrans2D.ReadBackup(reader);
-        }
-
-        public override int GetHash(ref int idx)
-        {
-            int hash = 1;
-            hash += EntityId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += PrefabId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += CurHealth.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += _damage.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += _isInvincible.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += MaxHealth.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            //hash += _moveSpd.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            //hash += _turnSpd.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += _animator.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += ColliderData.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            //hash += input.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += _characterController.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += Rigidbody.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += _skill.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            hash += LTrans2D.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-            return hash;
-        }
-
-        public override void DumpStr(StringBuilder sb, string prefix)
-        {
-            sb.AppendLine(prefix + "EntityId" + ":" + EntityId.ToString());
-            sb.AppendLine(prefix + "PrefabId" + ":" + PrefabId.ToString());
-            sb.AppendLine(prefix + "curHealth" + ":" + CurHealth.ToString());
-            sb.AppendLine(prefix + "damage" + ":" + _damage.ToString());
-            sb.AppendLine(prefix + "isInvincible" + ":" + _isInvincible.ToString());
-            sb.AppendLine(prefix + "maxHealth" + ":" + MaxHealth.ToString());
-            //sb.AppendLine(prefix + "moveSpd" + ":" + _moveSpd.ToString());
-            //sb.AppendLine(prefix + "turnSpd" + ":" + _turnSpd.ToString());
-            sb.AppendLine(prefix + "animator" + ":"); _animator.DumpStr(sb, "\t" + prefix);
-            sb.AppendLine(prefix + "colliderData" + ":"); ColliderData.DumpStr(sb, "\t" + prefix);
-            //sb.AppendLine(prefix + "input" +":");  input.DumpStr(sb,"\t" + prefix);
-            sb.AppendLine(prefix + "mover" + ":"); _characterController.DumpStr(sb, "\t" + prefix);
-            sb.AppendLine(prefix + "rigidbody" + ":"); Rigidbody.DumpStr(sb, "\t" + prefix);
-            sb.AppendLine(prefix + "skillBox" + ":"); _skill.DumpStr(sb, "\t" + prefix);
-            sb.AppendLine(prefix + "transform" + ":"); LTrans2D.DumpStr(sb, "\t" + prefix);
         }
     }
 }

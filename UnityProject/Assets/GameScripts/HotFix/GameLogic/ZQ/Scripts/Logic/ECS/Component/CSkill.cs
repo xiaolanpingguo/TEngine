@@ -22,7 +22,6 @@ namespace Lockstep.Game
         public Action<CSkill> OnSkillPartStartHandler;
         public Action<CSkill> OnSkillDoneHandler;
 
-        //public config _config;
 
         private LFloat _cdTimer;
         private ESkillState _state;
@@ -170,7 +169,11 @@ namespace Lockstep.Game
 #endif
             foreach (var other in _tempEntities)
             {
-                //other.TakeDamage(Entity, _curPart.damage, other.LTrans2D.pos.ToLVector3());
+                CHealth health = other.GetComponent<CHealth>();
+                if (health != null)
+                {
+                    health.TakeDamage(Entity, _curPart.damage, other.LTrans2D.pos.ToLVector3());
+                }
             }
 
             //add force

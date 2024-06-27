@@ -43,23 +43,31 @@ namespace Lockstep.Game
         public override void Serialize(Serializer writer)
         {
             writer.Write(_hasReachTarget);
+            writer.Write(_moveSpd);
+            writer.Write(_turnSpd);
         }
 
         public override void Deserialize(Deserializer reader)
         {
             _hasReachTarget = reader.ReadBoolean();
+            _moveSpd = reader.ReadLFloat();
+            _turnSpd = reader.ReadLFloat();
         }
 
         public override int GetHash(ref int idx)
         {
             int hash = 1;
             hash += _hasReachTarget.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += _moveSpd.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+            hash += _turnSpd.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
             return hash;
         }
 
         public override void DumpStr(StringBuilder sb, string prefix)
         {
             sb.AppendLine(prefix + "hasReachTarget" + ":" + _hasReachTarget.ToString());
+            sb.AppendLine(prefix + "moveSpd" + ":" + _moveSpd.ToString());
+            sb.AppendLine(prefix + "turnSpd" + ":" + _turnSpd.ToString());
         }
     }
 }
