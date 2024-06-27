@@ -16,7 +16,6 @@ namespace Lockstep.Game
         protected override void Init()
         {
             _config = Resources.Load<GameConfig>(configPath);
-            _config.DoAwake();
         }
 
         public EntityConfig GetEntityConfig(int id)
@@ -31,11 +30,6 @@ namespace Lockstep.Game
             }
 
             return _config.GetPlayerConfig(id);
-        }
-
-        public AnimatorConfig GetAnimatorConfig(int id)
-        {
-            return _config.GetAnimatorConfig(id - 1);
         }
 
         public SkillConfig GetSkillConfig()

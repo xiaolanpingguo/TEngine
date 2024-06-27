@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using Lockstep.Framework;
 using System.Text;
+using static Lockstep.Framework.LMathUtils;
+using dnlib.DotNet.Pdb;
 
 
 namespace Lockstep.Game
@@ -22,17 +24,19 @@ namespace Lockstep.Game
         public Action<CSkill> OnSkillPartStartHandler;
         public Action<CSkill> OnSkillDoneHandler;
 
+        private bool _deubgCollistion = false;
 
         private LFloat _cdTimer;
-        private ESkillState _state;
-        private LFloat _skillTimer;
-
-        private int[] _partCounter = new int[0];
         private int _curPartIdx;
+        private LFloat _skillTimer;
+        private ESkillState _state;
+        private int[] _partCounter = new int[0];
+
         private SkillPart _curPart => _curPartIdx == -1 ? null : _parts[_curPartIdx];
 
         private float _showTimer;
 
+        // config
         private LFloat _cd;
         private LFloat _doneDelay;
         private List<SkillPart> _parts;
@@ -140,33 +144,37 @@ namespace Lockstep.Game
             _showTimer = Time.realtimeSinceStartup + 0.1f;
 
             var col = part.collider;
-#if NO_DEBUG_NO_COLLISION
-            if (col.radius > 0) 
-            {
-                //circle
-                PhysicSystem.QueryRegion(TargetLayer, entity.transform.TransformPoint(col.pos), col.radius, _OnTriggerEnter);
-            }
-            else 
-            {
-                //aabb
-                PhysicSystem.QueryRegion(TargetLayer, entity.transform.TransformPoint(col.pos), col.size, entity.transform.forward, _OnTriggerEnter);
-            }
 
-#else
-            //TODO Ignore CollisionSystem
-            if (col.radius > 0)
+            if (_deubgCollistion)
             {
-                var colPos = Entity.LTrans2D.TransformPoint(col.pos);
-                foreach (var e in World.Instance.GetEnemies())
+                if (col.radius > 0)
                 {
-                    var targetCenter = e.LTrans2D.pos;
-                    if ((targetCenter - colPos).sqrMagnitude < col.radius * col.radius)
+                    //circle
+                    PhysicSystem.QueryRegion(_targetLayer, Entity.LTrans2D.TransformPoint(col.pos), col.radius, _OnTriggerEnter);
+                }
+                else
+                {
+                    //aabb
+                    PhysicSystem.QueryRegion(_targetLayer, Entity.LTrans2D.TransformPoint(col.pos), col.size, Entity.LTrans2D.forward, _OnTriggerEnter);
+                }
+            }
+            else
+            {
+                //TODO Ignore CollisionSystem
+                if (col.radius > 0)
+                {
+                    var colPos = Entity.LTrans2D.TransformPoint(col.pos);
+                    foreach (var e in World.Instance.GetEnemies())
                     {
-                        _tempEntities.Add(e);
+                        var targetCenter = e.LTrans2D.pos;
+                        if ((targetCenter - colPos).sqrMagnitude < col.radius * col.radius)
+                        {
+                            _tempEntities.Add(e);
+                        }
                     }
                 }
             }
-#endif
+
             foreach (var other in _tempEntities)
             {
                 CHealth health = other.GetComponent<CHealth>();
@@ -202,8 +210,6 @@ namespace Lockstep.Game
             _tempEntities.Clear();
         }
 
-
-        //private static readonly HashSet<Entity> _tempEntities = new HashSet<Entity>();
         private void _OnTriggerEnter(ColliderProxy other)
         {
             if (_curPart.collider.IsCircle && _curPart.collider.deg > 0)
@@ -223,23 +229,25 @@ namespace Lockstep.Game
 
         public void OnDrawGizmos()
         {
-#if UNITY_EDITOR && DEBUG_SKILL
             float tintVal = 0.3f;
             Gizmos.color = new Color(0, 1.0f - tintVal, tintVal, 0.25f);
             if (Application.isPlaying) 
             {
-                if (entity == null) return;
-                if (CurPart == null) return;
+                if (_curPart == null)
+                {
+                    return;
+                }
+
                 if (_showTimer < Time.realtimeSinceStartup) 
                 {
                     return;
                 }
 
-                ShowPartGizmons(CurPart);
+                ShowPartGizmons(_curPart);
             }
             else 
             {
-                foreach (var part in Parts) 
+                foreach (var part in _parts) 
                 {
                     if (part._DebugShow) 
                     {
@@ -249,29 +257,28 @@ namespace Lockstep.Game
             }
 
             Gizmos.color = Color.white;
-#endif
         }
 
         private void ShowPartGizmons(SkillPart part)
         {
-            //var col = part.collider;
-            //if (col.radius > 0)
-            //{
-            //    //circle
-            //    var pos = entity?.transform.TransformPoint(col.pos) ?? col.pos;
-            //    Gizmos.DrawSphere(new UnityEngine.Vector3(pos.ToVector3XZ(LFloat.one)), col.radius.ToFloat());
-            //}
-            //else
-            //{
-            //    //aabb
-            //    var pos = entity?.transform.TransformPoint(col.pos) ?? col.pos;
-            //    Gizmos.DrawCube(pos.ToVector3XZ(LFloat.one), col.size.ToVector3XZ(LFloat.one));
-            //    DebugDraw.DebugLocalCube(Matrix4x4.TRS(
-            //            pos.ToVector3XZ(LFloat.one),
-            //            Quaternion.Euler(0, entity.transform.deg.ToFloat(), 0),
-            //            Vector3.one),
-            //        col.size.ToVector3XZ(LFloat.one), Gizmos.color);
-            //}
+            var col = part.collider;
+            if (col.radius > 0)
+            {
+                //circle
+                var pos = Entity.LTrans2D.TransformPoint(col.pos);
+                Gizmos.DrawSphere(pos.ToVector3XZ(LFloat.one), col.radius.ToFloat());
+            }
+            else
+            {
+                //aabb
+                LVector2 pos = Entity.LTrans2D.TransformPoint(col.pos);
+                Gizmos.DrawCube(pos.ToVector3XZ(LFloat.one), col.size.ToVector3XZ(LFloat.one));
+                DebugDraw.DebugLocalCube(Matrix4x4.TRS(
+                        pos.ToVector3XZ(LFloat.one),
+                        Quaternion.Euler(0, Entity.LTrans2D.deg.ToFloat(), 0),
+                        Vector3.one),
+                    col.size.ToVector3XZ(LFloat.one), Gizmos.color);
+            }
         }
 
         public override void Serialize(Serializer writer)

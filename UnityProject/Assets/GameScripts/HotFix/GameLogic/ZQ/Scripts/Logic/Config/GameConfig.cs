@@ -128,17 +128,8 @@ namespace Lockstep.Game
         public List<PlayerConfig> player = new List<PlayerConfig>();
         public List<EnemyConfig> enemies = new List<EnemyConfig>();
         public List<SpawnerConfig> spawner = new List<SpawnerConfig>();
-        public List<AnimatorConfig> animators = new List<AnimatorConfig>();
         public SkillConfig SkillCofnig = new SkillConfig();
-        //public List<SkillBoxConfig> skills = new List<SkillBoxConfig>();
 
-        public void DoAwake()
-        {
-            //foreach (var skill in skills)
-            //{
-            //    skill.CheckInit();
-            //}
-        }
 
         private T GetConfig<T>(List<T> lst, int id) where T: EntityConfig
         {
@@ -154,15 +145,9 @@ namespace Lockstep.Game
         public EntityConfig GetPlayerConfig(int id){return  GetConfig(player, id);}
         public EntityConfig GetSpawnerConfig(int id){return  GetConfig(spawner, id);}   
 
-        public AnimatorConfig GetAnimatorConfig(int id)
-        {
-            return (id < 0 ||id >= animators.Count) ? null : animators[id];
-        }
-
         public SkillConfig GetSkillConfig()
         {
             return SkillCofnig;
-            //return (id < 0 ||id >= skills.Count) ? null : skills[id];
         }
     }
 }
