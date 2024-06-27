@@ -166,9 +166,9 @@ namespace Lockstep.Game
         {
             sb.AppendLine("Hash ------: " + Hash);
             sb.AppendLine(prefix + "EntityIdCounter" + ":" + _entityIdCounter.ToString());
-            BackUpUtil.DumpList("GetPlayers", GetPlayers(), sb, prefix);
-            BackUpUtil.DumpList("GetEnemies", GetEnemies(), sb, prefix);
-            BackUpUtil.DumpList("GetSpawners", GetSpawners(), sb, prefix);
+            SerializeUtil.DumpList("GetPlayers", GetPlayers(), sb, prefix);
+            SerializeUtil.DumpList("GetEnemies", GetEnemies(), sb, prefix);
+            SerializeUtil.DumpList("GetSpawners", GetSpawners(), sb, prefix);
             sb.AppendLine(prefix + "EntityId" + ":" + _curGameState.ToString());
         }
 

@@ -6,7 +6,7 @@ using Lockstep.Framework;
 
 namespace Lockstep.Game
 {
-    public static class BackUpUtil
+    public static class SerializeUtil
     {
         public static void Write<T>(this Serializer writer, IList<T> lst) where T : IComponent, new()
         {

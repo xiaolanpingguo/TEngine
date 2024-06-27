@@ -316,7 +316,7 @@ namespace Lockstep.Game
             sb.AppendLine(prefix + "_curPartIdx" + ":" + _curPartIdx.ToString());
             sb.AppendLine(prefix + "skillTimer" + ":" + _skillTimer.ToString());
             sb.AppendLine(prefix + "State" + ":" + _state.ToString());
-            BackUpUtil.DumpList("partCounter", _partCounter, sb, prefix);
+            SerializeUtil.DumpList("partCounter", _partCounter, sb, prefix);
         }
     }
 
