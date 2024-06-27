@@ -6,7 +6,6 @@ using Lockstep.Framework;
 
 namespace Lockstep.Game
 {
-    [Serializable]
     public class SkillColliderInfo
     {
         public LVector2 pos;
@@ -18,13 +17,11 @@ namespace Lockstep.Game
         public bool IsCircle => radius > 0;
     }
 
-    [Serializable]
     public class SkillPart
     {
-        public bool _DebugShow;
+        public bool DebugShow;
         public LFloat moveSpd;
         public LFloat startFrame;
-        public LFloat startTimer => startFrame * SkillPart.AnimFrameScale;
         public SkillColliderInfo collider;
         public LVector3 impulseForce;
         public bool needForce;
@@ -33,19 +30,27 @@ namespace Lockstep.Game
         public LFloat interval;
         public int otherCount;
         public int damage;
-        public static LFloat AnimFrameScale = new LFloat(true, 1667);
-        [HideInInspector] public LFloat DeadTimer => startTimer + interval * (otherCount + LFloat.half);
+        
+        private LFloat _animFrameScale = new LFloat(true, 1667);
 
         public LFloat NextTriggerTimer(int counter)
         {
-            return startTimer + interval * counter;
+            return StartTimer() + interval * counter;
+        }
+
+        public LFloat StartTimer()
+        {
+            return startFrame * _animFrameScale;
+        }
+
+        public LFloat DeadTimer()
+        {
+            return StartTimer() + interval * (otherCount + LFloat.half);
         }
     }
 
-    [Serializable]
-    public class SkillConfig
+    public class SkillConfig : ScriptableObject
     {
-        public string animName;
         public LFloat CD;
         public LFloat doneDelay;
         public int targetLayer;
@@ -58,7 +63,7 @@ namespace Lockstep.Game
             var time = LFloat.MinValue;
             foreach (var part in parts)
             {
-                var partDeadTime = part.DeadTimer;
+                var partDeadTime = part.DeadTimer();
                 if (partDeadTime > time)
                 {
                     time = partDeadTime;

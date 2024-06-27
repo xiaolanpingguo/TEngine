@@ -6,19 +6,33 @@ using Lockstep.Framework;
 using UnityEngine;
 using TEngine;
 using System.Text;
+using Lockstep.Game;
 
 
 namespace Lockstep.Game
 {
+    public enum EntityType
+    {
+        Spawner,
+        Enemy,
+        Player,
+    }
+
     public class World
     {
+        private static int _spawnerPrefabIdBegin = 100;
+        private static int _enemyPrefabIdBegin = 10;
+        private static int _playerPrefabIdBegin = 0;
+
         public static World Instance { get; private set; }
         public bool IsPause { get; set; }
         public int Tick { get; set; }
         public static Player MyPlayer;
-        private List<IGameSystem> _systems = new List<IGameSystem>();
 
-        private Dictionary<int, GameObject> _id2Prefab = new Dictionary<int, GameObject>();
+        private List<IGameSystem> _systems = new List<IGameSystem>();
+        private Dictionary<Type, IGameSystem> _systemMap = new();
+
+        private Dictionary<EntityType, GameObject> _id2Prefab = new();
 
 
         //--
@@ -200,17 +214,62 @@ namespace Lockstep.Game
         public T CreateEntity<T>(int prefabId, LVector3 position) where T : Entity, new()
         {
             var entity = new T();
-            GameConfigSingleton.Instance.GetEntityConfig(prefabId)?.CopyTo(entity);
             entity.EntityId = GenId();
             entity.PrefabId = prefabId;
             entity.LTrans2D.Pos3 = position;
-            PhysicSystem.Instance.RegisterEntity(prefabId, entity);
+            GetSystem<PhysicSystem>().RegisterEntity(prefabId, entity);
 
             entity.Start();
             BindView(entity);
             AddEntity(entity);
             return entity;
         }
+
+        //public Player CreatePlayer(int prefabId, LVector3 position)
+        //{
+        //    var entity = new Player();
+        //    PlayerConfig playerConfig = GameConfigSingleton.Instance.PlayerConfig;
+        //    GameConfigSingleton.Instance.GetEntityConfig(prefabId)?.CopyTo(entity);
+        //    entity.EntityId = GenId();
+        //    entity.PrefabId = prefabId;
+        //    entity.LTrans2D.Pos3 = position;
+        //    PhysicSystem.Instance.RegisterEntity(prefabId, entity);
+
+        //    entity.Start();
+        //    BindView(entity);
+        //    AddEntity(entity);
+        //    return entity;
+        //}
+
+        //public T CreateEntity<T>(int prefabId, LVector3 position) where T : Entity, new()
+        //{
+        //    var entity = new T();
+        //    GameConfigSingleton.Instance.GetEntityConfig(prefabId)?.CopyTo(entity);
+        //    entity.EntityId = GenId();
+        //    entity.PrefabId = prefabId;
+        //    entity.LTrans2D.Pos3 = position;
+        //    PhysicSystem.Instance.RegisterEntity(prefabId, entity);
+
+        //    entity.Start();
+        //    BindView(entity);
+        //    AddEntity(entity);
+        //    return entity;
+        //}
+
+        //public T CreateEntity<T>(int prefabId, LVector3 position) where T : Entity, new()
+        //{
+        //    var entity = new T();
+        //    GameConfigSingleton.Instance.GetEntityConfig(prefabId)?.CopyTo(entity);
+        //    entity.EntityId = GenId();
+        //    entity.PrefabId = prefabId;
+        //    entity.LTrans2D.Pos3 = position;
+        //    PhysicSystem.Instance.RegisterEntity(prefabId, entity);
+
+        //    entity.Start();
+        //    BindView(entity);
+        //    AddEntity(entity);
+        //    return entity;
+        //}
 
         public void DestroyEntity(Entity entity)
         {
@@ -396,28 +455,75 @@ namespace Lockstep.Game
             RegisterSystem(new EnemySystem());
         }
 
-        public void RegisterSystem(IGameSystem mgr)
+        public void RegisterSystem(IGameSystem sys)
         {
-            _systems.Add(mgr);
+            Type type = sys.GetType();
+            if (_systemMap.ContainsKey(type))
+            {
+                return;
+            }
+
+            _systemMap.Add(type, sys);
+            _systems.Add(sys);
         }
 
-        public GameObject LoadPrefab(int id)
+        public T GetSystem<T>() where T : IGameSystem
         {
-            if (_id2Prefab.TryGetValue(id, out var val))
+            Type type = typeof(T);
+            if (_systemMap.TryGetValue(type, out var v))
+            {
+                return v as T;
+            }
+
+            return null;
+        }
+
+        public GameObject LoadPrefab(EntityType type)
+        {
+            if (_id2Prefab.TryGetValue(type, out var val))
             {
                 return val;
             }
 
-            var config = GameConfigSingleton.Instance.GetEntityConfig(id);
-            if (string.IsNullOrEmpty(config.prefabPath))
+            GameConfig gameConfig = GameConfigSingleton.Instance.GameConfig;
+            string prefabPath = "";
+            if (type == EntityType.Player) 
+            {
+                prefabPath = gameConfig.PlayerPrefabPath;
+            }
+            else if (type == EntityType.Enemy)
+            {
+                prefabPath = gameConfig.EnemyPrefabPath;
+            }
+            else if (type == EntityType.Spawner)
+            {
+                prefabPath = gameConfig.SpawnerPrefabPath;
+            }
+            else
             {
                 return null;
             }
+            //if (id >= _spawnerPrefabIdBegin)
+            //{
+            //    SpawnerConfig spawnerConfig = GameConfigSingleton.Instance.SpawnerConfig;
+            //    return _config.GetSpawnerConfig(id - _spawnerPrefabIdBegin);
+            //}
+            //if (id >= 10)
+            //{
+            //    return _config.GetEnemyConfig(id - 10);
+            //}
 
-            string pathPrefix = "Prefabs/";
-            var prefab = (GameObject)Resources.Load(pathPrefix + config.prefabPath);
-            _id2Prefab[id] = prefab;
-            PhysicSystem.Instance.RigisterPrefab(id, id < 10 ? (int)EColliderLayer.Hero : (int)EColliderLayer.Enemy);
+            //var config = GameConfigSingleton.Instance.GetEntityConfig(id);
+            //if (string.IsNullOrEmpty(config.prefabPath))
+            //{
+            //    return null;
+            //}
+
+            var prefab = (GameObject)Resources.Load(prefabPath);
+            _id2Prefab[type] = prefab;
+
+            EColliderLayer layer = (type == EntityType.Player) ? EColliderLayer.Player : EColliderLayer.Enemy;
+            GetSystem<PhysicSystem>().RigisterPrefabLayer((int)type, (int)layer);
             return prefab;
         }
 

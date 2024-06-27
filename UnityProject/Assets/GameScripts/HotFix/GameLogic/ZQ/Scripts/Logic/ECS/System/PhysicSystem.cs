@@ -11,10 +11,7 @@ namespace Lockstep.Game
 {
     public class PhysicSystem : IGameSystem 
     {
-        private static PhysicSystem _instance;
-        public static PhysicSystem Instance => _instance;
         private CollisionSystem _collisionSystem;
-        public CollisionConfig config;
 
         static Dictionary<int, ColliderPrefab> _fabId2ColPrefab = new Dictionary<int, ColliderPrefab>();
         static Dictionary<int, int> _fabId2Layer = new Dictionary<int, int>();
@@ -22,27 +19,20 @@ namespace Lockstep.Game
         static Dictionary<ILPTriggerEventHandler, ColliderProxy> _mono2ColProxy = new ();
         static Dictionary<ColliderProxy, ILPTriggerEventHandler> _colProxy2Mono = new ();
 
+        private int[] allTypes = new int[] { 0, 1, 2 };
+
+        public CollisionConfig config;
         public bool[] collisionMatrix => config.collisionMatrix;
         public LVector3 pos => config.pos;
         public LFloat worldSize => config.worldSize;
         public LFloat minNodeSize => config.minNodeSize;
         public LFloat loosenessval => config.loosenessval;
 
-        private int[] allTypes = new int[] {0, 1, 2};
-
         public int showTreeId = 0;
 
         public override void Init()
         {
-            _instance = this;
             config = GameConfigSingleton.Instance.CollisionConfig;
-
-            if (_instance != this)
-            {
-               Log.Error("Duplicate CollisionSystemAdapt!");
-                return;
-            }
-
             _collisionSystem = new CollisionSystem()
             {
                 worldSize = worldSize,
@@ -74,22 +64,22 @@ namespace Lockstep.Game
             }
         }
 
-        public static ColliderProxy GetCollider(int id)
+        public ColliderProxy GetCollider(int id)
         {
-            return _instance._collisionSystem.GetCollider(id);
+            return _collisionSystem.GetCollider(id);
         }
 
-        public static bool Raycast(int layerMask, Ray2D ray, out LRaycastHit2D ret)
+        public bool Raycast(int layerMask, Ray2D ray, out LRaycastHit2D ret)
         {
             return Raycast(layerMask, ray, out ret, LFloat.MaxValue);
         }
 
-        public static bool Raycast(int layerMask, Ray2D ray, out LRaycastHit2D ret, LFloat maxDistance)
+        public bool Raycast(int layerMask, Ray2D ray, out LRaycastHit2D ret, LFloat maxDistance)
         {
             ret = new LRaycastHit2D();
             LFloat t = LFloat.one; 
             int id;
-            if (_instance.DoRaycast(layerMask, ray, out t, out id, maxDistance)) 
+            if (DoRaycast(layerMask, ray, out t, out id, maxDistance)) 
             {
                 ret.point = ray.origin + ray.direction * t;
                 ret.distance = t * ray.direction.magnitude;
@@ -100,14 +90,14 @@ namespace Lockstep.Game
             return false;
         }
 
-        public static void QueryRegion(int layerType, LVector2 pos, LVector2 size, LVector2 forward, FuncCollision callback)
+        public void QueryRegion(int layerType, LVector2 pos, LVector2 size, LVector2 forward, FuncCollision callback)
         {
-            _instance._QueryRegion(layerType, pos, size, forward, callback);
+            _QueryRegion(layerType, pos, size, forward, callback);
         }
 
-        public static void QueryRegion(int layerType, LVector2 pos, LFloat radius, FuncCollision callback)
+        public void QueryRegion(int layerType, LVector2 pos, LFloat radius, FuncCollision callback)
         {
-            _instance._QueryRegion(layerType, pos, radius, callback);
+            _QueryRegion(layerType, pos, radius, callback);
         }
 
         private void _QueryRegion(int layerType, LVector2 pos, LVector2 size, LVector2 forward, FuncCollision callback)
@@ -126,31 +116,31 @@ namespace Lockstep.Game
             return ret;
         }
 
-        public void RigisterPrefab(int prefabId, int val)
+        public void RigisterPrefabLayer(int entityType, int layer)
         {
-            _fabId2Layer[prefabId] = val;
+            _fabId2Layer[entityType] = layer;
         }
 
-        public void RegisterEntity(int prefabId, Entity entity)
+        public void RegisterEntity(int entityType, Entity entity)
         {
             ColliderPrefab prefab = null;
             var fab = World.Instance.LoadPrefab(prefabId);
             if (!_fabId2ColPrefab.TryGetValue(prefabId, out prefab)) 
             {
-                prefab = CreateColliderPrefab(fab, entity.ColliderData);
+                prefab = CreateColliderPrefab(entity.ColliderData);
             }
 
-            AttachToColSystem(_fabId2Layer[prefabId], prefab,  entity);
+            AttachToColSystem(_fabId2Layer[entityType], prefab,  entity);
         }
 
-        public ColliderPrefab CreateColliderPrefab(GameObject fab, ColliderData data)
+        public ColliderPrefab CreateColliderPrefab(ColliderData data)
         {
-            CBaseShape collider = null;
             if (data == null)
             {
                 return null;
             }
 
+            CBaseShape collider = null;
             if (data.radius > 0)
             {
                 //circle

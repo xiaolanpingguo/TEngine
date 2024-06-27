@@ -1,6 +1,8 @@
 using System;
 using System.Text;
 using Lockstep.Framework;
+using UnityEngine;
+using UnityEngine.Assertions.Must;
 
 
 namespace Lockstep.Game
@@ -16,16 +18,19 @@ namespace Lockstep.Game
 
         public PlayerView EntityView = null;
 
-        private int _damage = 10;
-
         public override void Start()
         {
+            PlayerConfig playerConfig = GameConfigSingleton.Instance.PlayerConfig;
+
             _health = new CHealth(this);
+            _health.MaxHealth = playerConfig.MaxHealth;
             _health.OnDamage += OnTakeDamage;
 
             _characterController = new CCharacterController(this);
-            var config = GameConfigSingleton.Instance.GetSkillConfig();
-            _skill = new CSkill(this, config);
+            _characterController.MoveSpd = playerConfig.MoveSpd;
+            _characterController.TurnSpd = playerConfig.TurnSpd;
+
+            _skill = new CSkill(this);
             _skill.OnSkillStartHandler = OnSkillStart;
             _skill.OnSkillPartStartHandler = OnSkillPartStart;
             _skill.OnSkillDoneHandler = OnSkillDone;
@@ -43,7 +48,6 @@ namespace Lockstep.Game
                 _skill.Fire();
             }
         }
-
 
         public void StopSkill()
         {

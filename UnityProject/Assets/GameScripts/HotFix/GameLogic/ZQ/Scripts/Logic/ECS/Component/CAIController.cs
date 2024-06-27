@@ -14,11 +14,15 @@ namespace Lockstep.Game
         private LFloat _stopDistSqr = 1 * 1;
         private LFloat _atkInterval = 1;
 
-        private int _damage = 10;
-        private LFloat _moveSpd = 2;
-        private LFloat _turnSpd = 150;
+        public int Damage = 10;
+        public LFloat MoveSpd = 2;
+        public LFloat TurnSpd = 150;
 
         public CAIController(Entity entity) : base(entity)
+        {
+        }
+
+        public override void Start()
         {
         }
 
@@ -54,13 +58,13 @@ namespace Lockstep.Game
                 // turn to target
                 var targetPos = minTarget.LTrans2D.pos;
                 var currentPos = Entity.LTrans2D.pos;
-                var turnVal = _turnSpd * deltaTime;
+                var turnVal = TurnSpd * deltaTime;
                 var targetDeg = CTransform2D.TurnToward(targetPos, currentPos, Entity.LTrans2D.deg, turnVal, out var isFinishedTurn);
                 Entity.LTrans2D.deg = targetDeg;
 
                 // move to target
                 var distToTarget = (targetPos - currentPos).magnitude;
-                var movingStep = _moveSpd * deltaTime;
+                var movingStep = MoveSpd * deltaTime;
                 if (movingStep > distToTarget)
                 {
                     movingStep = distToTarget;
@@ -79,7 +83,7 @@ namespace Lockstep.Game
                     CHealth health = minTarget.GetComponent<CHealth>();
                     if (health != null)
                     {
-                        health.TakeDamage(Entity, _damage, minTarget.LTrans2D.Pos3);
+                        health.TakeDamage(Entity, Damage, minTarget.LTrans2D.Pos3);
                     }
                 }
             }

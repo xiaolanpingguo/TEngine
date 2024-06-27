@@ -16,8 +16,15 @@ namespace Lockstep.Game
 
         public override void Start()
         {
+            EnemyConfig enemyConfig = GameConfigSingleton.Instance.EnemyConfig;
+
             _aiontroller = new CAIController(this);
+            _aiontroller.Damage = enemyConfig.Damage;
+            _aiontroller.MoveSpd = enemyConfig.MoveSpd;
+            _aiontroller.TurnSpd = enemyConfig.TurnSpd;
+
             _health = new CHealth(this);
+            _health.MaxHealth = enemyConfig.MaxHealth;
             _health.OnDamage += OnTakeDamage;
 
             RegisterComponent(_aiontroller);

@@ -44,8 +44,13 @@ namespace Lockstep.Game
         private LFloat _maxPartTime;
 
 
-        public CSkill(Entity entity, SkillConfig config) : base(entity)
+        public CSkill(Entity entity) : base(entity)
         {
+        }
+
+        public override void Start()
+        {
+            var config = GameConfigSingleton.Instance.SkillConfig;
             _cd = config.CD;
             _doneDelay = config.doneDelay;
             _parts = config.parts;
@@ -56,10 +61,6 @@ namespace Lockstep.Game
             _state = ESkillState.Idle;
             _curPartIdx = -1;
             _partCounter = new int[_parts.Count];
-        }
-
-        public override void Start()
-        {
         }
 
         public override void Update(LFloat deltaTime)
@@ -249,7 +250,7 @@ namespace Lockstep.Game
             {
                 foreach (var part in _parts) 
                 {
-                    if (part._DebugShow) 
+                    if (part.DebugShow) 
                     {
                         ShowPartGizmons(part);
                     }

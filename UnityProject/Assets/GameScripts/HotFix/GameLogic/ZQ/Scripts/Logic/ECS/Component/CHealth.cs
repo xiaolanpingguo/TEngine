@@ -9,15 +9,19 @@ namespace Lockstep.Game
 {
     public class CHealth : IComponent
     {
-        public CHealth(Entity entity) : base(entity)
-        {
-            CurHealth = MaxHealth;
-        }
-
         public Action<Entity, int, LVector3> OnDamage { get; set; }
         public int CurHealth;
         public int MaxHealth = 100;
         public bool IsDead => CurHealth <= 0;
+
+        public CHealth(Entity entity) : base(entity)
+        {
+        }
+
+        public override void Start()
+        {
+            CurHealth = MaxHealth;
+        }
 
         public void TakeDamage(Entity attacker, int amount, LVector3 hitPoint)
         {
