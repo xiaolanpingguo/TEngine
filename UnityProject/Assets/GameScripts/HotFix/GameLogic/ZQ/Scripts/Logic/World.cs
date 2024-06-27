@@ -391,7 +391,8 @@ namespace Lockstep.Game
         public void RegisterSystems()
         {
             RegisterSystem(new PhysicSystem());
-            RegisterSystem(new HeroSystem());
+            RegisterSystem(new SpawnerSystem());
+            RegisterSystem(new PlayerSystem());
             RegisterSystem(new EnemySystem());
         }
 

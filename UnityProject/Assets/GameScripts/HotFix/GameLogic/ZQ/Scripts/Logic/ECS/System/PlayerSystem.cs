@@ -3,14 +3,7 @@ using Lockstep.Framework;
 
 namespace Lockstep.Game
 {
-    public enum EColliderLayer
-    {
-        Static,
-        Enemy,
-        Hero,
-        EnumCount
-    }
-    public class HeroSystem : IGameSystem
+    public class PlayerSystem : IGameSystem
     {
         public override void Update(LFloat deltaTime)
         {
