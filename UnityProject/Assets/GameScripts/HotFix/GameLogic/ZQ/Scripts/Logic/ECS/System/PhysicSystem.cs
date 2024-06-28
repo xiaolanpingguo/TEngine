@@ -13,11 +13,9 @@ namespace Lockstep.Game
     {
         private CollisionSystem _collisionSystem;
 
-        static Dictionary<int, ColliderPrefab> _fabId2ColPrefab = new Dictionary<int, ColliderPrefab>();
-        static Dictionary<int, int> _fabId2Layer = new Dictionary<int, int>();
-
-        static Dictionary<ILPTriggerEventHandler, ColliderProxy> _mono2ColProxy = new ();
-        static Dictionary<ColliderProxy, ILPTriggerEventHandler> _colProxy2Mono = new ();
+        private static Dictionary<int, ColliderPrefab> _entityId2Collider = new Dictionary<int, ColliderPrefab>();
+        private static Dictionary<ILPTriggerEventHandler, ColliderProxy> _mono2ColProxy = new ();
+        private static Dictionary<ColliderProxy, ILPTriggerEventHandler> _colProxy2Mono = new ();
 
         private int[] allTypes = new int[] { 0, 1, 2 };
 
@@ -116,21 +114,19 @@ namespace Lockstep.Game
             return ret;
         }
 
-        public void RigisterPrefabLayer(int entityType, int layer)
+        public void RegisterEntity(int entityId, Entity entity, int layer)
         {
-            _fabId2Layer[entityType] = layer;
-        }
-
-        public void RegisterEntity(int entityType, Entity entity)
-        {
-            ColliderPrefab prefab = null;
-            var fab = World.Instance.LoadPrefab(prefabId);
-            if (!_fabId2ColPrefab.TryGetValue(prefabId, out prefab)) 
+            ColliderPrefab collider = null;
+            if (!_entityId2Collider.TryGetValue(entityId, out collider)) 
             {
-                prefab = CreateColliderPrefab(entity.ColliderData);
+                collider = CreateColliderPrefab(entity.ColliderData);
+            }
+            else
+            {
+                _entityId2Collider[entityId] = collider;
             }
 
-            AttachToColSystem(_fabId2Layer[entityType], prefab,  entity);
+            AttachToColSystem(layer, collider,  entity);
         }
 
         public ColliderPrefab CreateColliderPrefab(ColliderData data)

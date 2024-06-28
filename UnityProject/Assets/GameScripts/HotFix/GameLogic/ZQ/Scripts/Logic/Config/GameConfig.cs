@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 
@@ -40,13 +42,32 @@ namespace Lockstep.Game
     //    }
     //}
 
+    public enum PrefabType
+    {
+        None,
+        Player,
+        Enemy,
+        Spawner,
+    }
+
     public class GameConfig : ScriptableObject 
     {
+        public Dictionary<PrefabType, string> PrefabMap = new Dictionary<PrefabType, string>();
         public string PrefabPath = "Prefabs/";
         public string PlayerPrefabPath = "Prefabs/Player.prefab";
         public string EnemyPrefabPath = "Prefabs/Enemy.prefab";
         public string SpawnerPrefabPath = "Prefabs/Spawner.prefeb";
         public string RecorderFilePath;
         public string DumpStrPath;
+
+        public string GetPrefabPath(PrefabType type)
+        {
+            if (PrefabMap.TryGetValue(type, out var Path))
+            {
+                return Path;
+            }
+
+            return string.Empty;
+        }
     }
 }

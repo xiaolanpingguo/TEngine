@@ -7,6 +7,7 @@ using UnityEngine;
 using TEngine;
 using System.Text;
 using Lockstep.Game;
+using System.Net.Http.Headers;
 
 
 namespace Lockstep.Game
@@ -32,7 +33,7 @@ namespace Lockstep.Game
         private List<IGameSystem> _systems = new List<IGameSystem>();
         private Dictionary<Type, IGameSystem> _systemMap = new();
 
-        private Dictionary<EntityType, GameObject> _id2Prefab = new();
+        private Dictionary<PrefabType, GameObject> _id2Prefab = new();
 
 
         //--
@@ -217,11 +218,12 @@ namespace Lockstep.Game
             entity.EntityId = GenId();
             entity.PrefabId = prefabId;
             entity.LTrans2D.Pos3 = position;
-            GetSystem<PhysicSystem>().RegisterEntity(prefabId, entity);
-
             entity.Start();
             BindView(entity);
             AddEntity(entity);
+
+            EColliderLayer layer = entityType2Layer(typeof(T));
+            GetSystem<PhysicSystem>().RegisterEntity(entity.EntityId, entity, (int)layer);
             return entity;
         }
 
@@ -478,7 +480,7 @@ namespace Lockstep.Game
             return null;
         }
 
-        public GameObject LoadPrefab(EntityType type)
+        public GameObject LoadPrefab(PrefabType type)
         {
             if (_id2Prefab.TryGetValue(type, out var val))
             {
@@ -486,44 +488,14 @@ namespace Lockstep.Game
             }
 
             GameConfig gameConfig = GameConfigSingleton.Instance.GameConfig;
-            string prefabPath = "";
-            if (type == EntityType.Player) 
-            {
-                prefabPath = gameConfig.PlayerPrefabPath;
-            }
-            else if (type == EntityType.Enemy)
-            {
-                prefabPath = gameConfig.EnemyPrefabPath;
-            }
-            else if (type == EntityType.Spawner)
-            {
-                prefabPath = gameConfig.SpawnerPrefabPath;
-            }
-            else
+            string prefabPath = gameConfig.GetPrefabPath(type);
+            if (string.IsNullOrEmpty(prefabPath)) 
             {
                 return null;
             }
-            //if (id >= _spawnerPrefabIdBegin)
-            //{
-            //    SpawnerConfig spawnerConfig = GameConfigSingleton.Instance.SpawnerConfig;
-            //    return _config.GetSpawnerConfig(id - _spawnerPrefabIdBegin);
-            //}
-            //if (id >= 10)
-            //{
-            //    return _config.GetEnemyConfig(id - 10);
-            //}
-
-            //var config = GameConfigSingleton.Instance.GetEntityConfig(id);
-            //if (string.IsNullOrEmpty(config.prefabPath))
-            //{
-            //    return null;
-            //}
 
             var prefab = (GameObject)Resources.Load(prefabPath);
             _id2Prefab[type] = prefab;
-
-            EColliderLayer layer = (type == EntityType.Player) ? EColliderLayer.Player : EColliderLayer.Enemy;
-            GetSystem<PhysicSystem>().RigisterPrefabLayer((int)type, (int)layer);
             return prefab;
         }
 
@@ -531,6 +503,8 @@ namespace Lockstep.Game
         {
             if (oldEntity != null)
             {
+                //PrefabType prefabType = GetPrefabTypeByEntity(oldEntity);
+                //if ()
                 if (oldEntity.PrefabId == entity.PrefabId)
                 {
                     entity.UserData = oldEntity.UserData;
@@ -548,7 +522,8 @@ namespace Lockstep.Game
             }
             else
             {
-                var prefab = World.Instance.LoadPrefab(entity.PrefabId);
+                PrefabType prefabType = GetPrefabTypeByEntity(entity);
+                var prefab = World.Instance.LoadPrefab(prefabType);
                 if (prefab == null)
                 {
                     return;
@@ -574,6 +549,43 @@ namespace Lockstep.Game
         public void UnbindView(Entity entity)
         {
             entity.OnRollbackDestroy();
+        }
+
+        EColliderLayer entityType2Layer(Type type)
+        {
+            if (type == typeof(Player))
+            {
+                return EColliderLayer.Player;
+            }
+            else if (type == typeof(Enemy)) 
+            {
+                return EColliderLayer.Enemy;
+            }
+            else
+            {
+                return EColliderLayer.Static;
+            }
+        }
+
+        PrefabType GetPrefabTypeByEntity(Entity entity)
+        {
+            Type type = entity.GetType();
+            if (type == typeof(Player))
+            {
+                return PrefabType.Player;
+            }
+            else if (type == typeof(Enemy))
+            {
+                return PrefabType.Enemy;
+            }
+            else if (type == typeof(Spawner))
+            {
+                return PrefabType.Spawner;
+            }
+            else
+            {
+                return PrefabType.None;
+            }
         }
     }
 }
