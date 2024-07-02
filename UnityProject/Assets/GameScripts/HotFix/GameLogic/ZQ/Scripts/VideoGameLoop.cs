@@ -145,13 +145,13 @@ namespace Lockstep.Game
 
         private void ProcessInputQueue(ServerFrame frame)
         {
-            var playerInputs = World.Instance.GetPlayers().Select(a => a.input).ToArray();
+            var playerInputs = _world.GetPlayers().Select(a => a.input).ToArray();
             foreach (var playerInput in playerInputs)
             {
                 playerInput.Reset();
             }
 
-            Player[] players = World.Instance.GetPlayers();
+            Player[] players = _world.GetPlayers();
             var inputs = frame.Inputs;
             foreach (var input in inputs)
             {

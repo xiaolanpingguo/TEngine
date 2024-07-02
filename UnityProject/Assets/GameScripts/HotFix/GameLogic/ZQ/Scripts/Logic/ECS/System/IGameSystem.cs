@@ -6,8 +6,10 @@ namespace Lockstep.Game
 {
     public class IGameSystem
     {
+        public World World;
         public bool Enable = true;
 
+        public IGameSystem(World world) {  World = world; }
         public virtual void Init() { }
         public virtual void Update(LFloat deltaTime) { }
         public virtual void Destroy() { }

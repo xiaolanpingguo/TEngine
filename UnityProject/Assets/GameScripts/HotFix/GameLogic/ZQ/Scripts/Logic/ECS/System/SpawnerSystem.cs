@@ -1,24 +1,25 @@
 using Lockstep.Framework;
+using System.Collections.Generic;
 
 
 namespace Lockstep.Game
 {
     public class SpawnerSystem : IGameSystem
     {
-        private Spawner[] _spawners => World.Instance.GetSpawners();
+        private Spawner[] _spawners => World.GetSpawners();
+
+        public SpawnerSystem(World world) : base(world) { }
 
         public override void Init()
         {
-            for (int i = 0; i < 3; i++)
+            var config = GameConfigSingleton.Instance.SpawnerConfig;
+            foreach(var data in config.Spawners) 
             {
-                var configId = 100 + i;
-                var config = GameConfigSingleton.Instance.SpawnerConfig;
-                World.Instance.CreateEntity<Spawner>(configId, config.spawnPoint);
-            }
-
-            foreach (var spawner in _spawners)
-            {
-                spawner.Start();
+                CEnemySpawner enemySpawner = new CEnemySpawner();
+                enemySpawner.SpawnPoint = data.spawnPoint;
+                enemySpawner.SpawnTime = data.spawnTime;
+                List<IComponent> components = new List<IComponent>() { enemySpawner };
+                World.CreateEntity<Spawner>(data.spawnPoint, components);
             }
         }
 

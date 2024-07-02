@@ -6,6 +6,8 @@ namespace Lockstep.Game
 {
     public class RandomSystem : IGameSystem
     {
+        public RandomSystem(World world) : base(world) { }
+
         public class RandomCmd : ICommand
         {
             public ulong RandSeed;

@@ -27,23 +27,18 @@ namespace Lockstep.Game
             _health.MaxHealth = enemyConfig.MaxHealth;
             _health.OnDamage += OnTakeDamage;
 
-            RegisterComponent(_aiontroller);
-            RegisterComponent(_health);
+            AddComponent(_aiontroller);
+            AddComponent(_health);
             base.Start();
         }
 
         public void OnTakeDamage(Entity attacker, int amount, LVector3 hitPoint)
         {
-            if (_health.IsDead)
-            {
-                return;
-            }
-
             EntityView?.OnTakeDamage(amount, hitPoint);
             if (_health.IsDead)
             {
                 EntityView?.OnDead();
-                PhysicSystem.Instance.RemoveCollider(this);
+                World.Instance.GetSystem<PhysicSystem>().RemoveCollider(this);
                 World.Instance.DestroyEntity(this);
             }
         }

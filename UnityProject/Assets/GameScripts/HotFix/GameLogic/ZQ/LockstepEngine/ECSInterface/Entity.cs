@@ -19,12 +19,6 @@ namespace Lockstep.Framework
             set{ EntityBase.EntityId = value; }
         }
 
-        public int PrefabId
-        {
-            get { return EntityBase.PrefabId; }
-            set {  EntityBase.PrefabId = value; }
-        }
-
         public object UserData;
 
         public CEntityBase EntityBase = null;
@@ -39,10 +33,10 @@ namespace Lockstep.Framework
             Rigidbody = new CRigidbody();
             Rigidbody.BindRef(LTrans2D);
             ColliderData = new ColliderData();
-            RegisterComponent(EntityBase);
-            RegisterComponent(LTrans2D);
-            RegisterComponent(Rigidbody);
-            RegisterComponent(ColliderData);
+            AddComponent(EntityBase);
+            AddComponent(LTrans2D);
+            AddComponent(Rigidbody);
+            AddComponent(ColliderData);
         }
 
         public virtual void Start()
@@ -67,6 +61,18 @@ namespace Lockstep.Framework
             {
                 comp.Destroy();
             }
+        }
+
+        public void AddComponent(IComponent comp)
+        {
+            Type type = comp.GetType();
+            if (_componentsMap.ContainsKey(type))
+            {
+                return;
+            }
+
+            _componentsMap.Add(type, comp);
+            _components.Add(comp);
         }
 
         public T GetComponent<T>() where T : IComponent
@@ -129,18 +135,6 @@ namespace Lockstep.Framework
 
         public virtual void OnRollbackDestroy()
         {
-        }
-
-        protected void RegisterComponent(IComponent comp)
-        {
-            Type type = comp.GetType();
-            if (_componentsMap.ContainsKey(type))
-            {
-                return;
-            }
-
-            _componentsMap.Add(type, comp);
-            _components.Add(comp);
         }
     }
 }

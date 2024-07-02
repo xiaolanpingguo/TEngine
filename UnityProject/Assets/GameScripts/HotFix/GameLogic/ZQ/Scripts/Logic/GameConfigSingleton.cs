@@ -13,7 +13,7 @@ namespace Lockstep.Game
         public CollisionConfig CollisionConfig { get; private set; }
         public SkillConfig SkillConfig { get; private set; }
 
-        private string _configPath = "GameConfig";
+        private string _configPath = "Config";
         private string _gameConfigName = "GameConfig";
         private string _enemyConfigName = "EnemyConfig";
         private string _playerConfigName = "PlayerConfig";

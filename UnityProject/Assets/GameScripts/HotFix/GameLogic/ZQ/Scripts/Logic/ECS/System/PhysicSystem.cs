@@ -17,7 +17,7 @@ namespace Lockstep.Game
         private static Dictionary<ILPTriggerEventHandler, ColliderProxy> _mono2ColProxy = new ();
         private static Dictionary<ColliderProxy, ILPTriggerEventHandler> _colProxy2Mono = new ();
 
-        private int[] allTypes = new int[] { 0, 1, 2 };
+        private int[] _allTypes = new int[] { 0, 1, 2 };
 
         public CollisionConfig config;
         public bool[] collisionMatrix => config.collisionMatrix;
@@ -27,6 +27,8 @@ namespace Lockstep.Game
         public LFloat loosenessval => config.loosenessval;
 
         public int showTreeId = 0;
+
+        public PhysicSystem(World world) : base(world) { }
 
         public override void Init()
         {
@@ -39,7 +41,7 @@ namespace Lockstep.Game
                 loosenessval = loosenessval
             };
 
-            _collisionSystem.Start(collisionMatrix, allTypes);
+            _collisionSystem.Start(collisionMatrix, _allTypes);
             _collisionSystem.funcGlobalOnTriggerEvent += GlobalOnTriggerEvent;
         }
 

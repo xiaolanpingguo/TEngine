@@ -216,7 +216,7 @@ namespace Lockstep.Game
         private void Simulate(ServerFrame frame)
         {
             var hash = _hashHelper.CalcHash();
-            World.Instance.Hash = hash;
+            _world.Hash = hash;
             DumpFrame(hash);
             hash = _hashHelper.CalcHash(true);
             _hashHelper.SetHash(_world.Tick, hash);
@@ -230,7 +230,7 @@ namespace Lockstep.Game
         private void Predict(ServerFrame frame)
         {
             var hash = _hashHelper.CalcHash();
-            World.Instance.Hash = hash;
+            _world.Hash = hash;
             DumpFrame(hash);
             hash = _hashHelper.CalcHash(true);
             _hashHelper.SetHash(_world.Tick, hash);
@@ -244,7 +244,7 @@ namespace Lockstep.Game
         private bool RollbackTo(int tick, int maxContinueServerTick, bool isNeedClear = true)
         {
             _world.RollbackTo(tick, maxContinueServerTick, isNeedClear);
-            var hash = World.Instance.Hash;
+            var hash = _world.Hash;
             var curHash = _hashHelper.CalcHash();
             if (hash != curHash)
             {
@@ -280,13 +280,13 @@ namespace Lockstep.Game
 
         private void ProcessInputQueue(ServerFrame frame)
         {
-            var playerInputs = World.Instance.GetPlayers().Select(a => a.input).ToArray();
+            var playerInputs = _world.GetPlayers().Select(a => a.input).ToArray();
             foreach (var playerInput in playerInputs)
             {
                 playerInput.Reset();
             }
 
-            Player[] players = World.Instance.GetPlayers();
+            Player[] players = _world.GetPlayers();
             var inputs = frame.Inputs;
             foreach (var input in inputs)
             {

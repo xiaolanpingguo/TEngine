@@ -21,9 +21,21 @@ namespace Lockstep.Game
 
     public class World
     {
-        private static int _spawnerPrefabIdBegin = 100;
-        private static int _enemyPrefabIdBegin = 10;
-        private static int _playerPrefabIdBegin = 0;
+        internal struct GameState
+        {
+            public LFloat RemainTime;
+            public LFloat DeltaTime;
+            public int CurEnemyCount;
+            public int CurEnemyId;
+
+            public int GetHash(ref int idx)
+            {
+                int hash = 1;
+                hash += CurEnemyCount.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+                hash += CurEnemyId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
+                return hash;
+            }
+        }
 
         public static World Instance { get; private set; }
         public bool IsPause { get; set; }
@@ -34,28 +46,6 @@ namespace Lockstep.Game
         private Dictionary<Type, IGameSystem> _systemMap = new();
 
         private Dictionary<PrefabType, GameObject> _id2Prefab = new();
-
-
-        //--
-
-
-        internal struct GameState
-        {
-            public LFloat RemainTime;
-            public LFloat DeltaTime;
-            public int MaxEnemyCount;
-            public int CurEnemyCount;
-            public int CurEnemyId;
-
-            public int GetHash(ref int idx)
-            {
-                int hash = 1;
-                hash += CurEnemyCount.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-                hash += MaxEnemyCount.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-                hash += CurEnemyId.GetHash(ref idx) * PrimerLUT.GetPrimer(idx++);
-                return hash;
-            }
-        }
 
         private Dictionary<int, GameState> _tick2State = new Dictionary<int, GameState>();
         private GameState _curGameState;
@@ -78,12 +68,6 @@ namespace Lockstep.Game
         {
             get => _curGameState.DeltaTime;
             set => _curGameState.DeltaTime = value;
-        }
-
-        public int MaxEnemyCount
-        {
-            get => _curGameState.MaxEnemyCount;
-            set => _curGameState.MaxEnemyCount = value;
         }
 
         public int CurEnemyCount
@@ -212,12 +196,19 @@ namespace Lockstep.Game
             return null;
         }
 
-        public T CreateEntity<T>(int prefabId, LVector3 position) where T : Entity, new()
+        public T CreateEntity<T>(LVector3 position, List<IComponent> components = null) where T : Entity, new()
         {
             var entity = new T();
             entity.EntityId = GenId();
-            entity.PrefabId = prefabId;
             entity.LTrans2D.Pos3 = position;
+
+            if (components != null)
+            {
+                foreach(var c in components)
+                {
+                    entity.AddComponent(c);
+                }
+            }
             entity.Start();
             BindView(entity);
             AddEntity(entity);
@@ -226,52 +217,6 @@ namespace Lockstep.Game
             GetSystem<PhysicSystem>().RegisterEntity(entity.EntityId, entity, (int)layer);
             return entity;
         }
-
-        //public Player CreatePlayer(int prefabId, LVector3 position)
-        //{
-        //    var entity = new Player();
-        //    PlayerConfig playerConfig = GameConfigSingleton.Instance.PlayerConfig;
-        //    GameConfigSingleton.Instance.GetEntityConfig(prefabId)?.CopyTo(entity);
-        //    entity.EntityId = GenId();
-        //    entity.PrefabId = prefabId;
-        //    entity.LTrans2D.Pos3 = position;
-        //    PhysicSystem.Instance.RegisterEntity(prefabId, entity);
-
-        //    entity.Start();
-        //    BindView(entity);
-        //    AddEntity(entity);
-        //    return entity;
-        //}
-
-        //public T CreateEntity<T>(int prefabId, LVector3 position) where T : Entity, new()
-        //{
-        //    var entity = new T();
-        //    GameConfigSingleton.Instance.GetEntityConfig(prefabId)?.CopyTo(entity);
-        //    entity.EntityId = GenId();
-        //    entity.PrefabId = prefabId;
-        //    entity.LTrans2D.Pos3 = position;
-        //    PhysicSystem.Instance.RegisterEntity(prefabId, entity);
-
-        //    entity.Start();
-        //    BindView(entity);
-        //    AddEntity(entity);
-        //    return entity;
-        //}
-
-        //public T CreateEntity<T>(int prefabId, LVector3 position) where T : Entity, new()
-        //{
-        //    var entity = new T();
-        //    GameConfigSingleton.Instance.GetEntityConfig(prefabId)?.CopyTo(entity);
-        //    entity.EntityId = GenId();
-        //    entity.PrefabId = prefabId;
-        //    entity.LTrans2D.Pos3 = position;
-        //    PhysicSystem.Instance.RegisterEntity(prefabId, entity);
-
-        //    entity.Start();
-        //    BindView(entity);
-        //    AddEntity(entity);
-        //    return entity;
-        //}
 
         public void DestroyEntity(Entity entity)
         {
@@ -372,9 +317,6 @@ namespace Lockstep.Game
             return _entityIdCounter++;
         }
 
-        //--
-
-
         public void RollbackTo(int tick, int maxContinueServerTick, bool isNeedClear = true)
         {
             if (tick < 0)
@@ -396,7 +338,6 @@ namespace Lockstep.Game
         public void Init(int localPlayerId)
         {
             Instance = this;
-            MaxEnemyCount = 10;
             RegisterSystems();
 
             foreach (var sys in _systems)
@@ -408,9 +349,8 @@ namespace Lockstep.Game
             int playerCount = 1;
             for (int i = 0; i < playerCount; i++)
             {
-                var PrefabId = 0; //TODO
-                var initPos = LVector2.zero; //TODO
-                var player = CreateEntity<Player>(PrefabId, initPos);
+                var initPos = LVector2.zero;
+                var player = CreateEntity<Player>(initPos);
             }
 
             var allPlayers = GetPlayers();
@@ -451,10 +391,10 @@ namespace Lockstep.Game
 
         public void RegisterSystems()
         {
-            RegisterSystem(new PhysicSystem());
-            RegisterSystem(new SpawnerSystem());
-            RegisterSystem(new PlayerSystem());
-            RegisterSystem(new EnemySystem());
+            RegisterSystem(new PhysicSystem(this));
+            RegisterSystem(new SpawnerSystem(this));
+            RegisterSystem(new PlayerSystem(this));
+            RegisterSystem(new EnemySystem(this));
         }
 
         public void RegisterSystem(IGameSystem sys)
@@ -495,6 +435,11 @@ namespace Lockstep.Game
             }
 
             var prefab = (GameObject)Resources.Load(prefabPath);
+            if (prefab == null)
+            {
+                return null;
+            }
+
             _id2Prefab[type] = prefab;
             return prefab;
         }
@@ -503,9 +448,7 @@ namespace Lockstep.Game
         {
             if (oldEntity != null)
             {
-                //PrefabType prefabType = GetPrefabTypeByEntity(oldEntity);
-                //if ()
-                if (oldEntity.PrefabId == entity.PrefabId)
+                if (oldEntity.EntityId == entity.EntityId)
                 {
                     entity.UserData = oldEntity.UserData;
                     var obj = (oldEntity.UserData as GameObject).gameObject;
@@ -523,7 +466,7 @@ namespace Lockstep.Game
             else
             {
                 PrefabType prefabType = GetPrefabTypeByEntity(entity);
-                var prefab = World.Instance.LoadPrefab(prefabType);
+                var prefab = LoadPrefab(prefabType);
                 if (prefab == null)
                 {
                     return;

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec541500e90b53b4ea23126cb7e3e175, type: 3}
+  m_Name: CollisionConfig
+  m_EditorClassIdentifier: 
+  pos:
+    _x: 0
+    _y: 0
+    _z: 0
+  worldSize:
+    _val: 60000
+  minNodeSize:
+    _val: 1000
+  loosenessval:
+    _val: 1250
+  percent:
+    _val: 100
+  count: 100
+  showTreeId: 0
+  scrollPos: {x: 0, y: 0}
+  isShow: 1
+  collisionMatrix: 000000000000000000

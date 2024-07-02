@@ -8,7 +8,7 @@ namespace Lockstep.Game
     {
         public int MaxHealth = 100;
         public int Damage = 10;
-        public LFloat MoveSpd = 2;
-        public LFloat TurnSpd = 150;
+        public LFloat MoveSpd = 5;
+        public LFloat TurnSpd = 360;
     }
 }

@@ -151,12 +151,12 @@ namespace Lockstep.Game
                 if (col.radius > 0)
                 {
                     //circle
-                    PhysicSystem.QueryRegion(_targetLayer, Entity.LTrans2D.TransformPoint(col.pos), col.radius, _OnTriggerEnter);
+                    World.Instance.GetSystem<PhysicSystem>().QueryRegion(_targetLayer, Entity.LTrans2D.TransformPoint(col.pos), col.radius, _OnTriggerEnter);
                 }
                 else
                 {
                     //aabb
-                    PhysicSystem.QueryRegion(_targetLayer, Entity.LTrans2D.TransformPoint(col.pos), col.size, Entity.LTrans2D.forward, _OnTriggerEnter);
+                    World.Instance.GetSystem<PhysicSystem>().QueryRegion(_targetLayer, Entity.LTrans2D.TransformPoint(col.pos), col.size, Entity.LTrans2D.forward, _OnTriggerEnter);
                 }
             }
             else
