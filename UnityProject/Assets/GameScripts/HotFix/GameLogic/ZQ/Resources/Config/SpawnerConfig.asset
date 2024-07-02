@@ -14,19 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Spawners:
   - spawnTime:
-      _val: 1000
+      _val: 500
     spawnPoint:
       _x: 5000
       _y: 0
       _z: 0
   - spawnTime:
-      _val: 1500
+      _val: 1000
     spawnPoint:
       _x: 5000
       _y: 0
       _z: 5000
   - spawnTime:
-      _val: 2000
+      _val: 1500
     spawnPoint:
       _x: 0
       _y: 0

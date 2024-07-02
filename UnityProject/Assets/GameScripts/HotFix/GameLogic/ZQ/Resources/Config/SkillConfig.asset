@@ -19,3 +19,172 @@ MonoBehaviour:
   targetLayer: 1
   maxPartTime:
     _val: 2598
+  parts:
+  - DebugShow: 1
+    moveSpd:
+      _val: 0
+    startFrame:
+      _val: 300
+    collider:
+      pos:
+        _x: 0
+        _y: 0
+      size:
+        _x: 4000
+        _y: 3000
+      radius:
+        _val: 3500
+      deg:
+        _val: 180000
+      maxY:
+        _val: 0
+    impulseForce:
+      _x: 0
+      _y: 6000
+      _z: 0
+    needForce: 1
+    isResetForce: 0
+    interval:
+      _val: 300
+    otherCount: 0
+    damage: 10
+  - DebugShow: 0
+    moveSpd:
+      _val: 0
+    startFrame:
+      _val: 569
+    collider:
+      pos:
+        _x: 0
+        _y: 1000
+      size:
+        _x: 4000
+        _y: 3000
+      radius:
+        _val: 3500
+      deg:
+        _val: 180000
+      maxY:
+        _val: 0
+    impulseForce:
+      _x: 0
+      _y: 3000
+      _z: 0
+    needForce: 0
+    isResetForce: 1
+    interval:
+      _val: 300
+    otherCount: 0
+    damage: 15
+  - DebugShow: 0
+    moveSpd:
+      _val: 0
+    startFrame:
+      _val: 768
+    collider:
+      pos:
+        _x: 0
+        _y: 1000
+      size:
+        _x: 4000
+        _y: 5000
+      radius:
+        _val: 3500
+      deg:
+        _val: 180000
+      maxY:
+        _val: 0
+    impulseForce:
+      _x: 0
+      _y: 3000
+      _z: 0
+    needForce: 0
+    isResetForce: 1
+    interval:
+      _val: 300
+    otherCount: 0
+    damage: 10
+  - DebugShow: 0
+    moveSpd:
+      _val: 0
+    startFrame:
+      _val: 870
+    collider:
+      pos:
+        _x: 0
+        _y: 1000
+      size:
+        _x: 4000
+        _y: 5000
+      radius:
+        _val: 3500
+      deg:
+        _val: 180000
+      maxY:
+        _val: 0
+    impulseForce:
+      _x: 0
+      _y: 3000
+      _z: 0
+    needForce: 0
+    isResetForce: 1
+    interval:
+      _val: 300
+    otherCount: 0
+    damage: 10
+  - DebugShow: 0
+    moveSpd:
+      _val: 0
+    startFrame:
+      _val: 136
+    collider:
+      pos:
+        _x: 0
+        _y: 1000
+      size:
+        _x: 4000
+        _y: 5000
+      radius:
+        _val: 3500
+      deg:
+        _val: 180000
+      maxY:
+        _val: 0
+    impulseForce:
+      _x: 0
+      _y: 3000
+      _z: 0
+    needForce: 0
+    isResetForce: 1
+    interval:
+      _val: 300
+    otherCount: 0
+    damage: 15
+  - DebugShow: 0
+    moveSpd:
+      _val: 0
+    startFrame:
+      _val: 1289
+    collider:
+      pos:
+        _x: 0
+        _y: 1000
+      size:
+        _x: 4000
+        _y: 5000
+      radius:
+        _val: 4000
+      deg:
+        _val: 180000
+      maxY:
+        _val: 0
+    impulseForce:
+      _x: 0
+      _y: 0
+      _z: 7000
+    needForce: 1
+    isResetForce: 0
+    interval:
+      _val: 300
+    otherCount: 0
+    damage: 30

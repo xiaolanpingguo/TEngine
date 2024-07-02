@@ -6,6 +6,7 @@ using Lockstep.Framework;
 
 namespace Lockstep.Game
 {
+    [Serializable]
     public class SkillColliderInfo
     {
         public LVector2 pos;
@@ -17,6 +18,7 @@ namespace Lockstep.Game
         public bool IsCircle => radius > 0;
     }
 
+    [Serializable]
     public class SkillPart
     {
         public bool DebugShow;
