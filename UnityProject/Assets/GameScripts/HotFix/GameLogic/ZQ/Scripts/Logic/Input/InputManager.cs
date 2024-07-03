@@ -8,21 +8,56 @@ using UnityEngine.Windows;
 
 namespace Lockstep.Game
 {
-    public struct PlayerCommands
+    public struct PlayerCommand
     {
+        public static readonly PlayerCommand Empty = new PlayerCommand();
+
+        [System.Flags]
+        public enum Button : uint
+        {
+            None = 0,
+            Jump = 1 << 0,
+            Skill1 = 1 << 1,
+            Skill2 = 1 << 2,
+        }
+
+        public readonly bool IsSet(Button button)
+        {
+            return (ButtonField & (uint)button) > 0;
+        }
+
+        public void Or(Button button, bool val)
+        {
+            if (val)
+            {
+                ButtonField |= (uint)button;
+            }
+        }
+
+        public void Set(Button button, bool val)
+        {
+            if (val)
+            {
+                ButtonField |= (uint)button;
+            }
+            else
+            {
+                ButtonField &= ~(uint)button;
+            }
+        }
+
+        public const int k_buttonCount = sizeof(Button) * 8;
+
+        public uint ButtonField;
         public LVector2 inputUV;
-        public byte skillId;
-        public bool isJump;
-        public byte ActorId;
+        public byte EntityId;
         public int Tick;
         public bool IsMiss;
 
         public void Reset()
         {
             inputUV = LVector2.zero;
-            skillId = 0;
-            isJump = false;
-            ActorId = 0;
+            EntityId = 0;
             Tick = -1;
             IsMiss = false;
         }
@@ -30,7 +65,7 @@ namespace Lockstep.Game
 
     public class InputManager
     {
-        public static PlayerCommands CurrentInput = new PlayerCommands();
+        public static PlayerCommand CurrentInput = new PlayerCommand();
 
         private static InputActions.GameplayMapActions _inputActionsMap;
 
@@ -51,16 +86,16 @@ namespace Lockstep.Game
 
             if (_inputActionsMap.Jump.IsPressed())
             {
-                CurrentInput.isJump = true;
+                CurrentInput.Set(PlayerCommand.Button.Jump, true);
             }
 
             if (_inputActionsMap.Skill1.IsPressed())
             {
-                CurrentInput.skillId++;
+                CurrentInput.Set(PlayerCommand.Button.Skill1, true);
             }
             if (_inputActionsMap.Skill2.IsPressed())
             {
-                CurrentInput.skillId++;
+                CurrentInput.Set(PlayerCommand.Button.Skill2, true);
             }
         }
     }

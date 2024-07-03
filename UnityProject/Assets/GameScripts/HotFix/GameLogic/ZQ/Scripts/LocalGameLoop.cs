@@ -3,6 +3,8 @@ using GameBase;
 using TEngine;
 using UnityEngine;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using UnityEngine.Windows;
 
 
 namespace Lockstep.Game
@@ -18,14 +20,6 @@ namespace Lockstep.Game
         private World _world;
         private FrameBuffer _frameBuffer;
 
-        // game status
-        public byte LocalActorId { get; set; }
-        private byte[] _allActors;
-        public bool IsRunning { get; set; }
-
-        // frame count that need predict(TODO should change according current network's delay)
-        public int FramePredictCount = 0;
-
         // game init timestamp
         public long _gameStartTimestampMs = -1;
 
@@ -33,6 +27,8 @@ namespace Lockstep.Game
         public int TargetTick;
 
         // input presend
+        private PlayerCommand _receivedPlayerCommand;
+        private bool _receivedInput = false;
         public int PreSendInputCount = 1;
         public int inputTick = 0;
         public int inputTargetTick => _tickSinceGameStart + PreSendInputCount;
@@ -46,86 +42,84 @@ namespace Lockstep.Game
             InputManager.Init();
         }
 
-        public void DoDestroy()
+
+        public void CreateGame()
         {
-            IsRunning = false;
-        }
-
-        public void CreateGame(byte localActorId, byte actorCount)
-        {
-            if (IsRunning)
-            {
-                Log.Error("Already started!");
-                return;
-            }
-            IsRunning = true;
-
-            _allActors = new byte[actorCount];
-            for (byte i = 0; i < actorCount; i++)
-            {
-                _allActors[i] = i;
-            }
-
-            _world.Init(LocalActorId);
+            byte localPlayerId = 0;
+            _world.Init(localPlayerId);
             _gameStartTimestampMs = LTime.realtimeSinceStartupMS;
             Log.Info($"Game Start");
         }
 
         public void Update()
         {
-            if (!IsRunning)
-            {
-                return;
-            }
-
             _tickSinceGameStart = (int)((LTime.realtimeSinceStartupMS - _gameStartTimestampMs) / NetworkDefine.UPDATE_DELTATIME);
 
             InputManager.Update();
+            UpdateMockNetwork();
 
             float fDeltaTime = Time.deltaTime;
             _frameBuffer.Update(fDeltaTime);
 
-            TargetTick = _tickSinceGameStart + FramePredictCount;
+            TargetTick = _tickSinceGameStart;
             while (_world.Tick < TargetTick)
             {
-                FramePredictCount = 0;
-                var input = InputManager.CurrentInput;
-                input.Tick = _world.Tick;
-                input.ActorId = LocalActorId;
-                var frame = new ServerFrame()
-                {
-                    tick = _world.Tick,
-                    Inputs = new PlayerCommands[] { input }
-                };
-                _frameBuffer.PushLocalFrame(frame);
-                _frameBuffer.PushServerFrames(new ServerFrame[] { frame });
-                Simulate(_frameBuffer.GetFrame(_world.Tick));
+                PushFrame();
+                ProcessInputQueue();
+                _world.Update();
+                var tick = _world.Tick;
+                _frameBuffer.SetClientTick(tick);
             }
         }
 
-        private void Simulate(ServerFrame frame)
+        private void UpdateMockNetwork()
         {
-            ProcessInputQueue(frame);
-            _world.Update();
-            var tick = _world.Tick;
-            _frameBuffer.SetClientTick(tick);
+            var input = InputManager.CurrentInput;
+            input.Tick = _world.Tick;
+            input.EntityId = _world.LocalPlayerId;
+
+            _receivedPlayerCommand = input;
+            _receivedInput = true;
         }
 
-        private void ProcessInputQueue(ServerFrame frame)
+        private void PushFrame()
         {
-            var playerInputs = _world.GetPlayers().Select(a => a.input).ToArray();
-            foreach (var playerInput in playerInputs)
+            var input = GetPlayerInput();
+            var frame = new ServerFrame()
             {
-                playerInput.Reset();
+                tick = _world.Tick,
+                Inputs = new PlayerCommand[] { input }
+            };
+            _frameBuffer.PushLocalFrame(frame);
+            _frameBuffer.PushServerFrames(new ServerFrame[] { frame });
+        }
+
+        private PlayerCommand GetPlayerInput()
+        {
+            return _receivedPlayerCommand;
+        }
+
+        private void ProcessInputQueue()
+        {
+            ServerFrame frame = _frameBuffer.GetFrame(_world.Tick);
+            if (frame == null)
+            {
+                return;
             }
 
-            Player[] players = _world.GetPlayers();
             var inputs = frame.Inputs;
             foreach (var input in inputs)
             {
-                if (input.ActorId >= playerInputs.Length) continue;
-                //_playerInputs[input.ActorId] = input;
-                players[input.ActorId].input = input;
+                if (input.EntityId >= _world.PlayerInputs.Length)
+                {
+                    continue;
+                }
+
+                if (input.inputUV.x >0 || input.inputUV.y >0)
+                {
+                   // Debug.Log("dawdawdawd");
+                }
+                _world.PlayerInputs[input.EntityId] = input;
             }
         }
     }

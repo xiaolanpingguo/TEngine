@@ -12,9 +12,6 @@ namespace Lockstep.Game
     {
         private bool _hasReachTarget = false;
 
-        public Player player => (Player)Entity;
-        public PlayerCommands input => player.input;
-
         public LFloat MoveSpd = 5;
         public LFloat TurnSpd = 360;
 
@@ -33,6 +30,7 @@ namespace Lockstep.Game
                 return;
             }
 
+            PlayerCommand input = World.Instance.GetPlayerInput((byte)Entity.EntityId);
             var needChase = input.inputUV.sqrMagnitude > new LFloat(true, 10);
             if (needChase)
             {

@@ -10,8 +10,6 @@ namespace Lockstep.Game
     [Serializable]
     public class Player : Entity
     {
-        public PlayerCommands input = new PlayerCommands();
-
         private CCharacterController _characterController = null;
         private CSkill _skill= null;
         private CHealth _health = null;
@@ -43,10 +41,6 @@ namespace Lockstep.Game
         public override void Update(LFloat deltaTime)
         {
             base.Update(deltaTime);
-            if (input.skillId != 0)
-            {
-                _skill.Fire();
-            }
         }
 
         public void StopSkill()

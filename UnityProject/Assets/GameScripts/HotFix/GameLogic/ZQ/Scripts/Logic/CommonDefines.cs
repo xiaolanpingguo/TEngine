@@ -7,7 +7,7 @@ namespace Lockstep.Game
     public class ServerFrame
     {
         public int tick;
-        public PlayerCommands[] Inputs;
+        public PlayerCommand[] Inputs;
     }
 
     public class MutilFrames1

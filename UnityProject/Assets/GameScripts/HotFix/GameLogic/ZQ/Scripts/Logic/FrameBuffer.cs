@@ -163,7 +163,6 @@ namespace Lockstep.Game
             for (int i = 0; i < count; i++)
             {
                 var data = frames[i];
-                //Debug.Log("PushServerFrames" + data.tick);
                 if (_tick2SendTimestamp.TryGetValue(data.tick, out var sendTick))
                 {
                     var delay = LTime.realtimeSinceStartupMS - sendTick;
@@ -184,11 +183,10 @@ namespace Lockstep.Game
 
                 if (data.tick >= NextTickToCheck + _maxServerOverFrameCount - 1)
                 {
-                    //to avoid ringBuffer override the frame that have not been checked
+                    // to avoid ringBuffer override the frame that have not been checked
                     return;
                 }
 
-                //Debug.Log("PushServerFramesSucc" + data.tick);
                 if (data.tick > MaxServerTickInBuffer)
                 {
                     MaxServerTickInBuffer = data.tick;
@@ -284,7 +282,7 @@ namespace Lockstep.Game
             //}
         }
 
-        public void SendInput(PlayerCommands input)
+        public void SendInput(PlayerCommand input)
         {
             _tick2SendTimestamp[input.Tick] = LTime.realtimeSinceStartupMS;
 #if DEBUG_SHOW_INPUT

@@ -193,9 +193,9 @@ namespace Lockstep.Game
         {
             var input = InputManager.CurrentInput;
             input.Tick = curTick;
-            input.ActorId = LocalActorId;
+            input.EntityId = LocalActorId;
             var cFrame = new ServerFrame();
-            var inputs = new PlayerCommands[_allActors.Length];
+            var inputs = new PlayerCommand[_allActors.Length];
             inputs[LocalActorId] = input;
             cFrame.Inputs = inputs;
             cFrame.tick = curTick;
@@ -280,20 +280,20 @@ namespace Lockstep.Game
 
         private void ProcessInputQueue(ServerFrame frame)
         {
-            var playerInputs = _world.GetPlayers().Select(a => a.input).ToArray();
-            foreach (var playerInput in playerInputs)
-            {
-                playerInput.Reset();
-            }
+            //var playerInputs = _world.GetPlayers().Select(a => a.input).ToArray();
+            //foreach (var playerInput in playerInputs)
+            //{
+            //    playerInput.Reset();
+            //}
 
-            Player[] players = _world.GetPlayers();
-            var inputs = frame.Inputs;
-            foreach (var input in inputs)
-            {
-                if (input.ActorId >= playerInputs.Length) continue;
-                //_playerInputs[input.ActorId] = input;
-                players[input.ActorId].input = input;
-            }
+            //Player[] players = _world.GetPlayers();
+            //var inputs = frame.Inputs;
+            //foreach (var input in inputs)
+            //{
+            //   // if (input.EntityId >= playerInputs.Length) continue;
+            //    //_playerInputs[input.ActorId] = input;
+            //   // players[input.EntityId].input = input;
+            //}
         }
 
         private void OnPursuingFrame()

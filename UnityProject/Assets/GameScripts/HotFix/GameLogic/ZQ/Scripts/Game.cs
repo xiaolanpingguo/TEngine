@@ -36,7 +36,7 @@ namespace Lockstep.Game
         {
             if (GameType == GameType.Local) 
             {
-                LocalGameLoop.Instance.CreateGame(0, 1);
+                LocalGameLoop.Instance.CreateGame();
             }
             else if (GameType == GameType.Video)
             {

@@ -6,8 +6,6 @@ using Lockstep.Framework;
 using UnityEngine;
 using TEngine;
 using System.Text;
-using Lockstep.Game;
-using System.Net.Http.Headers;
 
 
 namespace Lockstep.Game
@@ -40,7 +38,9 @@ namespace Lockstep.Game
         public static World Instance { get; private set; }
         public bool IsPause { get; set; }
         public int Tick { get; set; }
-        public static Player MyPlayer;
+        public byte LocalPlayerId;
+        public Player LocalPlayer;
+        public PlayerCommand[] PlayerInputs;
 
         private List<IGameSystem> _systems = new List<IGameSystem>();
         private Dictionary<Type, IGameSystem> _systemMap = new();
@@ -58,6 +58,7 @@ namespace Lockstep.Game
 
         private int _entityIdCounter = 0;
         private Dictionary<int, int> _tick2Id = new Dictionary<int, int>();
+
         public LFloat RemainTime
         {
             get => _curGameState.RemainTime;
@@ -183,7 +184,7 @@ namespace Lockstep.Game
 
         public Spawner[] GetSpawners()
         {
-            return GetEntities<Spawner>().ToArray(); //TODO Cache
+            return GetEntities<Spawner>().ToArray();
         }
 
         public object GetEntity(int id)
@@ -335,9 +336,10 @@ namespace Lockstep.Game
             Tick = tick;
         }
 
-        public void Init(int localPlayerId)
+        public void Init(byte localPlayerId)
         {
             Instance = this;
+            LocalPlayerId = localPlayerId;
             RegisterSystems();
 
             foreach (var sys in _systems)
@@ -351,10 +353,14 @@ namespace Lockstep.Game
             {
                 var initPos = LVector2.zero;
                 var player = CreateEntity<Player>(initPos);
+                if (LocalPlayerId == i)
+                {
+                    LocalPlayer = player;
+                    player.EntityId = LocalPlayerId;
+                }
             }
 
-            var allPlayers = GetPlayers();
-            MyPlayer = allPlayers[localPlayerId];
+            PlayerInputs = new PlayerCommand[playerCount];
         }
 
         public void DoDestroy()
@@ -529,6 +535,16 @@ namespace Lockstep.Game
             {
                 return PrefabType.None;
             }
+        }
+
+        public PlayerCommand GetPlayerInput(byte entityId)
+        {
+            if (entityId >= PlayerInputs.Length)
+            {
+                return PlayerCommand.Empty;
+            }
+
+            return PlayerInputs[entityId];
         }
     }
 }

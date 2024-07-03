@@ -5,6 +5,7 @@ using Lockstep.Framework;
 using System.Text;
 using static Lockstep.Framework.LMathUtils;
 using dnlib.DotNet.Pdb;
+using UnityEngine.Windows;
 
 
 namespace Lockstep.Game
@@ -87,6 +88,12 @@ namespace Lockstep.Game
                 {
                     Done();
                 }
+            }
+
+            PlayerCommand input = World.Instance.GetPlayerInput((byte)Entity.EntityId);
+            if (input.IsSet(PlayerCommand.Button.Skill1))
+            {
+                Fire();
             }
         }
 

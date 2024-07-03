@@ -22,7 +22,7 @@ namespace Lockstep.Game
 
         private void Update()
         {
-            GameObject obj = World.MyPlayer?.UserData as GameObject;
+            GameObject obj = World.Instance.LocalPlayer?.UserData as GameObject;
             if (obj == null)
             {
                 return;
