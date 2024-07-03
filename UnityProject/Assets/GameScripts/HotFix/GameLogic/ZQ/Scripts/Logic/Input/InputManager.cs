@@ -60,6 +60,7 @@ namespace Lockstep.Game
             EntityId = 0;
             Tick = -1;
             IsMiss = false;
+            ButtonField = 0;
         }
     }
 

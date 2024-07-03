@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9382ccc498df17342ac7c0954944312c, type: 3}
   m_Name: PlayerConfig
   m_EditorClassIdentifier: 
-  MaxHealth: 100
+  MaxHealth: 10000
   Damage: 10
   MoveSpd:
     _val: 5000

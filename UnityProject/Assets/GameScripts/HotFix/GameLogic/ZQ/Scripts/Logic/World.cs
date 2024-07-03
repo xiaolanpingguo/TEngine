@@ -35,7 +35,13 @@ namespace Lockstep.Game
             }
         }
 
+        public const int MaxPredictFrameCount = 30;
+
         public static World Instance { get; private set; }
+
+        private FrameBuffer _frameBuffer;
+        private int _snapshotFrameInterval = 1;
+
         public bool IsPause { get; set; }
         public int Tick { get; set; }
         public byte LocalPlayerId;
@@ -59,6 +65,11 @@ namespace Lockstep.Game
         private int _entityIdCounter = 0;
         private Dictionary<int, int> _tick2Id = new Dictionary<int, int>();
 
+        private long _gameStartTimestampMs = -1;
+        private int _tickSinceGameStart;
+        private int _targetTick;
+        private LFloat WorldUpdateTick = new LFloat(true, 30);
+
         public LFloat RemainTime
         {
             get => _curGameState.RemainTime;
@@ -81,6 +92,175 @@ namespace Lockstep.Game
         {
             get => _curGameState.CurEnemyId;
             set => _curGameState.CurEnemyId = value;
+        }
+
+        public void Init(byte localPlayerId)
+        {
+            Instance = this;
+            LocalPlayerId = localPlayerId;
+            _frameBuffer = new FrameBuffer(2000, _snapshotFrameInterval, MaxPredictFrameCount);
+            RegisterSystems();
+
+            foreach (var sys in _systems)
+            {
+                sys.Init();
+            }
+
+            //create Players 
+            int playerCount = 1;
+            for (int i = 0; i < playerCount; i++)
+            {
+                var initPos = LVector2.zero;
+                var player = CreateEntity<Player>(initPos);
+                if (LocalPlayerId == i)
+                {
+                    LocalPlayer = player;
+                    player.EntityId = LocalPlayerId;
+                }
+            }
+
+            PlayerInputs = new PlayerCommand[playerCount];
+        }
+
+        public void Destroy()
+        {
+            foreach (var sys in _systems)
+            {
+                sys.Destroy();
+            }
+        }
+
+        public void OnApplicationQuit()
+        {
+            Destroy();
+        }
+
+        public void Update()
+        {
+            if (IsPause)
+            {
+                return;
+            }
+
+            _tickSinceGameStart = (int)((LTime.realtimeSinceStartupMS - _gameStartTimestampMs) / NetworkDefine.UPDATE_DELTATIME);
+            float fDeltaTime = Time.deltaTime;
+            _frameBuffer.Update(fDeltaTime);
+
+            int targetTick = _tickSinceGameStart;
+            while (Tick < targetTick)
+            {
+                ProcessFrame();
+                foreach (var sys in _systems)
+                {
+                    if (sys.Enable)
+                    {
+                        sys.Update(WorldUpdateTick);
+                    }
+                }
+
+                _frameBuffer.SetClientTick(Tick);
+                Tick++;
+            }
+        }
+
+        public void RegisterSystems()
+        {
+            RegisterSystem(new PhysicSystem(this));
+            RegisterSystem(new SpawnerSystem(this));
+            RegisterSystem(new PlayerSystem(this));
+            RegisterSystem(new EnemySystem(this));
+        }
+
+        public void RegisterSystem(IGameSystem sys)
+        {
+            Type type = sys.GetType();
+            if (_systemMap.ContainsKey(type))
+            {
+                return;
+            }
+
+            _systemMap.Add(type, sys);
+            _systems.Add(sys);
+        }
+
+        public T GetSystem<T>() where T : IGameSystem
+        {
+            Type type = typeof(T);
+            if (_systemMap.TryGetValue(type, out var v))
+            {
+                return v as T;
+            }
+
+            return null;
+        }
+
+        public GameObject LoadPrefab(PrefabType type)
+        {
+            if (_id2Prefab.TryGetValue(type, out var val))
+            {
+                return val;
+            }
+
+            GameConfig gameConfig = GameConfigSingleton.Instance.GameConfig;
+            string prefabPath = gameConfig.GetPrefabPath(type);
+            if (string.IsNullOrEmpty(prefabPath)) 
+            {
+                return null;
+            }
+
+            var prefab = (GameObject)Resources.Load(prefabPath);
+            if (prefab == null)
+            {
+                return null;
+            }
+
+            _id2Prefab[type] = prefab;
+            return prefab;
+        }
+
+        public void BindView(Entity entity, Entity oldEntity = null)
+        {
+            if (oldEntity != null)
+            {
+                if (oldEntity.EntityId == entity.EntityId)
+                {
+                    entity.UserData = oldEntity.UserData;
+                    var obj = (oldEntity.UserData as GameObject).gameObject;
+                    var views = obj.GetComponents<EntityView>();
+                    foreach (var view in views)
+                    {
+                        view.BindEntity(entity, oldEntity);
+                    }
+                }
+                else
+                {
+                    UnbindView(oldEntity);
+                }
+            }
+            else
+            {
+                PrefabType prefabType = GetPrefabTypeByEntity(entity);
+                var prefab = LoadPrefab(prefabType);
+                if (prefab == null)
+                {
+                    return;
+                }
+                var obj = GameObject.Instantiate(prefab, entity.LTrans2D.Pos3.ToVector3(), Quaternion.Euler(new Vector3(0, entity.LTrans2D.deg, 0)));
+                entity.UserData = obj;
+                var views = obj.GetComponents<EntityView>();
+                if (views.Length <= 0)
+                {
+                    var view = obj.AddComponent<EntityView>();
+                    view.BindEntity(entity);
+                }
+                else
+                {
+                    foreach (var view in views)
+                    {
+                        view.BindEntity(entity);
+                    }
+                }
+            }
         }
 
         private void AddEntity<T>(T e) where T : Entity
@@ -205,7 +385,7 @@ namespace Lockstep.Game
 
             if (components != null)
             {
-                foreach(var c in components)
+                foreach (var c in components)
                 {
                     entity.AddComponent(c);
                 }
@@ -336,165 +516,6 @@ namespace Lockstep.Game
             Tick = tick;
         }
 
-        public void Init(byte localPlayerId)
-        {
-            Instance = this;
-            LocalPlayerId = localPlayerId;
-            RegisterSystems();
-
-            foreach (var sys in _systems)
-            {
-                sys.Init();
-            }
-
-            //create Players 
-            int playerCount = 1;
-            for (int i = 0; i < playerCount; i++)
-            {
-                var initPos = LVector2.zero;
-                var player = CreateEntity<Player>(initPos);
-                if (LocalPlayerId == i)
-                {
-                    LocalPlayer = player;
-                    player.EntityId = LocalPlayerId;
-                }
-            }
-
-            PlayerInputs = new PlayerCommand[playerCount];
-        }
-
-        public void DoDestroy()
-        {
-            foreach (var mgr in _systems)
-            {
-                mgr.Destroy();
-            }
-        }
-
-        public void OnApplicationQuit()
-        {
-            DoDestroy();
-        }
-
-        public void Update()
-        {
-            if (IsPause)
-            {
-                return;
-            }
-
-            var deltaTime = new LFloat(true, 30);
-            foreach (var system in _systems)
-            {
-                if (system.Enable)
-                {
-                    system.Update(deltaTime);
-                }
-            }
-
-            Tick++;
-        }
-
-        public void RegisterSystems()
-        {
-            RegisterSystem(new PhysicSystem(this));
-            RegisterSystem(new SpawnerSystem(this));
-            RegisterSystem(new PlayerSystem(this));
-            RegisterSystem(new EnemySystem(this));
-        }
-
-        public void RegisterSystem(IGameSystem sys)
-        {
-            Type type = sys.GetType();
-            if (_systemMap.ContainsKey(type))
-            {
-                return;
-            }
-
-            _systemMap.Add(type, sys);
-            _systems.Add(sys);
-        }
-
-        public T GetSystem<T>() where T : IGameSystem
-        {
-            Type type = typeof(T);
-            if (_systemMap.TryGetValue(type, out var v))
-            {
-                return v as T;
-            }
-
-            return null;
-        }
-
-        public GameObject LoadPrefab(PrefabType type)
-        {
-            if (_id2Prefab.TryGetValue(type, out var val))
-            {
-                return val;
-            }
-
-            GameConfig gameConfig = GameConfigSingleton.Instance.GameConfig;
-            string prefabPath = gameConfig.GetPrefabPath(type);
-            if (string.IsNullOrEmpty(prefabPath)) 
-            {
-                return null;
-            }
-
-            var prefab = (GameObject)Resources.Load(prefabPath);
-            if (prefab == null)
-            {
-                return null;
-            }
-
-            _id2Prefab[type] = prefab;
-            return prefab;
-        }
-
-        public void BindView(Entity entity, Entity oldEntity = null)
-        {
-            if (oldEntity != null)
-            {
-                if (oldEntity.EntityId == entity.EntityId)
-                {
-                    entity.UserData = oldEntity.UserData;
-                    var obj = (oldEntity.UserData as GameObject).gameObject;
-                    var views = obj.GetComponents<EntityView>();
-                    foreach (var view in views)
-                    {
-                        view.BindEntity(entity, oldEntity);
-                    }
-                }
-                else
-                {
-                    UnbindView(oldEntity);
-                }
-            }
-            else
-            {
-                PrefabType prefabType = GetPrefabTypeByEntity(entity);
-                var prefab = LoadPrefab(prefabType);
-                if (prefab == null)
-                {
-                    return;
-                }
-                var obj = GameObject.Instantiate(prefab, entity.LTrans2D.Pos3.ToVector3(), Quaternion.Euler(new Vector3(0, entity.LTrans2D.deg, 0)));
-                entity.UserData = obj;
-                var views = obj.GetComponents<EntityView>();
-                if (views.Length <= 0)
-                {
-                    var view = obj.AddComponent<EntityView>();
-                    view.BindEntity(entity);
-                }
-                else
-                {
-                    foreach (var view in views)
-                    {
-                        view.BindEntity(entity);
-                    }
-                }
-            }
-        }
-
         public void UnbindView(Entity entity)
         {
             entity.OnRollbackDestroy();
@@ -545,6 +566,42 @@ namespace Lockstep.Game
             }
 
             return PlayerInputs[entityId];
+        }
+
+        public void PushServerFrame(int tick, PlayerCommand[] playerInputs)
+        {
+            var frame = new ServerFrame()
+            {
+                tick = tick,
+                Inputs = playerInputs
+            };
+            _frameBuffer.PushLocalFrame(frame);
+            _frameBuffer.PushServerFrames(new ServerFrame[] { frame });
+        }
+
+        private void ProcessFrame()
+        {
+            ServerFrame frame = _frameBuffer.GetFrame(Tick);
+            if (frame == null)
+            {
+                return;
+            }
+
+            var inputs = frame.Inputs;
+            foreach (var input in inputs)
+            {
+                if (input.EntityId >= PlayerInputs.Length)
+                {
+                    continue;
+                }
+
+                if (input.inputUV.x > 0 || input.inputUV.y > 0)
+                {
+                    // Debug.Log("dawdawdawd");
+                }
+
+                PlayerInputs[input.EntityId] = input;
+            }
         }
     }
 }

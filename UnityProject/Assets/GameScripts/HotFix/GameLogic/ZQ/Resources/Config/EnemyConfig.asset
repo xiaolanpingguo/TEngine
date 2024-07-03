@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bc089a39ad3ff5b45923915a3bd37e45, type: 3}
   m_Name: EnemyConfig
   m_EditorClassIdentifier: 
-  MaxHealth: 100
+  MaxHealth: 10000
   Damage: 10
   MoveSpd:
     _val: 2000
