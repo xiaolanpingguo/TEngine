@@ -24,27 +24,29 @@ namespace C2DS {
     static C2DsMsgReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cg5jMmRzX21zZy5wcm90bxIEQzJEUyIhCgtDMkRTUGluZ1JlcRISCgpwcm9m",
-            "aWxlX2lkGAEgASgJIiIKC0MyRFNQaW5nUmVzEhMKC3NlcnZlcl90aW1lGAEg",
-            "ASgDIiUKD0MyRFNKb2luUm9vbVJlcRISCgpwcm9maWxlX2lkGAEgASgJIjwK",
-            "D0MyRFNKb2luUm9vbVJlcxIpCgplcnJvcl9jb2RlGAEgASgOMhUuQzJEUy5D",
-            "MkRTX0VSUk9SX0NPREUiEgoQRFMyQ1N0YXJ0R2FtZVJlcSIUChJEUzJDU2Vy",
-            "dmVyRnJhbWVSZXEiKAoSQzJEU0NsaWVudElucHV0UmVxEhIKCnByb2ZpbGVf",
-            "aWQYASABKAkq2AEKC0MyRFNfTVNHX0lEEggKBE5PTkUQABIVChBJRF9DMkRT",
-            "X1BJTkdfUkVRENEPEhUKEElEX0MyRFNfUElOR19SRVMQ0g8SGgoVSURfQzJE",
-            "U19KT0lOX1JPT01fUkVRENMPEhoKFUlEX0MyRFNfSk9JTl9ST09NX1JFUxDU",
-            "DxIbChZJRF9EUzJDX1NUQVJUX0dBTUVfUkVRENUPEh0KGElEX0RTMkNfU0VS",
-            "VkVSX0ZSQU1FX1JFURDWDxIdChhJRF9DMkRTX0NMSUVOVF9JTlBVVF9SRVEQ",
-            "1w8qMgoPQzJEU19FUlJPUl9DT0RFEgsKB1NVQ0NFU1MQABISCg5HRU5FUlJB",
-            "TF9FUlJPUhBlYgZwcm90bzM="));
+            "Cg5jMmRzX21zZy5wcm90bxIEQzJEUyI2CgtDMkRTUGluZ1JlcRISCgpwcm9m",
+            "aWxlX2lkGAEgASgJEhMKC2NsaWVudF90aW1lGAIgASgDIksKC0MyRFNQaW5n",
+            "UmVzEhIKCnByb2ZpbGVfaWQYASABKAkSEwoLY2xpZW50X3RpbWUYAiABKAMS",
+            "EwoLc2VydmVyX3RpbWUYAyABKAMiJwoRQzJEU0pvaW5TZXJ2ZXJSZXESEgoK",
+            "cHJvZmlsZV9pZBgBIAEoCSJRChFDMkRTSm9pblNlcnZlclJlcxIRCglwbGF5",
+            "ZXJfaWQYASABKAUSKQoKZXJyb3JfY29kZRgCIAEoDjIVLkMyRFMuQzJEU19F",
+            "UlJPUl9DT0RFIigKEERTMkNTdGFydEdhbWVSZXESFAoMcGxheWVyX2NvdW50",
+            "GAEgASgFIhQKEkRTMkNTZXJ2ZXJGcmFtZVJlcSIoChJDMkRTQ2xpZW50SW5w",
+            "dXRSZXESEgoKcHJvZmlsZV9pZBgBIAEoCSrcAQoLQzJEU19NU0dfSUQSCAoE",
+            "Tk9ORRAAEhUKEElEX0MyRFNfUElOR19SRVEQ0Q8SFQoQSURfQzJEU19QSU5H",
+            "X1JFUxDSDxIcChdJRF9DMkRTX0pPSU5fU0VSVkVSX1JFURDTDxIcChdJRF9D",
+            "MkRTX0pPSU5fU0VSVkVSX1JFUxDUDxIbChZJRF9EUzJDX1NUQVJUX0dBTUVf",
+            "UkVRENUPEh0KGElEX0RTMkNfU0VSVkVSX0ZSQU1FX1JFURDWDxIdChhJRF9D",
+            "MkRTX0NMSUVOVF9JTlBVVF9SRVEQ1w8qMgoPQzJEU19FUlJPUl9DT0RFEgsK",
+            "B1NVQ0NFU1MQABISCg5HRU5FUlJBTF9FUlJPUhBlYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::C2DS.C2DS_MSG_ID), typeof(global::C2DS.C2DS_ERROR_CODE), }, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::C2DS.C2DSPingReq), global::C2DS.C2DSPingReq.Parser, new[]{ "ProfileId" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::C2DS.C2DSPingRes), global::C2DS.C2DSPingRes.Parser, new[]{ "ServerTime" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::C2DS.C2DSJoinRoomReq), global::C2DS.C2DSJoinRoomReq.Parser, new[]{ "ProfileId" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::C2DS.C2DSJoinRoomRes), global::C2DS.C2DSJoinRoomRes.Parser, new[]{ "ErrorCode" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::C2DS.DS2CStartGameReq), global::C2DS.DS2CStartGameReq.Parser, null, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::C2DS.C2DSPingReq), global::C2DS.C2DSPingReq.Parser, new[]{ "ProfileId", "ClientTime" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::C2DS.C2DSPingRes), global::C2DS.C2DSPingRes.Parser, new[]{ "ProfileId", "ClientTime", "ServerTime" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::C2DS.C2DSJoinServerReq), global::C2DS.C2DSJoinServerReq.Parser, new[]{ "ProfileId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::C2DS.C2DSJoinServerRes), global::C2DS.C2DSJoinServerRes.Parser, new[]{ "PlayerId", "ErrorCode" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::C2DS.DS2CStartGameReq), global::C2DS.DS2CStartGameReq.Parser, new[]{ "PlayerCount" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::C2DS.DS2CServerFrameReq), global::C2DS.DS2CServerFrameReq.Parser, null, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::C2DS.C2DSClientInputReq), global::C2DS.C2DSClientInputReq.Parser, new[]{ "ProfileId" }, null, null, null, null)
           }));
@@ -55,22 +57,16 @@ namespace C2DS {
   #region Enums
   public enum C2DS_MSG_ID {
     [pbr::OriginalName("NONE")] None = 0,
-    /// <summary>
-    /// Ping
-    /// </summary>
     [pbr::OriginalName("ID_C2DS_PING_REQ")] IdC2DsPingReq = 2001,
     [pbr::OriginalName("ID_C2DS_PING_RES")] IdC2DsPingRes = 2002,
-    [pbr::OriginalName("ID_C2DS_JOIN_ROOM_REQ")] IdC2DsJoinRoomReq = 2003,
-    [pbr::OriginalName("ID_C2DS_JOIN_ROOM_RES")] IdC2DsJoinRoomRes = 2004,
+    [pbr::OriginalName("ID_C2DS_JOIN_SERVER_REQ")] IdC2DsJoinServerReq = 2003,
+    [pbr::OriginalName("ID_C2DS_JOIN_SERVER_RES")] IdC2DsJoinServerRes = 2004,
     [pbr::OriginalName("ID_DS2C_START_GAME_REQ")] IdDs2CStartGameReq = 2005,
     [pbr::OriginalName("ID_DS2C_SERVER_FRAME_REQ")] IdDs2CServerFrameReq = 2006,
     [pbr::OriginalName("ID_C2DS_CLIENT_INPUT_REQ")] IdC2DsClientInputReq = 2007,
   }
 
   public enum C2DS_ERROR_CODE {
-    /// <summary>
-    /// oommon
-    /// </summary>
     [pbr::OriginalName("SUCCESS")] Success = 0,
     [pbr::OriginalName("GENERRAL_ERROR")] GenerralError = 101,
   }
@@ -113,6 +109,7 @@ namespace C2DS {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public C2DSPingReq(C2DSPingReq other) : this() {
       profileId_ = other.profileId_;
+      clientTime_ = other.clientTime_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -134,6 +131,18 @@ namespace C2DS {
       }
     }
 
+    /// <summary>Field number for the "client_time" field.</summary>
+    public const int ClientTimeFieldNumber = 2;
+    private long clientTime_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long ClientTime {
+      get { return clientTime_; }
+      set {
+        clientTime_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
@@ -150,6 +159,7 @@ namespace C2DS {
         return true;
       }
       if (ProfileId != other.ProfileId) return false;
+      if (ClientTime != other.ClientTime) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -158,6 +168,7 @@ namespace C2DS {
     public override int GetHashCode() {
       int hash = 1;
       if (ProfileId.Length != 0) hash ^= ProfileId.GetHashCode();
+      if (ClientTime != 0L) hash ^= ClientTime.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -180,6 +191,10 @@ namespace C2DS {
         output.WriteRawTag(10);
         output.WriteString(ProfileId);
       }
+      if (ClientTime != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(ClientTime);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -194,6 +209,10 @@ namespace C2DS {
         output.WriteRawTag(10);
         output.WriteString(ProfileId);
       }
+      if (ClientTime != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(ClientTime);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -206,6 +225,9 @@ namespace C2DS {
       int size = 0;
       if (ProfileId.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(ProfileId);
+      }
+      if (ClientTime != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(ClientTime);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -221,6 +243,9 @@ namespace C2DS {
       }
       if (other.ProfileId.Length != 0) {
         ProfileId = other.ProfileId;
+      }
+      if (other.ClientTime != 0L) {
+        ClientTime = other.ClientTime;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -241,6 +266,10 @@ namespace C2DS {
             ProfileId = input.ReadString();
             break;
           }
+          case 16: {
+            ClientTime = input.ReadInt64();
+            break;
+          }
         }
       }
     #endif
@@ -258,6 +287,10 @@ namespace C2DS {
             break;
           case 10: {
             ProfileId = input.ReadString();
+            break;
+          }
+          case 16: {
+            ClientTime = input.ReadInt64();
             break;
           }
         }
@@ -301,6 +334,8 @@ namespace C2DS {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public C2DSPingRes(C2DSPingRes other) : this() {
+      profileId_ = other.profileId_;
+      clientTime_ = other.clientTime_;
       serverTime_ = other.serverTime_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -311,8 +346,32 @@ namespace C2DS {
       return new C2DSPingRes(this);
     }
 
+    /// <summary>Field number for the "profile_id" field.</summary>
+    public const int ProfileIdFieldNumber = 1;
+    private string profileId_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public string ProfileId {
+      get { return profileId_; }
+      set {
+        profileId_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "client_time" field.</summary>
+    public const int ClientTimeFieldNumber = 2;
+    private long clientTime_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public long ClientTime {
+      get { return clientTime_; }
+      set {
+        clientTime_ = value;
+      }
+    }
+
     /// <summary>Field number for the "server_time" field.</summary>
-    public const int ServerTimeFieldNumber = 1;
+    public const int ServerTimeFieldNumber = 3;
     private long serverTime_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -338,6 +397,8 @@ namespace C2DS {
       if (ReferenceEquals(other, this)) {
         return true;
       }
+      if (ProfileId != other.ProfileId) return false;
+      if (ClientTime != other.ClientTime) return false;
       if (ServerTime != other.ServerTime) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -346,6 +407,8 @@ namespace C2DS {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override int GetHashCode() {
       int hash = 1;
+      if (ProfileId.Length != 0) hash ^= ProfileId.GetHashCode();
+      if (ClientTime != 0L) hash ^= ClientTime.GetHashCode();
       if (ServerTime != 0L) hash ^= ServerTime.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -365,8 +428,16 @@ namespace C2DS {
     #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       output.WriteRawMessage(this);
     #else
+      if (ProfileId.Length != 0) {
+        output.WriteRawTag(10);
+        output.WriteString(ProfileId);
+      }
+      if (ClientTime != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(ClientTime);
+      }
       if (ServerTime != 0L) {
-        output.WriteRawTag(8);
+        output.WriteRawTag(24);
         output.WriteInt64(ServerTime);
       }
       if (_unknownFields != null) {
@@ -379,8 +450,16 @@ namespace C2DS {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (ProfileId.Length != 0) {
+        output.WriteRawTag(10);
+        output.WriteString(ProfileId);
+      }
+      if (ClientTime != 0L) {
+        output.WriteRawTag(16);
+        output.WriteInt64(ClientTime);
+      }
       if (ServerTime != 0L) {
-        output.WriteRawTag(8);
+        output.WriteRawTag(24);
         output.WriteInt64(ServerTime);
       }
       if (_unknownFields != null) {
@@ -393,6 +472,12 @@ namespace C2DS {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public int CalculateSize() {
       int size = 0;
+      if (ProfileId.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ProfileId);
+      }
+      if (ClientTime != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(ClientTime);
+      }
       if (ServerTime != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(ServerTime);
       }
@@ -407,6 +492,12 @@ namespace C2DS {
     public void MergeFrom(C2DSPingRes other) {
       if (other == null) {
         return;
+      }
+      if (other.ProfileId.Length != 0) {
+        ProfileId = other.ProfileId;
+      }
+      if (other.ClientTime != 0L) {
+        ClientTime = other.ClientTime;
       }
       if (other.ServerTime != 0L) {
         ServerTime = other.ServerTime;
@@ -426,7 +517,15 @@ namespace C2DS {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
-          case 8: {
+          case 10: {
+            ProfileId = input.ReadString();
+            break;
+          }
+          case 16: {
+            ClientTime = input.ReadInt64();
+            break;
+          }
+          case 24: {
             ServerTime = input.ReadInt64();
             break;
           }
@@ -445,7 +544,15 @@ namespace C2DS {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
-          case 8: {
+          case 10: {
+            ProfileId = input.ReadString();
+            break;
+          }
+          case 16: {
+            ClientTime = input.ReadInt64();
+            break;
+          }
+          case 24: {
             ServerTime = input.ReadInt64();
             break;
           }
@@ -456,16 +563,16 @@ namespace C2DS {
 
   }
 
-  public sealed partial class C2DSJoinRoomReq : pb::IMessage<C2DSJoinRoomReq>
+  public sealed partial class C2DSJoinServerReq : pb::IMessage<C2DSJoinServerReq>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<C2DSJoinRoomReq> _parser = new pb::MessageParser<C2DSJoinRoomReq>(() => new C2DSJoinRoomReq());
+    private static readonly pb::MessageParser<C2DSJoinServerReq> _parser = new pb::MessageParser<C2DSJoinServerReq>(() => new C2DSJoinServerReq());
     private pb::UnknownFieldSet _unknownFields;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<C2DSJoinRoomReq> Parser { get { return _parser; } }
+    public static pb::MessageParser<C2DSJoinServerReq> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -481,7 +588,7 @@ namespace C2DS {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public C2DSJoinRoomReq() {
+    public C2DSJoinServerReq() {
       OnConstruction();
     }
 
@@ -489,15 +596,15 @@ namespace C2DS {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public C2DSJoinRoomReq(C2DSJoinRoomReq other) : this() {
+    public C2DSJoinServerReq(C2DSJoinServerReq other) : this() {
       profileId_ = other.profileId_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public C2DSJoinRoomReq Clone() {
-      return new C2DSJoinRoomReq(this);
+    public C2DSJoinServerReq Clone() {
+      return new C2DSJoinServerReq(this);
     }
 
     /// <summary>Field number for the "profile_id" field.</summary>
@@ -515,12 +622,12 @@ namespace C2DS {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
-      return Equals(other as C2DSJoinRoomReq);
+      return Equals(other as C2DSJoinServerReq);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(C2DSJoinRoomReq other) {
+    public bool Equals(C2DSJoinServerReq other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -593,7 +700,7 @@ namespace C2DS {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(C2DSJoinRoomReq other) {
+    public void MergeFrom(C2DSJoinServerReq other) {
       if (other == null) {
         return;
       }
@@ -645,16 +752,16 @@ namespace C2DS {
 
   }
 
-  public sealed partial class C2DSJoinRoomRes : pb::IMessage<C2DSJoinRoomRes>
+  public sealed partial class C2DSJoinServerRes : pb::IMessage<C2DSJoinServerRes>
   #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       , pb::IBufferMessage
   #endif
   {
-    private static readonly pb::MessageParser<C2DSJoinRoomRes> _parser = new pb::MessageParser<C2DSJoinRoomRes>(() => new C2DSJoinRoomRes());
+    private static readonly pb::MessageParser<C2DSJoinServerRes> _parser = new pb::MessageParser<C2DSJoinServerRes>(() => new C2DSJoinServerRes());
     private pb::UnknownFieldSet _unknownFields;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public static pb::MessageParser<C2DSJoinRoomRes> Parser { get { return _parser; } }
+    public static pb::MessageParser<C2DSJoinServerRes> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -670,7 +777,7 @@ namespace C2DS {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public C2DSJoinRoomRes() {
+    public C2DSJoinServerRes() {
       OnConstruction();
     }
 
@@ -678,19 +785,32 @@ namespace C2DS {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public C2DSJoinRoomRes(C2DSJoinRoomRes other) : this() {
+    public C2DSJoinServerRes(C2DSJoinServerRes other) : this() {
+      playerId_ = other.playerId_;
       errorCode_ = other.errorCode_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public C2DSJoinRoomRes Clone() {
-      return new C2DSJoinRoomRes(this);
+    public C2DSJoinServerRes Clone() {
+      return new C2DSJoinServerRes(this);
+    }
+
+    /// <summary>Field number for the "player_id" field.</summary>
+    public const int PlayerIdFieldNumber = 1;
+    private int playerId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int PlayerId {
+      get { return playerId_; }
+      set {
+        playerId_ = value;
+      }
     }
 
     /// <summary>Field number for the "error_code" field.</summary>
-    public const int ErrorCodeFieldNumber = 1;
+    public const int ErrorCodeFieldNumber = 2;
     private global::C2DS.C2DS_ERROR_CODE errorCode_ = global::C2DS.C2DS_ERROR_CODE.Success;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
@@ -704,18 +824,19 @@ namespace C2DS {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override bool Equals(object other) {
-      return Equals(other as C2DSJoinRoomRes);
+      return Equals(other as C2DSJoinServerRes);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public bool Equals(C2DSJoinRoomRes other) {
+    public bool Equals(C2DSJoinServerRes other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
       if (ReferenceEquals(other, this)) {
         return true;
       }
+      if (PlayerId != other.PlayerId) return false;
       if (ErrorCode != other.ErrorCode) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -724,6 +845,7 @@ namespace C2DS {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override int GetHashCode() {
       int hash = 1;
+      if (PlayerId != 0) hash ^= PlayerId.GetHashCode();
       if (ErrorCode != global::C2DS.C2DS_ERROR_CODE.Success) hash ^= ErrorCode.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -743,8 +865,12 @@ namespace C2DS {
     #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       output.WriteRawMessage(this);
     #else
-      if (ErrorCode != global::C2DS.C2DS_ERROR_CODE.Success) {
+      if (PlayerId != 0) {
         output.WriteRawTag(8);
+        output.WriteInt32(PlayerId);
+      }
+      if (ErrorCode != global::C2DS.C2DS_ERROR_CODE.Success) {
+        output.WriteRawTag(16);
         output.WriteEnum((int) ErrorCode);
       }
       if (_unknownFields != null) {
@@ -757,8 +883,12 @@ namespace C2DS {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
-      if (ErrorCode != global::C2DS.C2DS_ERROR_CODE.Success) {
+      if (PlayerId != 0) {
         output.WriteRawTag(8);
+        output.WriteInt32(PlayerId);
+      }
+      if (ErrorCode != global::C2DS.C2DS_ERROR_CODE.Success) {
+        output.WriteRawTag(16);
         output.WriteEnum((int) ErrorCode);
       }
       if (_unknownFields != null) {
@@ -771,6 +901,9 @@ namespace C2DS {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public int CalculateSize() {
       int size = 0;
+      if (PlayerId != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(PlayerId);
+      }
       if (ErrorCode != global::C2DS.C2DS_ERROR_CODE.Success) {
         size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) ErrorCode);
       }
@@ -782,9 +915,12 @@ namespace C2DS {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public void MergeFrom(C2DSJoinRoomRes other) {
+    public void MergeFrom(C2DSJoinServerRes other) {
       if (other == null) {
         return;
+      }
+      if (other.PlayerId != 0) {
+        PlayerId = other.PlayerId;
       }
       if (other.ErrorCode != global::C2DS.C2DS_ERROR_CODE.Success) {
         ErrorCode = other.ErrorCode;
@@ -805,6 +941,10 @@ namespace C2DS {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
           case 8: {
+            PlayerId = input.ReadInt32();
+            break;
+          }
+          case 16: {
             ErrorCode = (global::C2DS.C2DS_ERROR_CODE) input.ReadEnum();
             break;
           }
@@ -824,6 +964,10 @@ namespace C2DS {
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
           case 8: {
+            PlayerId = input.ReadInt32();
+            break;
+          }
+          case 16: {
             ErrorCode = (global::C2DS.C2DS_ERROR_CODE) input.ReadEnum();
             break;
           }
@@ -868,6 +1012,7 @@ namespace C2DS {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public DS2CStartGameReq(DS2CStartGameReq other) : this() {
+      playerCount_ = other.playerCount_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -875,6 +1020,18 @@ namespace C2DS {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public DS2CStartGameReq Clone() {
       return new DS2CStartGameReq(this);
+    }
+
+    /// <summary>Field number for the "player_count" field.</summary>
+    public const int PlayerCountFieldNumber = 1;
+    private int playerCount_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public int PlayerCount {
+      get { return playerCount_; }
+      set {
+        playerCount_ = value;
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -892,6 +1049,7 @@ namespace C2DS {
       if (ReferenceEquals(other, this)) {
         return true;
       }
+      if (PlayerCount != other.PlayerCount) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -899,6 +1057,7 @@ namespace C2DS {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public override int GetHashCode() {
       int hash = 1;
+      if (PlayerCount != 0) hash ^= PlayerCount.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -917,6 +1076,10 @@ namespace C2DS {
     #if !GOOGLE_PROTOBUF_REFSTRUCT_COMPATIBILITY_MODE
       output.WriteRawMessage(this);
     #else
+      if (PlayerCount != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(PlayerCount);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -927,6 +1090,10 @@ namespace C2DS {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     void pb::IBufferMessage.InternalWriteTo(ref pb::WriteContext output) {
+      if (PlayerCount != 0) {
+        output.WriteRawTag(8);
+        output.WriteInt32(PlayerCount);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
       }
@@ -937,6 +1104,9 @@ namespace C2DS {
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public int CalculateSize() {
       int size = 0;
+      if (PlayerCount != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(PlayerCount);
+      }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -948,6 +1118,9 @@ namespace C2DS {
     public void MergeFrom(DS2CStartGameReq other) {
       if (other == null) {
         return;
+      }
+      if (other.PlayerCount != 0) {
+        PlayerCount = other.PlayerCount;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -964,6 +1137,10 @@ namespace C2DS {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
             break;
+          case 8: {
+            PlayerCount = input.ReadInt32();
+            break;
+          }
         }
       }
     #endif
@@ -979,6 +1156,10 @@ namespace C2DS {
           default:
             _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, ref input);
             break;
+          case 8: {
+            PlayerCount = input.ReadInt32();
+            break;
+          }
         }
       }
     }

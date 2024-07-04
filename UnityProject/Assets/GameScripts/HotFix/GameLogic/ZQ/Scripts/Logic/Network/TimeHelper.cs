@@ -1,6 +1,7 @@
 ﻿using System;
 
-namespace ZQ
+
+namespace Lockstep.Game
 {
     public static class TimeHelper
     {

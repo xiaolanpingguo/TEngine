@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace ZQ
+
+namespace Lockstep.Game
 {
     public class MessageBuffer
     {

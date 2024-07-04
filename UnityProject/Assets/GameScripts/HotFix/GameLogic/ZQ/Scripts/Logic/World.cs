@@ -106,20 +106,7 @@ namespace Lockstep.Game
                 sys.Init();
             }
 
-            //create Players 
-            int playerCount = 1;
-            for (int i = 0; i < playerCount; i++)
-            {
-                var initPos = LVector2.zero;
-                var player = CreateEntity<Player>(initPos);
-                if (LocalPlayerId == i)
-                {
-                    LocalPlayer = player;
-                    player.EntityId = LocalPlayerId;
-                }
-            }
-
-            PlayerInputs = new PlayerCommand[playerCount];
+            //OnGameStart(1);
         }
 
         public void Destroy()
@@ -218,7 +205,24 @@ namespace Lockstep.Game
             return prefab;
         }
 
-        public void BindView(Entity entity, Entity oldEntity = null)
+        public void OnGameStart(int playerCount)
+        {
+            //create Players 
+            for (int i = 0; i < playerCount; i++)
+            {
+                var initPos = LVector2.zero;
+                var player = CreateEntity<Player>(initPos);
+                if (LocalPlayerId == i)
+                {
+                    LocalPlayer = player;
+                    player.EntityId = LocalPlayerId;
+                }
+            }
+
+            PlayerInputs = new PlayerCommand[playerCount];
+        }
+
+        private void BindView(Entity entity, Entity oldEntity = null)
         {
             if (oldEntity != null)
             {

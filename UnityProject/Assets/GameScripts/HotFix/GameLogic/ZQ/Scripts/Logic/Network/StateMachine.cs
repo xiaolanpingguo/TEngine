@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using TEngine;
 
-namespace ZQ
+
+namespace Lockstep.Game
 {
     public static class EnumEx<TEnum> where TEnum : unmanaged, Enum
     {
@@ -221,13 +223,13 @@ namespace ZQ
             int stateAsInt = EnumEx<T>.To<int>(state);
             if (!m_states.ContainsKey(stateAsInt))
             {
-                Log.Error($"[StateMachine] Trying to switch to unknown state {stateAsInt.ToString()} ");
+                Log.Error($"[StateMachine] Trying to switch to unknown state {stateAsInt} ");
                 return;
             }
 
             if (m_currentState != null && m_currentState.Id.Equals(state))
             {
-                Log.Error($"[StateMachine] Trying to switch to {state.ToString()} but that is already current state\"");
+                Log.Error($"[StateMachine] Trying to switch to {state} but that is already current state\"");
                 return;
             }
 

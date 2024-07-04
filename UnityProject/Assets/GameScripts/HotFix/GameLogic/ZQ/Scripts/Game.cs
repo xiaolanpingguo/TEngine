@@ -19,7 +19,7 @@ namespace Lockstep.Game
         public bool IsRunVideo;
         public bool IsVideoMode = false;
 
-        public GameType GameType = GameType.Local;
+        public GameType GameType = GameType.Client;
         private VideoGameLoop _videoGameLoop;
         private ClientGameLoop _clientGameLoop;
         private LocalGameLoop _localGameLoop;
@@ -44,7 +44,7 @@ namespace Lockstep.Game
             }
             else if (GameType == GameType.Client)
             {
-                //ClientGameLoop.Instance.CreateGame(0, 1);
+                ClientGameLoop.Instance.CreateGame();
             }
         }
 
@@ -69,6 +69,7 @@ namespace Lockstep.Game
             }
             else if (GameType == GameType.Client)
             {
+                ClientGameLoop.Instance.Update();
             }
         }
     }
