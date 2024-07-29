@@ -15,14 +15,13 @@ namespace Lockstep.Game
 
         protected override void Init()
         {
-            _world = new World();
+            _world = new World(null);
             InputManager.Init();
         }
 
         public void CreateGame()
         {
-            byte localPlayerId = 0;
-            _world.Init(localPlayerId);
+            _world.Init();
             Log.Info($"Game Start");
         }
 

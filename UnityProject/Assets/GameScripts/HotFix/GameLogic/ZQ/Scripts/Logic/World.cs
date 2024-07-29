@@ -6,6 +6,9 @@ using Lockstep.Framework;
 using UnityEngine;
 using TEngine;
 using System.Text;
+using C2DS;
+using UnityEngine.InputSystem;
+using Unity.Android.Gradle;
 
 
 namespace Lockstep.Game
@@ -35,18 +38,16 @@ namespace Lockstep.Game
             }
         }
 
-        public const int MaxPredictFrameCount = 30;
-
         public static World Instance { get; private set; }
 
-        private FrameBuffer _frameBuffer;
-        private int _snapshotFrameInterval = 1;
+        public int FramePredictCount = 0;
 
         public bool IsPause { get; set; }
-        public int Tick { get; set; }
-        public byte LocalPlayerId;
+        public int Tick { get; private set; }
         public Player LocalPlayer;
         public PlayerCommand[] PlayerInputs;
+
+        private readonly NetworkModule _networkModule;
 
         private List<IGameSystem> _systems = new List<IGameSystem>();
         private Dictionary<Type, IGameSystem> _systemMap = new();
@@ -62,13 +63,24 @@ namespace Lockstep.Game
         private Dictionary<int, int> _tick2StateHash = new Dictionary<int, int>();
         public int Hash { get; set; }
 
+        private int _playerCount = 1;
+        private int _localPlayerIndex;
         private int _entityIdCounter = 0;
         private Dictionary<int, int> _tick2Id = new Dictionary<int, int>();
 
         private long _gameStartTimestampMs = -1;
-        private int _tickSinceGameStart;
-        private int _targetTick;
+        private int _tickSinceGameStart = 0;
+
+        private int _preSendInputCount = 1;
+        private int _inputTick = 0;
+
         private LFloat WorldUpdateTick = new LFloat(true, 30);
+
+        private FrameBuffer _frameBuffer;
+        private int _snapshotFrameInterval = 1;
+
+        private const int _maxSimulationMsPerFrame = 20;
+        private const int _maxPredictFrameCount = 5;
 
         public LFloat RemainTime
         {
@@ -94,19 +106,21 @@ namespace Lockstep.Game
             set => _curGameState.CurEnemyId = value;
         }
 
-        public void Init(byte localPlayerId)
+        public World(NetworkModule networkModule)
+        {
+            _networkModule = networkModule;
+        }
+
+        public void Init()
         {
             Instance = this;
-            LocalPlayerId = localPlayerId;
-            _frameBuffer = new FrameBuffer(2000, _snapshotFrameInterval, MaxPredictFrameCount);
+            _frameBuffer = new FrameBuffer(2000, _snapshotFrameInterval, _maxPredictFrameCount);
             RegisterSystems();
 
             foreach (var sys in _systems)
             {
                 sys.Init();
             }
-
-            //OnGameStart(1);
         }
 
         public void Destroy()
@@ -124,7 +138,7 @@ namespace Lockstep.Game
 
         public void Update()
         {
-            if (IsPause)
+            if (_gameStartTimestampMs < 0)
             {
                 return;
             }
@@ -132,22 +146,24 @@ namespace Lockstep.Game
             _tickSinceGameStart = (int)((LTime.realtimeSinceStartupMS - _gameStartTimestampMs) / NetworkDefine.UPDATE_DELTATIME);
             float fDeltaTime = Time.deltaTime;
             _frameBuffer.Update(fDeltaTime);
+            SendInput();
 
-            int targetTick = _tickSinceGameStart;
-            while (Tick < targetTick)
+            // make sure client is not move ahead too much than server
+            var maxContinueServerTick = _frameBuffer.MaxContinueServerTick;
+            if ((Tick - maxContinueServerTick) > _maxPredictFrameCount)
             {
-                ProcessFrame();
-                foreach (var sys in _systems)
-                {
-                    if (sys.Enable)
-                    {
-                        sys.Update(WorldUpdateTick);
-                    }
-                }
-
-                _frameBuffer.SetClientTick(Tick);
-                Tick++;
+                return;
             }
+
+            // persue server frames
+            var deadline = LTime.realtimeSinceStartupMS + _maxSimulationMsPerFrame;
+            PursueServerFrames(deadline);
+
+            // rollback
+            UpdateRollback();
+
+            // run frames
+            RunFrames();
         }
 
         public void RegisterSystems()
@@ -205,21 +221,93 @@ namespace Lockstep.Game
             return prefab;
         }
 
-        public void OnGameStart(int playerCount)
+        public void OnGameStart(int playerCount, int localPlayerIndex)
         {
-            //create Players 
-            for (int i = 0; i < playerCount; i++)
+            _playerCount = playerCount;
+            _localPlayerIndex = localPlayerIndex;
+            for (int i = 0; i < _playerCount; i++)
             {
                 var initPos = LVector2.zero;
                 var player = CreateEntity<Player>(initPos);
-                if (LocalPlayerId == i)
+                if (localPlayerIndex == i)
                 {
                     LocalPlayer = player;
-                    player.EntityId = LocalPlayerId;
+                    player.EntityId = _localPlayerIndex;
                 }
             }
 
-            PlayerInputs = new PlayerCommand[playerCount];
+            PlayerInputs = new PlayerCommand[_playerCount];
+            SendInput();
+            _gameStartTimestampMs = LTime.realtimeSinceStartupMS;
+        }
+
+        public void OnServerFrameRecieved(List<ServerFrame> serverFrames)
+        {
+            _frameBuffer.PushServerFrames(serverFrames.ToArray());
+        }
+
+        private void RunFrames()
+        {
+            int targetTick = _tickSinceGameStart + FramePredictCount;
+            while (Tick < targetTick)
+            {
+                var curTick = Tick;
+                ServerFrame frame = null;
+                var serverFrame = _frameBuffer.GetServerFrame(curTick);
+                if (serverFrame != null)
+                {
+                    frame = serverFrame;
+                }
+                else
+                {
+                    var cientFrame = _frameBuffer.GetLocalFrame(curTick);
+                    PredictPlayerInput(cientFrame);
+                    frame = cientFrame;
+                }
+
+                _frameBuffer.PushLocalFrame(frame);
+                RunOneFrame(frame);
+            }
+        }
+
+        private void RunOneFrame(ServerFrame frame)
+        {
+            ProcessInputQueue(frame);
+            RunWorldOneFrame();
+            _frameBuffer.SetClientTick(Tick);
+        }
+
+        private void RunWorldOneFrame()
+        {
+            foreach (var sys in _systems)
+            {
+                if (sys.Enable)
+                {
+                    sys.Update(WorldUpdateTick);
+                }
+            }
+
+            Tick++;
+        }
+
+        private void ProcessInputQueue(ServerFrame frame)
+        {
+            var inputs = frame.Inputs;
+            foreach (var playerInput in PlayerInputs)
+            {
+                playerInput.Reset();
+            }
+
+            foreach (var input in inputs)
+            {
+                var entityId = input.EntityId;
+                if (entityId >= _playerCount)
+                {
+                    continue;
+                }
+
+                PlayerInputs[entityId] = input;
+            }
         }
 
         private void BindView(Entity entity, Entity oldEntity = null)
@@ -564,7 +652,7 @@ namespace Lockstep.Game
 
         public PlayerCommand GetPlayerInput(byte entityId)
         {
-            if (entityId >= PlayerInputs.Length)
+            if (entityId >= _playerCount)
             {
                 return PlayerCommand.Empty;
             }
@@ -583,6 +671,39 @@ namespace Lockstep.Game
             _frameBuffer.PushServerFrames(new ServerFrame[] { frame });
         }
 
+        private void SendInput()
+        {
+            int inputTargetTick = _tickSinceGameStart + _preSendInputCount;
+            while (_inputTick <= inputTargetTick)
+            {
+                var input = InputManager.CurrentInput;
+                input.Tick = _inputTick;
+                input.EntityId = _localPlayerIndex;
+
+                var frame = new ServerFrame();
+                frame.Inputs =  new PlayerCommand[_playerCount];
+                frame.Inputs[_localPlayerIndex] = input;
+                frame.tick = _inputTick;
+                PredictPlayerInput(frame);
+                _frameBuffer.PushLocalFrame(frame);
+
+                if (_inputTick > _frameBuffer.MaxServerTickInBuffer)
+                {
+                    C2DSClientInputReq req = new C2DSClientInputReq();
+                    req.PlayerInput = new C2DS.PlayerInput();
+                    req.PlayerInput.ProfileId = "0";
+                    req.PlayerInput.Tick = _inputTick;
+                    req.PlayerInput.Button = (int)input.ButtonField;
+                    req.PlayerInput.Horizontal = input.inputUV._x;
+                    req.PlayerInput.Vertical = input.inputUV._y;
+                    _networkModule.Send(req, (ushort)C2DS_MSG_ID.IdC2DsClientInputReq);
+                    _frameBuffer.SetInputTickStamp(_inputTick);
+                }
+
+                _inputTick++;
+            }
+        }
+
         private void ProcessFrame()
         {
             ServerFrame frame = _frameBuffer.GetFrame(Tick);
@@ -594,7 +715,7 @@ namespace Lockstep.Game
             var inputs = frame.Inputs;
             foreach (var input in inputs)
             {
-                if (input.EntityId >= PlayerInputs.Length)
+                if (input.EntityId >= _playerCount)
                 {
                     continue;
                 }
@@ -606,6 +727,73 @@ namespace Lockstep.Game
 
                 PlayerInputs[input.EntityId] = input;
             }
+        }
+
+        private void PredictPlayerInput(ServerFrame frame)
+        {
+            int tick = frame.tick;
+            var currentFrameInputs = frame.Inputs;
+            var myInput = currentFrameInputs[_localPlayerIndex];
+
+            // fill inputs with last frame's input (Input predict)
+            var lastFrameInputs = tick == 0 ? null : _frameBuffer.GetFrame(tick - 1)?.Inputs;
+            for (int i = 0; i < _playerCount; i++)
+            {
+                if (lastFrameInputs == null)
+                {
+                    currentFrameInputs[i] = PlayerCommand.Empty;
+                }
+                else
+                {
+                    currentFrameInputs[i] = lastFrameInputs[i];
+                }
+            }
+
+            currentFrameInputs[_localPlayerIndex] = myInput;
+            frame.Inputs = currentFrameInputs;
+        }
+
+        private void PursueServerFrames(long deadline)
+        {
+            while (Tick < _frameBuffer.CurTickInServer)
+            {
+                var frame = _frameBuffer.GetServerFrame(Tick);
+                if (frame == null)
+                {
+                    OnPursuingFrame();
+                    return;
+                }
+
+                _frameBuffer.PushLocalFrame(frame);
+                RunOneFrame(frame);
+                if (LTime.realtimeSinceStartupMS > deadline)
+                {
+                    OnPursuingFrame();
+                    return;
+                }
+            }
+        }
+
+        private void UpdateRollback()
+        {
+            if (!_frameBuffer.IsNeedRollback)
+            {
+                return;
+            }
+
+            var maxContinueServerTick = _frameBuffer.MaxContinueServerTick;
+            RollbackTo(_frameBuffer.NextTickToCheck, maxContinueServerTick);
+            while (Tick <= maxContinueServerTick)
+            {
+                var frame = _frameBuffer.GetServerFrame(Tick);
+                _frameBuffer.PushLocalFrame(frame);
+                RunOneFrame(frame);
+            }
+        }
+
+        private void OnPursuingFrame() 
+        {
+        
         }
     }
 }

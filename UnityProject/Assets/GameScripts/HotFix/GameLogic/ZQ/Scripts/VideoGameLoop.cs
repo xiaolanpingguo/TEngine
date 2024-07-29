@@ -42,7 +42,7 @@ namespace Lockstep.Game
         protected override void Init()
         {
             _frameBuffer = new FrameBuffer(2000, SnapshotFrameInterval, MaxPredictFrameCount);
-            _world = new World();
+            _world = new World(null);
             InputManager.Init();
         }
 

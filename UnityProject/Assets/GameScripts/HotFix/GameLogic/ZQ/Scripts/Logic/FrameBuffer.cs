@@ -90,7 +90,6 @@ namespace Lockstep.Game
         //buffers
         private int _maxClientPredictFrameCount;
         private int _bufferSize;
-        private int _spaceRollbackNeed;
         private int _maxServerOverFrameCount;
 
         private ServerFrame[] _serverBuffer;
@@ -98,18 +97,14 @@ namespace Lockstep.Game
 
         //ping 
         public int PingVal { get; private set; }
-        private List<long> _pings = new List<long>();
         private long _guessServerStartTimestamp = Int64.MaxValue;
-        private long _historyMinPing = Int64.MaxValue;
-        private long _minPing = Int64.MaxValue;
-        private long _maxPing = Int64.MinValue;
         public int DelayVal { get; private set; }
         private float _pingTimer;
         private List<long> _delays = new List<long>();
         Dictionary<int, long> _tick2SendTimestamp = new Dictionary<int, long>();
 
-        /// the tick client need run in next update
-        private int _nextClientTick;
+        // the tick client need run in next update
+        private int _nextClientTick = 0;
 
         public int CurTickInServer { get; private set; }
         public int NextTickToCheck { get; private set; }
@@ -126,8 +121,8 @@ namespace Lockstep.Game
             _predictHelper = new PredictCountHelper(this);
             this._bufferSize = bufferSize;
             this._maxClientPredictFrameCount = maxClientPredictFrameCount;
-            _spaceRollbackNeed = snapshotFrameInterval * 2;
-            _maxServerOverFrameCount = bufferSize - _spaceRollbackNeed;
+            int spaceRollbackNeed = snapshotFrameInterval * 2;
+            _maxServerOverFrameCount = bufferSize - spaceRollbackNeed;
             _serverBuffer = new ServerFrame[bufferSize];
             _clientBuffer = new ServerFrame[bufferSize];
         }
@@ -146,7 +141,7 @@ namespace Lockstep.Game
 
         public void PushMissServerFrames(ServerFrame[] frames, bool isNeedDebugCheck = true)
         {
-            PushServerFrames(frames, isNeedDebugCheck);
+            PushServerFrames(frames);
             //_networkService.SendMissFrameRepAck(MaxContinueServerTick + 1);
         }
 
@@ -157,10 +152,9 @@ namespace Lockstep.Game
             _clientBuffer[targetIdx] = data;
         }
 
-        public void PushServerFrames(ServerFrame[] frames, bool isNeedDebugCheck = true)
+        public void PushServerFrames(ServerFrame[] frames)
         {
-            var count = frames.Length;
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < frames.Length; i++)
             {
                 var data = frames[i];
                 if (_tick2SendTimestamp.TryGetValue(data.tick, out var sendTick))
@@ -170,9 +164,9 @@ namespace Lockstep.Game
                     _tick2SendTimestamp.Remove(data.tick);
                 }
 
+                // the frame is already checked
                 if (data.tick < NextTickToCheck)
                 {
-                    //the frame is already checked
                     return;
                 }
 
@@ -181,9 +175,9 @@ namespace Lockstep.Game
                     CurTickInServer = data.tick;
                 }
 
+                // to avoid ringBuffer override the frame that have not been checked
                 if (data.tick >= NextTickToCheck + _maxServerOverFrameCount - 1)
                 {
-                    // to avoid ringBuffer override the frame that have not been checked
                     return;
                 }
 
@@ -206,12 +200,11 @@ namespace Lockstep.Game
 
         public void Update(float deltaTime)
         {
-            //_networkService.SendPing(_simulatorService.LocalActorId, LTime.realtimeSinceStartupMS);
             _predictHelper.Update(deltaTime);
             int worldTick = World.Instance.Tick;
-            UpdatePingVal(deltaTime);
 
-            //Debug.Assert(nextTickToCheck <= nextClientTick, "localServerTick <= localClientTick ");
+            UnityEngine.Debug.Assert(NextTickToCheck <= _nextClientTick, "localServerTick <= localClientTick ");
+
             //Confirm frames
             IsNeedRollback = false;
             while (NextTickToCheck <= MaxServerTickInBuffer && NextTickToCheck < worldTick)
@@ -220,7 +213,9 @@ namespace Lockstep.Game
                 var cFrame = _clientBuffer[sIdx];
                 var sFrame = _serverBuffer[sIdx];
                 if (cFrame == null || cFrame.tick != NextTickToCheck || sFrame == null || sFrame.tick != NextTickToCheck)
+                {
                     break;
+                }
 
                 //Check client guess input match the real input
                 if (object.ReferenceEquals(sFrame, cFrame) || sFrame.Equals(cFrame))
@@ -260,40 +255,9 @@ namespace Lockstep.Game
             }
         }
 
-        private void UpdatePingVal(float deltaTime)
+        public void SetInputTickStamp(int tick)
         {
-            //_pingTimer += deltaTime;
-            //if (_pingTimer > 0.5f)
-            //{
-            //    _pingTimer = 0;
-            //    DelayVal = (int)(_delays.Sum() / LMath.Max(_delays.Count, 1));
-            //    _delays.Clear();
-            //    PingVal = (int)(_pings.Sum() / LMath.Max(_pings.Count, 1));
-            //    _pings.Clear();
-
-            //    if (_minPing < _historyMinPing && _simulatorService._gameStartTimestampMs != -1)
-            //    {
-            //        _historyMinPing = _minPing;
-            //        _simulatorService._gameStartTimestampMs = LMath.Min(_guessServerStartTimestamp, _simulatorService._gameStartTimestampMs);
-            //    }
-
-            //    _minPing = Int64.MaxValue;
-            //    _maxPing = Int64.MinValue;
-            //}
-        }
-
-        public void SendInput(PlayerCommand input)
-        {
-            _tick2SendTimestamp[input.Tick] = LTime.realtimeSinceStartupMS;
-#if DEBUG_SHOW_INPUT
-            var cmd = input.Commands[0];
-            var playerInput = new Deserializer(cmd.content).Parse<Lockstep.Game. PlayerInput>();
-            if (playerInput.inputUV != LVector2.zero) 
-            {
-                Debug.Log($"SendInput tick:{input.Tick} uv:{playerInput.inputUV}");
-            }
-#endif
-            // _networkService.SendInput(input);
+            _tick2SendTimestamp[tick] = LTime.realtimeSinceStartupMS;
         }
 
         public ServerFrame GetFrame(int tick)

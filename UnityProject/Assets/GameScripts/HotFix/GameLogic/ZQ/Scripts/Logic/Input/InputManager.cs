@@ -10,8 +10,6 @@ namespace Lockstep.Game
 {
     public struct PlayerCommand
     {
-        public static readonly PlayerCommand Empty = new PlayerCommand();
-
         [System.Flags]
         public enum Button : uint
         {
@@ -21,36 +19,11 @@ namespace Lockstep.Game
             Skill2 = 1 << 2,
         }
 
-        public readonly bool IsSet(Button button)
-        {
-            return (ButtonField & (uint)button) > 0;
-        }
-
-        public void Or(Button button, bool val)
-        {
-            if (val)
-            {
-                ButtonField |= (uint)button;
-            }
-        }
-
-        public void Set(Button button, bool val)
-        {
-            if (val)
-            {
-                ButtonField |= (uint)button;
-            }
-            else
-            {
-                ButtonField &= ~(uint)button;
-            }
-        }
-
-        public const int k_buttonCount = sizeof(Button) * 8;
-
-        public uint ButtonField;
+        public static readonly PlayerCommand Empty = new PlayerCommand();
+        public static readonly int k_buttonCount = sizeof(Button) * 8;
+        public int ButtonField;
         public LVector2 inputUV;
-        public byte EntityId;
+        public int EntityId;
         public int Tick;
         public bool IsMiss;
 
@@ -61,6 +34,54 @@ namespace Lockstep.Game
             Tick = -1;
             IsMiss = false;
             ButtonField = 0;
+        }
+
+        public readonly bool IsSet(Button button)
+        {
+            return (ButtonField & (int)button) > 0;
+        }
+
+        public void Or(Button button, bool val)
+        {
+            if (val)
+            {
+                ButtonField |= (int)button;
+            }
+        }
+
+        public void Set(Button button, bool val)
+        {
+            if (val)
+            {
+                ButtonField |= (int)button;
+            }
+            else
+            {
+                ButtonField &= ~(int)button;
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is PlayerCommand other && Equals(other);
+        }
+
+        public bool Equals(PlayerCommand other)
+        {
+            return this.inputUV == other.inputUV && 
+                this.ButtonField == other.ButtonField &&
+                this.EntityId == other.EntityId && 
+                this.Tick == other.Tick;
+        }
+
+        public static bool operator ==(PlayerCommand a, PlayerCommand b)
+        {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(PlayerCommand a, PlayerCommand b)
+        {
+            return !(a == b);
         }
     }
 
