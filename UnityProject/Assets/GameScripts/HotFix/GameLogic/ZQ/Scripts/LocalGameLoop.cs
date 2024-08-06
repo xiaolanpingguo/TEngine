@@ -34,18 +34,18 @@ namespace Lockstep.Game
 
         private void UpdateMockNetwork()
         {
-            float delta = Time.deltaTime;
-            _tickTimer += delta;
-            if (_tickTimer <= _networkUpdateInterval) 
-            {
-                return;
-            }
-            _tickTimer = 0;
+            //float delta = Time.deltaTime;
+            //_tickTimer += delta;
+            //if (_tickTimer <= _networkUpdateInterval) 
+            //{
+            //    return;
+            //}
+            //_tickTimer = 0;
 
-            var input = InputManager.CurrentInput;
-            input.Tick = _world.Tick;
-            input.EntityId = _world.LocalPlayerId;
-            _world.PushServerFrame(_world.Tick, new PlayerCommand[] { input });
+            //var input = InputManager.CurrentInput;
+            //input.Tick = _world.Tick;
+            //input.EntityId = _world.LocalPlayerId;
+            //_world.PushServerFrame(_world.Tick, new PlayerCommand[] { input });
         }
     }
 }

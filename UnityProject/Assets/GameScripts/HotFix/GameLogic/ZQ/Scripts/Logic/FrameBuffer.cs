@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Lockstep.Framework;
 using TEngine;
@@ -7,297 +9,151 @@ using TEngine;
 
 namespace Lockstep.Game
 {
-    public class NetworkDefine
+    public class MemoryBuffer : MemoryStream, IBufferWriter<byte>
     {
-        /// <summary>
-        /// 最大延迟时间 超过这个时间 依旧等不到玩家的输入包，默认玩家没有输入（输入丢失）
-        /// </summary>
-        public const int MAX_DELAY_TIME_MS = 300;
+        private int _origin;
 
-        /// 正常玩家的延迟
-        public const int NORMAL_PLAYER_MAX_DELAY = 100;
+        public MemoryBuffer()
+        {
+        }
 
-        /// 正常玩家最大收到输入确认包的延迟 （有其中一个玩家输入延迟太大 且自身网络达到66%丢包率 情况下的时延）
-        public const int MAX_FRAME_DATA_DELAY = MAX_DELAY_TIME_MS + NORMAL_PLAYER_MAX_DELAY + 2 * UPDATE_DELTATIME;
+        public MemoryBuffer(int capacity) : base(capacity)
+        {
+        }
 
-        /// 帧率
-        public const int FRAME_RATE = 33;
-        public const int UPDATE_DELTATIME = 30;
+        public MemoryBuffer(byte[] buffer) : base(buffer)
+        {
+        }
 
-        public const int PreSendInputCount = 1;
+        public MemoryBuffer(byte[] buffer, int index, int length) : base(buffer, index, length)
+        {
+            this._origin = index;
+        }
+
+        public ReadOnlyMemory<byte> WrittenMemory => this.GetBuffer().AsMemory(this._origin, (int)this.Position);
+
+        public ReadOnlySpan<byte> WrittenSpan => this.GetBuffer().AsSpan(this._origin, (int)this.Position);
+
+        public void Advance(int count)
+        {
+            long newLength = this.Position + count;
+            if (newLength > this.Length)
+            {
+                this.SetLength(newLength);
+            }
+            this.Position = newLength;
+        }
+
+        public Memory<byte> GetMemory(int sizeHint = 0)
+        {
+            if (this.Length - this.Position < sizeHint)
+            {
+                this.SetLength(this.Position + sizeHint);
+            }
+            var memory = this.GetBuffer().AsMemory((int)this.Position + this._origin, (int)(this.Length - this.Position));
+            return memory;
+        }
+
+        public Span<byte> GetSpan(int sizeHint = 0)
+        {
+            if (this.Length - this.Position < sizeHint)
+            {
+                this.SetLength(this.Position + sizeHint);
+            }
+            var span = this.GetBuffer().AsSpan((int)this.Position + this._origin, (int)(this.Length - this.Position));
+            return span;
+        }
     }
 
     public class FrameBuffer
     {
-        public class PredictCountHelper
+        private readonly int _frameRate;
+        private int _maxFrame;
+        private readonly List<ServerFrame> _frameInputs;
+        private readonly List<MemoryBuffer> _snapshots;
+        private readonly List<long> _hashs;
+
+        public FrameBuffer(int frame = 0, int frameRate = 20)
         {
-            public PredictCountHelper(FrameBuffer cmdBuffer)
+            _frameRate = frameRate;
+            _maxFrame = frame + frameRate * 30;
+            int capacity = frameRate * 60;
+            _frameInputs = new List<ServerFrame>(capacity);
+            _snapshots = new List<MemoryBuffer>(capacity);
+            _hashs = new List<long>(capacity);
+
+            for (int i = 0; i < _snapshots.Capacity; ++i)
             {
-                this._cmdBuffer = cmdBuffer;
-            }
-
-            public int missTick = -1;
-            public int nextCheckMissTick = 0;
-            public bool hasMissTick;
-
-            private FrameBuffer _cmdBuffer;
-            private float _timer;
-            private float _checkInterval = 0.5f;
-            private float _incPercent = 0.3f;
-
-            private float _targetPreSendTick;
-            private float _oldPercent = 0.6f;
-
-            public void Update(float deltaTime)
-            {
-                //_timer += deltaTime;
-                //if (_timer > _checkInterval)
-                //{
-                //    _timer = 0;
-                //    if (!hasMissTick)
-                //    {
-                //        var preSend = _cmdBuffer._maxPing * 1.0f / NetworkDefine.UPDATE_DELTATIME;
-                //        _targetPreSendTick = _targetPreSendTick * _oldPercent + preSend * (1 - _oldPercent);
-
-                //        var targetPreSendTick = LMath.Clamp((int)System.Math.Ceiling(_targetPreSendTick), 1, 60);
-
-                //        Log.Warning(
-                //            $"Shrink preSend buffer old:{NetworkDefine.PreSendInputCount} new:{_targetPreSendTick} " +
-                //            $"PING: min:{_cmdBuffer._minPing} max:{_cmdBuffer._maxPing} avg:{_cmdBuffer.PingVal}");
-
-                //        NetworkDefine.PreSendInputCount = targetPreSendTick;
-                //    }
-
-                //    hasMissTick = false;
-                //}
-
-                //if (missTick != -1)
-                //{
-                //    var delayTick = NetworkDefine.TargetTick - missTick;
-                //    var targetPreSendTick = NetworkDefine.PreSendInputCount + (int)System.Math.Ceiling(delayTick * _incPercent);
-                //    targetPreSendTick = LMath.Clamp(targetPreSendTick, 1, 60);
-
-                //    Log.Warning($"Expend preSend buffer old:{NetworkDefine.PreSendInputCount} new:{targetPreSendTick}");
-
-                //    NetworkDefine.PreSendInputCount = targetPreSendTick;
-                //    nextCheckMissTick = NetworkDefine.TargetTick;
-                //    missTick = -1;
-                //    hasMissTick = true;
-                //}
+                _hashs.Add(0);
+                _frameInputs.Add(new ServerFrame());
+                MemoryBuffer memoryBuffer = new(10240);
+                memoryBuffer.SetLength(0);
+                memoryBuffer.Seek(0, SeekOrigin.Begin);
+                _snapshots.Add(memoryBuffer);
             }
         }
 
-        //buffers
-        private int _maxClientPredictFrameCount;
-        private int _bufferSize;
-        private int _maxServerOverFrameCount;
-
-        private ServerFrame[] _serverBuffer;
-        private ServerFrame[] _clientBuffer;
-
-        //ping 
-        public int PingVal { get; private set; }
-        private long _guessServerStartTimestamp = Int64.MaxValue;
-        public int DelayVal { get; private set; }
-        private float _pingTimer;
-        private List<long> _delays = new List<long>();
-        Dictionary<int, long> _tick2SendTimestamp = new Dictionary<int, long>();
-
-        // the tick client need run in next update
-        private int _nextClientTick = 0;
-
-        public int CurTickInServer { get; private set; }
-        public int NextTickToCheck { get; private set; }
-        public int MaxServerTickInBuffer { get; private set; } = -1;
-        public bool IsNeedRollback { get; private set; }
-        public int MaxContinueServerTick { get; private set; }
-
-        public byte LocalId;
-
-        private PredictCountHelper _predictHelper;
-
-        public FrameBuffer(int bufferSize, int snapshotFrameInterval, int maxClientPredictFrameCount)
+        public void SetHash(int frame, long hash)
         {
-            _predictHelper = new PredictCountHelper(this);
-            this._bufferSize = bufferSize;
-            this._maxClientPredictFrameCount = maxClientPredictFrameCount;
-            int spaceRollbackNeed = snapshotFrameInterval * 2;
-            _maxServerOverFrameCount = bufferSize - spaceRollbackNeed;
-            _serverBuffer = new ServerFrame[bufferSize];
-            _clientBuffer = new ServerFrame[bufferSize];
+            EnsureFrame(frame);
+            _hashs[frame % _frameInputs.Capacity] = hash;
         }
 
-        public void SetClientTick(int tick)
+        public long GetHash(int frame)
         {
-            _nextClientTick = tick + 1;
+            EnsureFrame(frame);
+            return _hashs[frame % _frameInputs.Capacity];
         }
 
-        public void PushLocalFrame(ServerFrame frame)
+        public bool CheckFrame(int frame)
         {
-            var sIdx = frame.tick % _bufferSize;
-            UnityEngine.Debug.Assert(_clientBuffer[sIdx] == null || _clientBuffer[sIdx].tick <= frame.tick, "Push local frame error!");
-            _clientBuffer[sIdx] = frame;
-        }
-
-        public void PushMissServerFrames(ServerFrame[] frames, bool isNeedDebugCheck = true)
-        {
-            PushServerFrames(frames);
-            //_networkService.SendMissFrameRepAck(MaxContinueServerTick + 1);
-        }
-
-        public void ForcePushDebugFrame(ServerFrame data)
-        {
-            var targetIdx = data.tick % _bufferSize;
-            _serverBuffer[targetIdx] = data;
-            _clientBuffer[targetIdx] = data;
-        }
-
-        public void PushServerFrames(ServerFrame[] frames)
-        {
-            for (int i = 0; i < frames.Length; i++)
+            if (frame < 0)
             {
-                var data = frames[i];
-                if (_tick2SendTimestamp.TryGetValue(data.tick, out var sendTick))
-                {
-                    var delay = LTime.realtimeSinceStartupMS - sendTick;
-                    _delays.Add(delay);
-                    _tick2SendTimestamp.Remove(data.tick);
-                }
+                return false;
+            }
 
-                // the frame is already checked
-                if (data.tick < NextTickToCheck)
-                {
-                    return;
-                }
+            if (frame > _maxFrame)
+            {
+                return false;
+            }
 
-                if (data.tick > CurTickInServer)
-                {
-                    CurTickInServer = data.tick;
-                }
+            return true;
+        }
 
-                // to avoid ringBuffer override the frame that have not been checked
-                if (data.tick >= NextTickToCheck + _maxServerOverFrameCount - 1)
-                {
-                    return;
-                }
-
-                if (data.tick > MaxServerTickInBuffer)
-                {
-                    MaxServerTickInBuffer = data.tick;
-                }
-
-                var targetIdx = data.tick % _bufferSize;
-                if (_serverBuffer[targetIdx] == null || _serverBuffer[targetIdx].tick != data.tick)
-                {
-                    _serverBuffer[targetIdx] = data;
-                    if (data.tick > _predictHelper.nextCheckMissTick && data.Inputs[LocalId].IsMiss && _predictHelper.missTick == -1)
-                    {
-                        _predictHelper.missTick = data.tick;
-                    }
-                }
+        private void EnsureFrame(int frame)
+        {
+            if (!CheckFrame(frame))
+            {
+                throw new Exception($"frame out: {frame}, maxframe: {_maxFrame}");
             }
         }
 
-        public void Update(float deltaTime)
+        public ServerFrame GetFrame(int frame)
         {
-            _predictHelper.Update(deltaTime);
-            int worldTick = World.Instance.Tick;
+            EnsureFrame(frame);
+            ServerFrame serverFrame = _frameInputs[frame % _frameInputs.Capacity];
+            return serverFrame;
+        }
 
-            UnityEngine.Debug.Assert(NextTickToCheck <= _nextClientTick, "localServerTick <= localClientTick ");
-
-            //Confirm frames
-            IsNeedRollback = false;
-            while (NextTickToCheck <= MaxServerTickInBuffer && NextTickToCheck < worldTick)
-            {
-                var sIdx = NextTickToCheck % _bufferSize;
-                var cFrame = _clientBuffer[sIdx];
-                var sFrame = _serverBuffer[sIdx];
-                if (cFrame == null || cFrame.tick != NextTickToCheck || sFrame == null || sFrame.tick != NextTickToCheck)
-                {
-                    break;
-                }
-
-                //Check client guess input match the real input
-                if (object.ReferenceEquals(sFrame, cFrame) || sFrame.Equals(cFrame))
-                {
-                    NextTickToCheck++;
-                }
-                else
-                {
-                    IsNeedRollback = true;
-                    break;
-                }
-            }
-
-            //Request miss frame data
-            int tick = NextTickToCheck;
-            for (; tick <= MaxServerTickInBuffer; tick++)
-            {
-                var idx = tick % _bufferSize;
-                if (_serverBuffer[idx] == null || _serverBuffer[idx].tick != tick)
-                {
-                    break;
-                }
-            }
-
-            MaxContinueServerTick = tick - 1;
-            if (MaxContinueServerTick <= 0)
+        public void MoveForward(int frame)
+        {
+            // at least reserve 1s
+            if (_maxFrame - frame > _frameRate)
             {
                 return;
             }
 
-            if (MaxContinueServerTick < CurTickInServer // has some middle frame pack was lost
-                || _nextClientTick > MaxContinueServerTick + (_maxClientPredictFrameCount - 3) //client has predict too much
-            )
-            {
-                Log.Info("SendMissFrameReq " + MaxContinueServerTick);
-                //_networkService.SendMissFrameReq(MaxContinueServerTick);
-            }
+            ++_maxFrame;
+
+            ServerFrame serverFrame = GetFrame(_maxFrame);
+            //serverFrame.Inputs.Clear();
         }
 
-        public void SetInputTickStamp(int tick)
+        public MemoryBuffer Snapshot(int frame)
         {
-            _tick2SendTimestamp[tick] = LTime.realtimeSinceStartupMS;
-        }
-
-        public ServerFrame GetFrame(int tick)
-        {
-            var sFrame = GetServerFrame(tick);
-            if (sFrame != null)
-            {
-                return sFrame;
-            }
-
-            return GetLocalFrame(tick);
-        }
-
-        public ServerFrame GetServerFrame(int tick)
-        {
-            if (tick > MaxServerTickInBuffer)
-            {
-                return null;
-            }
-
-            return _GetFrame(_serverBuffer, tick);
-        }
-
-        public ServerFrame GetLocalFrame(int tick)
-        {
-            if (tick >= _nextClientTick)
-            {
-                return null;
-            }
-
-            return _GetFrame(_clientBuffer, tick);
-        }
-
-        private ServerFrame _GetFrame(ServerFrame[] buffer, int tick)
-        {
-            var idx = tick % _bufferSize;
-            var frame = buffer[idx];
-            if (frame == null) return null;
-            if (frame.tick != tick) return null;
-            return frame;
+            EnsureFrame(frame);
+            MemoryBuffer memoryBuffer = _snapshots[frame % _snapshots.Capacity];
+            return memoryBuffer;
         }
     }
 }

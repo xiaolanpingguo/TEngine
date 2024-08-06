@@ -30,7 +30,6 @@ namespace Lockstep.Game
 
     public class NetworkModule
     {
-        public int Ping { get; private set; }
         public bool IsConnected { get; private set; }
         private KcpClient m_network = null!;
         private ClientMessageDispatcher m_messageDispatcher = null!;
@@ -62,9 +61,6 @@ namespace Lockstep.Game
             m_network.Connect(m_endPoint.Address.ToString(), (ushort)m_endPoint.Port);
 
             m_messageDispatcher = new ClientMessageDispatcher(m_network);
-            RegisterMessage((ushort)C2DS_MSG_ID.IdC2DsPingRes, typeof(C2DSPingRes), OnMsgPingRes);
-            GameModule.Timer.AddTimer(UpdatePing, 0.5f, true);
-
             Log.Info($"client is connecting to server, ip:{m_endPoint}");
             return true;
         }
@@ -116,33 +112,6 @@ namespace Lockstep.Game
         private void OnError(ErrorCode ec, string reason)
         {
             Log.Info($"a server error has occurred, error:{ec}, reason:{reason}");
-        }
-
-        private void UpdatePing(object[] args)
-        {
-            if (!IsConnected) 
-            {
-                return;
-            }
-
-            C2DS.C2DSPingReq req = new C2DS.C2DSPingReq();
-            req.ProfileId = "1234";
-            req.ClientTime = TimeHelper.TimeStampNowMs();
-            Send(req, (ushort)C2DS.C2DS_MSG_ID.IdC2DsPingReq);
-        }
-
-        private void OnMsgPingRes(ushort messageId, int rpcId, IMessage message)
-        {
-            if (message == null || message is not C2DSPingRes res)
-            {
-                Log.Error($"OnMsgPingRes error: cannot convert message to C2DSPingRes");
-                return;
-            }
-
-            long clientTime = res.ClientTime;
-            //long serverTime = res.ServerTime;
-            long now = TimeHelper.TimeStampNowMs();
-            Ping = (int)(now - clientTime);
         }
     }
 }

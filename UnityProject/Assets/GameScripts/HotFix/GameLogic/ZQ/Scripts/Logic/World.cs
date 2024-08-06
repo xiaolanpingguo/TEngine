@@ -7,8 +7,9 @@ using UnityEngine;
 using TEngine;
 using System.Text;
 using C2DS;
+using Google.Protobuf;
+using System.Management.Instrumentation;
 using UnityEngine.InputSystem;
-using Unity.Android.Gradle;
 
 
 namespace Lockstep.Game
@@ -64,8 +65,9 @@ namespace Lockstep.Game
         public int Hash { get; set; }
 
         private int _playerCount = 1;
-        private int _localPlayerIndex;
+        private PlayerInfo _myPlayerInfo = null;
         private int _entityIdCounter = 0;
+        private Dictionary<string, int> _profile2Index = new();
         private Dictionary<int, int> _tick2Id = new Dictionary<int, int>();
 
         private long _gameStartTimestampMs = -1;
@@ -74,13 +76,23 @@ namespace Lockstep.Game
         private int _preSendInputCount = 1;
         private int _inputTick = 0;
 
-        private LFloat WorldUpdateTick = new LFloat(true, 30);
-
         private FrameBuffer _frameBuffer;
         private int _snapshotFrameInterval = 1;
 
         private const int _maxSimulationMsPerFrame = 20;
         private const int _maxPredictFrameCount = 5;
+
+        private const int k_frameRate = 20;
+        private const int k_updateIntervalMs = 1000 / k_frameRate;
+        private LFloat WorldUpdateTick = new LFloat(true, k_frameRate);
+
+        private WorldGameTime _worldGameTime;
+        private FixedTimeCounter _fixedTimeCounter;
+        private const int k_maxPredictionTick = 5;
+        private const int k_maxPursueTime= 5; // ms
+        private int _predictionTick = -1;
+        private int _authorityTick = -1;
+        public int SpeedMultiply { get; set; }
 
         public LFloat RemainTime
         {
@@ -109,12 +121,17 @@ namespace Lockstep.Game
         public World(NetworkModule networkModule)
         {
             _networkModule = networkModule;
+            _networkModule.RegisterMessage((ushort)C2DS_MSG_ID.IdDs2CAdjustUpdateTimeReq, typeof(DS2CAdjustUpdateTimeReq), OnMsgAdjustUpdateTimeReq);
+            _networkModule.RegisterMessage((ushort)C2DS_MSG_ID.IdC2DsPingRes, typeof(C2DSPingRes), OnMsgPingRes);
+            _networkModule.RegisterMessage((ushort)C2DS_MSG_ID.IdDs2CServerFrameReq, typeof(DS2CServerFrameReq), OnMsgServerFrameReq);
+            GameModule.Timer.AddTimer(UpdatePing, 1f, true);
+            _worldGameTime = new WorldGameTime();
         }
 
         public void Init()
         {
             Instance = this;
-            _frameBuffer = new FrameBuffer(2000, _snapshotFrameInterval, _maxPredictFrameCount);
+            _frameBuffer = new FrameBuffer();
             RegisterSystems();
 
             foreach (var sys in _systems)
@@ -135,7 +152,7 @@ namespace Lockstep.Game
         {
             Destroy();
         }
-
+        
         public void Update()
         {
             if (_gameStartTimestampMs < 0)
@@ -143,27 +160,41 @@ namespace Lockstep.Game
                 return;
             }
 
-            _tickSinceGameStart = (int)((LTime.realtimeSinceStartupMS - _gameStartTimestampMs) / NetworkDefine.UPDATE_DELTATIME);
-            float fDeltaTime = Time.deltaTime;
-            _frameBuffer.Update(fDeltaTime);
-            SendInput();
+            _worldGameTime.Update();
+            PredictUpdate();
+        }
 
-            // make sure client is not move ahead too much than server
-            var maxContinueServerTick = _frameBuffer.MaxContinueServerTick;
-            if ((Tick - maxContinueServerTick) > _maxPredictFrameCount)
+        private void PredictUpdate()
+        {
+            long timeNow = _worldGameTime.ServerNow();
+            int i = 0;
+            while (true)
             {
-                return;
+                if (timeNow < _fixedTimeCounter.FrameTime(_predictionTick + 1))
+                {
+                    return;
+                }
+
+                // predict up to 5 frames
+                if (_predictionTick - _authorityTick > k_maxPredictionTick)
+                {
+                    return;
+                }
+
+                ++_predictionTick;
+                ServerFrame frame = GetOneFrameMessage(_predictionTick);
+                RunOneFrame(frame);
+                //SendHash(room.PredictionFrame);
+
+                SpeedMultiply = ++i;
+                SendInput(frame);
+
+                long timeNow2 = _worldGameTime.ServerNow();
+                if (timeNow2 - timeNow > k_maxPursueTime)
+                {
+                    break;
+                }
             }
-
-            // persue server frames
-            var deadline = LTime.realtimeSinceStartupMS + _maxSimulationMsPerFrame;
-            PursueServerFrames(deadline);
-
-            // rollback
-            UpdateRollback();
-
-            // run frames
-            RunFrames();
         }
 
         public void RegisterSystems()
@@ -197,7 +228,32 @@ namespace Lockstep.Game
             return null;
         }
 
-        public GameObject LoadPrefab(PrefabType type)
+        public void OnGameStart(PlayerInfo[] players, PlayerInfo myPlayer)
+        {
+            _playerCount = players.Length;
+            _myPlayerInfo = myPlayer;
+            for (int i = 0; i < _playerCount; i++)
+            {
+                var initPos = LVector2.zero;
+                var player = CreateEntity<Player>(initPos);
+                if (_myPlayerInfo.PlayerIndex == i)
+                {
+                    LocalPlayer = player;
+                    player.EntityId = i;
+                }
+
+                PlayerInfo playerInfo = players[i];
+                _profile2Index[playerInfo.ProfileId] = playerInfo.PlayerIndex;
+            }
+
+            PlayerInputs = new PlayerCommand[_playerCount];
+            //SendInput();
+            _gameStartTimestampMs = LTime.realtimeSinceStartupMS;
+            _worldGameTime.Start();
+            _fixedTimeCounter = new FixedTimeCounter(_worldGameTime.StartTime, 0, k_updateIntervalMs);
+        }
+
+        private GameObject LoadPrefab(PrefabType type)
         {
             if (_id2Prefab.TryGetValue(type, out var val))
             {
@@ -206,7 +262,7 @@ namespace Lockstep.Game
 
             GameConfig gameConfig = GameConfigSingleton.Instance.GameConfig;
             string prefabPath = gameConfig.GetPrefabPath(type);
-            if (string.IsNullOrEmpty(prefabPath)) 
+            if (string.IsNullOrEmpty(prefabPath))
             {
                 return null;
             }
@@ -221,60 +277,40 @@ namespace Lockstep.Game
             return prefab;
         }
 
-        public void OnGameStart(int playerCount, int localPlayerIndex)
+        private void Rollback(int tick)
         {
-            _playerCount = playerCount;
-            _localPlayerIndex = localPlayerIndex;
-            for (int i = 0; i < _playerCount; i++)
+            ServerFrame authorityFrame = _frameBuffer.GetFrame(tick);
+            RunOneFrame(authorityFrame);
+            //SendHash(tick);
+
+            // re-run prediction tick
+            for (int i = _authorityTick + 1; i <= _predictionTick; ++i)
             {
-                var initPos = LVector2.zero;
-                var player = CreateEntity<Player>(initPos);
-                if (localPlayerIndex == i)
+                ServerFrame frame = _frameBuffer.GetFrame(i);
+ 
+                // copy others inputs
+                foreach (var input in authorityFrame.Inputs)
                 {
-                    LocalPlayer = player;
-                    player.EntityId = _localPlayerIndex;
-                }
-            }
+                    if (input.EntityId == _myPlayerInfo.PlayerIndex)
+                    {
+                        continue;
+                    }
 
-            PlayerInputs = new PlayerCommand[_playerCount];
-            SendInput();
-            _gameStartTimestampMs = LTime.realtimeSinceStartupMS;
-        }
-
-        public void OnServerFrameRecieved(List<ServerFrame> serverFrames)
-        {
-            _frameBuffer.PushServerFrames(serverFrames.ToArray());
-        }
-
-        private void RunFrames()
-        {
-            int targetTick = _tickSinceGameStart + FramePredictCount;
-            while (Tick < targetTick)
-            {
-                var curTick = Tick;
-                ServerFrame frame = null;
-                var serverFrame = _frameBuffer.GetServerFrame(curTick);
-                if (serverFrame != null)
-                {
-                    frame = serverFrame;
-                }
-                else
-                {
-                    var cientFrame = _frameBuffer.GetLocalFrame(curTick);
-                    PredictPlayerInput(cientFrame);
-                    frame = cientFrame;
+                    frame.Inputs[input.EntityId] = input;
                 }
 
-                _frameBuffer.PushLocalFrame(frame);
                 RunOneFrame(frame);
             }
+
+            //RunLSRollbackSystem(room);
         }
 
         private void RunOneFrame(ServerFrame frame)
         {
-            ProcessInputQueue(frame);
+            // set inputs
+            PlayerInputs = frame.Inputs;
             RunWorldOneFrame();
-            _frameBuffer.SetClientTick(Tick);
+            //_frameBuffer.SetClientTick(Tick);
         }
 
         private void RunWorldOneFrame()
@@ -553,10 +589,6 @@ namespace Lockstep.Game
             }
         }
 
-        public void Clean(int maxVerifiedTick)
-        {
-        }
-
         private void BackUpEntities<T>(T[] lst, Serializer writer) where T : Entity, new()
         {
             writer.Write(lst.Length);
@@ -650,150 +682,225 @@ namespace Lockstep.Game
             }
         }
 
-        public PlayerCommand GetPlayerInput(byte entityId)
+        public PlayerCommand GetPlayerInput(int playerIndex)
         {
-            if (entityId >= _playerCount)
+            if (playerIndex >= _playerCount)
             {
                 return PlayerCommand.Empty;
             }
 
-            return PlayerInputs[entityId];
+            return PlayerInputs[playerIndex];
         }
 
-        public void PushServerFrame(int tick, PlayerCommand[] playerInputs)
+        private ServerFrame GetOneFrameMessage(int tick)
         {
-            var frame = new ServerFrame()
+            if (tick <= _authorityTick)
             {
-                tick = tick,
-                Inputs = playerInputs
-            };
-            _frameBuffer.PushLocalFrame(frame);
-            _frameBuffer.PushServerFrames(new ServerFrame[] { frame });
-        }
-
-        private void SendInput()
-        {
-            int inputTargetTick = _tickSinceGameStart + _preSendInputCount;
-            while (_inputTick <= inputTargetTick)
-            {
-                var input = InputManager.CurrentInput;
-                input.Tick = _inputTick;
-                input.EntityId = _localPlayerIndex;
-
-                var frame = new ServerFrame();
-                frame.Inputs =  new PlayerCommand[_playerCount];
-                frame.Inputs[_localPlayerIndex] = input;
-                frame.tick = _inputTick;
-                PredictPlayerInput(frame);
-                _frameBuffer.PushLocalFrame(frame);
-
-                if (_inputTick > _frameBuffer.MaxServerTickInBuffer)
-                {
-                    C2DSClientInputReq req = new C2DSClientInputReq();
-                    req.PlayerInput = new C2DS.PlayerInput();
-                    req.PlayerInput.ProfileId = "0";
-                    req.PlayerInput.Tick = _inputTick;
-                    req.PlayerInput.Button = (int)input.ButtonField;
-                    req.PlayerInput.Horizontal = input.inputUV._x;
-                    req.PlayerInput.Vertical = input.inputUV._y;
-                    _networkModule.Send(req, (ushort)C2DS_MSG_ID.IdC2DsClientInputReq);
-                    _frameBuffer.SetInputTickStamp(_inputTick);
-                }
-
-                _inputTick++;
+                return _frameBuffer.GetFrame(tick);
             }
+
+            // predict
+            ServerFrame predictionFrame = _frameBuffer.GetFrame(tick);
+            predictionFrame.Inputs = new PlayerCommand[_playerCount];
+            _frameBuffer.MoveForward(tick);
+
+            if (_frameBuffer.CheckFrame(_authorityTick))
+            {
+                ServerFrame authorityFrame = _frameBuffer.GetFrame(_authorityTick);
+                authorityFrame.CopyTo(predictionFrame);
+            }
+
+            int index = _myPlayerInfo.PlayerIndex;
+            predictionFrame.Inputs[index] = InputManager.CurrentInput;
+            predictionFrame.Inputs[index].EntityId = index;
+            return predictionFrame;
         }
 
-        private void ProcessFrame()
+        private void SendInput(ServerFrame frame)
         {
-            ServerFrame frame = _frameBuffer.GetFrame(Tick);
-            if (frame == null)
+            PlayerCommand myInput = frame.Inputs[_myPlayerInfo.PlayerIndex];
+            C2DSClientInputReq req = new C2DSClientInputReq();
+            req.PlayerInput = new C2DS.PlayerInput();
+            req.PlayerInput.ProfileId = _myPlayerInfo.ProfileId;
+            req.PlayerInput.Tick = _inputTick;
+            req.PlayerInput.Button = myInput.ButtonField;
+            req.PlayerInput.Horizontal = myInput.inputUV._x;
+            req.PlayerInput.Vertical = myInput.inputUV._y;
+            _networkModule.Send(req, (ushort)C2DS_MSG_ID.IdC2DsClientInputReq);
+        }
+
+        private void UpdatePing(object[] args)
+        {
+            if (!_networkModule.IsConnected)
             {
                 return;
             }
 
-            var inputs = frame.Inputs;
-            foreach (var input in inputs)
+            C2DS.C2DSPingReq req = new C2DS.C2DSPingReq();
+            req.ClientTime = TimeHelper.TimeStampNowMs();
+            _networkModule.Send(req, (ushort)C2DS.C2DS_MSG_ID.IdC2DsPingReq);
+        }
+
+        private int GetPlayerIndexByProfileId(string profileId)
+        {
+            if (_profile2Index.TryGetValue(profileId, out var index))
             {
-                if (input.EntityId >= _playerCount)
+                return index;
+            }
+
+            return -1;
+        }
+
+        private void OnMsgServerFrameReq(ushort messageId, int rpcId, IMessage message)
+        {
+            if (message == null || message is not DS2CServerFrameReq req)
+            {
+                Log.Error($"OnServerFrameReq error: cannot convert message to DS2CServerFrameReq");
+                return;
+            }
+
+            _authorityTick++;
+
+            ServerFrame serverFrame = MsgServerFrame2GameFrame(req.ServrFrame);
+
+            // the client tick is behind the server, just use server data for this tick
+            if (_authorityTick > _predictionTick)
+            {
+                ServerFrame authorityFrame = _frameBuffer.GetFrame(_authorityTick);
+                serverFrame.CopyTo(authorityFrame);
+            }
+            // The client tick runs in front of the server tick, this is the case most of the time
+            else
+            {
+                // comparing the predicted frame with the authoritative frame
+                // there are two cases of prediction failure
+                // 1: failure to predict other player's input
+                // 2: failure to predict my input, In this case, the message you sent arrives later than the server,
+                // the server will use the input of the previous frame to predict by default
+                // when rolling back and re-predicting, my input does not need to change
+                ServerFrame predictionFrame = _frameBuffer.GetFrame(_authorityTick);
+                if (serverFrame != predictionFrame)
+                {
+                    serverFrame.CopyTo(predictionFrame);
+                    Rollback(_authorityTick);
+                }
+                // predict success
+                else
+                {
+                    //Record(_authorityTick);
+                    //SendHash(_authorityTick);
+                }
+            }
+        }
+
+        private PlayerCommand MsgInput2GameInput(C2DS.PlayerInput msgInpt)
+        {
+            PlayerCommand playerCommand = default;
+            playerCommand.Tick = msgInpt.Tick;
+            playerCommand.inputUV._x = msgInpt.Horizontal;
+            playerCommand.inputUV._y = msgInpt.Vertical;
+            playerCommand.ButtonField = msgInpt.Button;
+            playerCommand.EntityId = GetPlayerIndexByProfileId(msgInpt.ProfileId);
+            return playerCommand;
+        }
+
+        private ServerFrame MsgServerFrame2GameFrame(C2DS.ServerFrame msgFrame)
+        {
+            ServerFrame serverFrame = new ServerFrame();
+            serverFrame.tick = msgFrame.Tick;
+            serverFrame.Inputs = new PlayerCommand[_playerCount];
+
+            for (int i = 0; i < serverFrame.Inputs.Length; ++i)
+            {
+                serverFrame.Inputs[i] = PlayerCommand.Empty;
+            }
+
+            foreach (var msgInput in msgFrame.PlayerInputs)
+            {
+                PlayerCommand playerCommand = MsgInput2GameInput(msgInput);
+                if (playerCommand.EntityId < 0 || playerCommand.EntityId >= _playerCount)
                 {
                     continue;
                 }
 
-                if (input.inputUV.x > 0 || input.inputUV.y > 0)
-                {
-                    // Debug.Log("dawdawdawd");
-                }
-
-                PlayerInputs[input.EntityId] = input;
+                serverFrame.Inputs[playerCommand.EntityId] = playerCommand;
             }
+
+            return serverFrame;
         }
 
-        private void PredictPlayerInput(ServerFrame frame)
+        public void OnMsgServerFrameRecieved(ServerFrame serverFrame)
         {
-            int tick = frame.tick;
-            var currentFrameInputs = frame.Inputs;
-            var myInput = currentFrameInputs[_localPlayerIndex];
+            _authorityTick++;
 
-            // fill inputs with last frame's input (Input predict)
-            var lastFrameInputs = tick == 0 ? null : _frameBuffer.GetFrame(tick - 1)?.Inputs;
-            for (int i = 0; i < _playerCount; i++)
+            // the client tick is behind the server, just use server data for this tick
+            if (_authorityTick > _predictionTick)
             {
-                if (lastFrameInputs == null)
+                ServerFrame authorityFrame = _frameBuffer.GetFrame(_authorityTick);
+                serverFrame.CopyTo(authorityFrame);
+            }
+            // The client tick runs in front of the server tick, this is the case most of the time
+            else
+            {
+                ServerFrame predictionFrame = _frameBuffer.GetFrame(_authorityTick);
+
+                // comparing the predicted frame with the authoritative frame
+                // there are two cases of prediction failure
+                // 1: failure to predict other player's input
+                // 2: failure to predict my input, In this case, the message you sent arrives later than the server,
+                // the server will use the input of the previous frame to predict by default
+                // when rolling back and re-predicting, my input does not need to change
+                if (serverFrame != predictionFrame)
                 {
-                    currentFrameInputs[i] = PlayerCommand.Empty;
+                    serverFrame.CopyTo(predictionFrame);
+                    Rollback(_authorityTick);
                 }
+                // predict success
                 else
                 {
-                    currentFrameInputs[i] = lastFrameInputs[i];
-                }
-            }
-
-            currentFrameInputs[_localPlayerIndex] = myInput;
-            frame.Inputs = currentFrameInputs;
-        }
-
-        private void PursueServerFrames(long deadline)
-        {
-            while (Tick < _frameBuffer.CurTickInServer)
-            {
-                var frame = _frameBuffer.GetServerFrame(Tick);
-                if (frame == null)
-                {
-                    OnPursuingFrame();
-                    return;
-                }
-
-                _frameBuffer.PushLocalFrame(frame);
-                RunOneFrame(frame);
-                if (LTime.realtimeSinceStartupMS > deadline)
-                {
-                    OnPursuingFrame();
-                    return;
+                    //Record(_authorityTick);
+                    //SendHash(_authorityTick);
                 }
             }
         }
 
-        private void UpdateRollback()
+        private void OnMsgAdjustUpdateTimeReq(ushort messageId, int rpcId, IMessage message)
         {
-            if (!_frameBuffer.IsNeedRollback)
+            if (message == null || message is not DS2CAdjustUpdateTimeReq req)
             {
+                Log.Error($"OnMsgAdjustUpdateTimeReq error: cannot convert message to DS2CAdjustUpdateTimeReq");
                 return;
             }
 
-            var maxContinueServerTick = _frameBuffer.MaxContinueServerTick;
-            RollbackTo(_frameBuffer.NextTickToCheck, maxContinueServerTick);
-            while (Tick <= maxContinueServerTick)
+            int diffTime = req.DiffTime;
+            int newInterval = (1000 + (diffTime - k_updateIntervalMs)) * k_updateIntervalMs / 1000;
+
+            if (newInterval < 40)
             {
-                var frame = _frameBuffer.GetServerFrame(Tick);
-                _frameBuffer.PushLocalFrame(frame);
-                RunOneFrame(frame);
+                newInterval = 40;
             }
+
+            if (newInterval > 66)
+            {
+                newInterval = 66;
+            }
+
+            _fixedTimeCounter.ChangeInterval(newInterval, _predictionTick);
         }
 
-        private void OnPursuingFrame() 
+        private void OnMsgPingRes(ushort messageId, int rpcId, IMessage message)
         {
-        
+            if (message == null || message is not C2DSPingRes res)
+            {
+                Log.Error($"OnMsgPingRes error: cannot convert message to C2DSPingRes");
+                return;
+            }
+
+            long clientRequestTime = res.ClientTime;
+            long serverTime = res.ServerTime;
+            long now = TimeHelper.TimeStampNowMs();
+            int ping = (int)(now - clientRequestTime);
+            _worldGameTime.ServerMinusClientTime = serverTime + (now - clientRequestTime) / 2 - now;
         }
     }
 }

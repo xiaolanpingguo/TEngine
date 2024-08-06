@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using kcp2k;
-using UnityEditor.MemoryProfiler;
+using Log = TEngine.Log;
 
 
 namespace Lockstep.Game
@@ -164,11 +164,12 @@ namespace Lockstep.Game
 
         public void DispatchMessage(ArraySegment<byte> buffer, KcpChannel channel) 
         {
+            ushort messageId = 0;
+            int rpcId = -1;
+            byte[] packetBytes = null;
+            IMessage packet = null;
             try
             {
-                ushort messageId;
-                int rpcId;
-                byte[] packetBytes;
                 if (!Deserialize(buffer, out messageId, out rpcId, out packetBytes))
                 {
                     return;
@@ -181,31 +182,31 @@ namespace Lockstep.Game
                 }
 
                 IMessage message = (IMessage)Activator.CreateInstance(type);
-                IMessage packet = message?.Descriptor.Parser.ParseFrom(packetBytes);
-
-                if (m_rpcRequests.Count == 0 || !m_rpcRequests.TryGetValue(rpcId, out var rpcData))
-                {
-                    if (!m_messageHandlers.TryGetValue(messageId, out var handler))
-                    {
-                        Log.Error($"both message and rcp request cannot be found, id:{messageId}");
-                        m_network.Disconnect();
-                        return;
-                    }
-                    else
-                    {
-                        handler?.Invoke(messageId, rpcId, packet);
-                    }
-                }
-                else
-                {
-                    m_rpcRequests.Remove(rpcId);
-                    rpcData?.tcs?.SetResult(packet);
-                }
+                packet = message?.Descriptor.Parser.ParseFrom(packetBytes);
             }
             catch (Exception e)
             {
                 string errorDesc = $"DispatchPacket packet failed, ex, {e.Message}";
                 Log.Error(errorDesc);
+            }
+
+            if (m_rpcRequests.Count == 0 || !m_rpcRequests.TryGetValue(rpcId, out var rpcData))
+            {
+                if (!m_messageHandlers.TryGetValue(messageId, out var handler))
+                {
+                    Log.Error($"both message and rcp request cannot be found, id:{messageId}");
+                    m_network.Disconnect();
+                    return;
+                }
+                else
+                {
+                    handler?.Invoke(messageId, rpcId, packet);
+                }
+            }
+            else
+            {
+                m_rpcRequests.Remove(rpcId);
+                rpcData?.tcs?.SetResult(packet);
             }
         }
 

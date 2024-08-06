@@ -13,7 +13,6 @@ namespace Lockstep.Game
     public class PlayerInfo
     {
         public string ProfileId;
-        public int ProfileIdHash;
         public int PlayerIndex;
     }
 
@@ -36,7 +35,7 @@ namespace Lockstep.Game
         private NetworkModule _networkModule = null;
         private StateMachine<State> _stateMachine;
 
-        private PlayerInfo _playerInfo = new PlayerInfo();
+        private PlayerInfo _myPlayerInfo = new PlayerInfo();
 
         protected override void Init()
         {
@@ -46,7 +45,6 @@ namespace Lockstep.Game
             _networkModule.Init();
             _networkModule.RegisterMessage((ushort)C2DS_MSG_ID.IdC2DsJoinServerRes, typeof(C2DSJoinServerRes), OnMsgJoinServerRes);
             _networkModule.RegisterMessage((ushort)C2DS_MSG_ID.IdDs2CStartGameReq, typeof(DS2CStartGameReq), OnMsgGameStartReq);
-            _networkModule.RegisterMessage((ushort)C2DS_MSG_ID.IdDs2CServerFrameReq, typeof(DS2CServerFrameReq), OnMsgServerFrameReq);
 
             _world = new World(_networkModule);
 
@@ -57,8 +55,7 @@ namespace Lockstep.Game
             _stateMachine.Add(State.End, null, () => { }, null);
             _stateMachine.SwitchTo(State.Start);
 
-            _playerInfo.ProfileId = "1234";
-            _playerInfo.ProfileIdHash = _playerInfo.ProfileId.GetHashCode();
+            _myPlayerInfo.ProfileId = "1234";
         }
 
         public void CreateGame()
@@ -79,25 +76,9 @@ namespace Lockstep.Game
             _networkModule.Update(timeNow);
         }
 
-        private void UpdateMockNetwork()
-        {
-            float delta = Time.deltaTime;
-            _tickTimer += delta;
-            if (_tickTimer <= _networkUpdateInterval)
-            {
-                return;
-            }
-            _tickTimer = 0;
-
-            var input = InputManager.CurrentInput;
-            input.Tick = _world.Tick;
-            input.EntityId = _world.LocalPlayerId;
-            _world.PushServerFrame(_world.Tick, new PlayerCommand[] { input });
-        }
-
         private void UpdateStart()
         {
-            if (_networkModule.IsConnected) 
+            if (_networkModule.IsConnected)
             {
                 _stateMachine.SwitchTo(State.JoinServer);
             }
@@ -106,14 +87,13 @@ namespace Lockstep.Game
         private void EnterJoinServer()
         {
             C2DS.C2DSJoinServerReq req = new C2DS.C2DSJoinServerReq();
-            req.ProfileId = _playerInfo.ProfileId;
-            _networkModule.Send(req,  (ushort)C2DS.C2DS_MSG_ID.IdC2DsJoinServerReq);
+            req.ProfileId = _myPlayerInfo.ProfileId;
+            _networkModule.Send(req, (ushort)C2DS.C2DS_MSG_ID.IdC2DsJoinServerReq);
         }
 
         private void UpdatePlaying()
         {
             InputManager.Update();
-            //UpdateMockNetwork();
             _world.Update();
         }
 
@@ -122,7 +102,7 @@ namespace Lockstep.Game
             return profileId.GetHashCode();
         }
 
-#region network msg
+        #region network msg
         private void OnMsgJoinServerRes(ushort messageId, int rpcId, IMessage message)
         {
             if (message == null || message is not C2DSJoinServerRes res)
@@ -137,9 +117,7 @@ namespace Lockstep.Game
                 return;
             }
 
-            int playerIndex = res.PlayerIndex;
-            _playerInfo.PlayerIndex = playerIndex;
-            Log.Info($"OnMsgJoinServerRes: join sever success, player index:{playerIndex}.");
+            Log.Info($"OnMsgJoinServerRes: join sever success, player profileId:{_myPlayerInfo.ProfileId}.");
         }
 
         private void OnMsgGameStartReq(ushort messageId, int rpcId, IMessage message)
@@ -150,56 +128,38 @@ namespace Lockstep.Game
                 return;
             }
 
-            int playerCount = res.PlayerCount;
-            Log.Info($"OnMsgGameStartReq: game start!, playerCount:{playerCount}.");
-            _world.OnGameStart(playerCount, _playerInfo.PlayerIndex);
-            _stateMachine.SwitchTo(State.Playing);
-        }
-
-        private void OnMsgServerFrameReq(ushort messageId, int rpcId, IMessage message)
-        {
-            if (message == null || message is not DS2CServerFrameReq req)
+            if (res.Players.Count == 0)
             {
-                Log.Error($"OnServerFrameReq error: cannot convert message to DS2CServerFrameReq");
+                Log.Error($"OnGameStartReq error: res.Players.Count == 0");
                 return;
             }
 
-            int startTick = req.StartTick;
-            List<C2DS.ServerFrame> msgframes = req.ServrFrame.ToList();
-            List<ServerFrame> serverFrames = new List<ServerFrame>();
-            foreach(var msgframe in msgframes) 
+            int playerCount = res.Players.Count;
+            PlayerInfo[] players = new PlayerInfo[playerCount];
+            bool found = false;
+            for(int i = 0; i < playerCount; ++i)
             {
-                serverFrames.Add(MsgServerFrame2GameFrame(msgframe));
+                C2DS.PlayerInfo msgPlayerInfo = res.Players[i];
+
+                PlayerInfo info = new PlayerInfo();
+                info.ProfileId = msgPlayerInfo.ProfileId;
+                info.PlayerIndex = i;
+                players[i] = info;
+                if (info.ProfileId == _myPlayerInfo.ProfileId)
+                {
+                    found = true;
+                }
+            }
+   
+            if (!found) 
+            {
+                Log.Error($"OnGameStartReq error: can't found myself, profileId:{_myPlayerInfo.ProfileId}");
+                return;
             }
 
-            _world.OnServerFrameRecieved(serverFrames);
-        }
-
-        private PlayerCommand MsgInput2GameInput(C2DS.PlayerInput msgInpt)
-        {
-            PlayerCommand playerCommand = default;
-            playerCommand.Tick = msgInpt.Tick;
-            playerCommand.inputUV._x = msgInpt.Horizontal;
-            playerCommand.inputUV._y = msgInpt.Vertical;
-            playerCommand.ButtonField = msgInpt.Button;
-            playerCommand.EntityId = (ProfileId2Hash(msgInpt.ProfileId));
-            return playerCommand;
-        }
-
-        private ServerFrame MsgServerFrame2GameFrame(C2DS.ServerFrame msgFrame)
-        {
-            ServerFrame serverFrame = new ServerFrame();
-            serverFrame.tick = msgFrame.Tick;
-            serverFrame.Inputs = new PlayerCommand[msgFrame.PlayerInputs.Count];
-
-            List<PlayerCommand> inputs = new List<PlayerCommand ();
-            foreach (var msgInput in msgFrame.PlayerInputs)
-            {
-                inputs.Add(MsgInput2GameInput(msgInput));
-            }
-
-            serverFrame.Inputs.AddRange(inputs);
-            return serverFrame;
+            Log.Info($"OnMsgGameStartReq: game start!, playerCount:{playerCount}.");
+            _world.OnGameStart(players, _myPlayerInfo);
+            _stateMachine.SwitchTo(State.Playing);
         }
         #endregion network msg
     }

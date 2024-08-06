@@ -9,6 +9,23 @@ namespace Lockstep.Game
         public int tick;
         public PlayerCommand[] Inputs;
 
+        public ServerFrame() 
+        {
+        
+        }
+
+        public void CopyTo(ServerFrame to)
+        {
+            if (Inputs == null || Inputs.Length == 0)
+            {
+                return;
+            }
+
+            to.tick = tick;
+            to.Inputs = new PlayerCommand[Inputs.Length];
+            Inputs.CopyTo(to.Inputs, 0);
+        }
+
         public override bool Equals(object obj)
         {
             if (obj == null)
