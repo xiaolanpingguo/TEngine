@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -425,3 +427,5 @@ public abstract class CustomObjectSelectionWindow<TWindow, TObject> : EditorWind
         return tex;
     }
 }
+
+#endif

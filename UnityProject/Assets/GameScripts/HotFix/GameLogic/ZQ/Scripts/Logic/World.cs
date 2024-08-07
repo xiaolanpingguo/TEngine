@@ -10,6 +10,7 @@ using C2DS;
 using Google.Protobuf;
 using System.Management.Instrumentation;
 using UnityEngine.InputSystem;
+using GameLogic;
 
 
 namespace Lockstep.Game
@@ -23,6 +24,13 @@ namespace Lockstep.Game
 
     public class World
     {
+        public enum State
+        {
+            Stop,
+            Running,
+            Pause,
+        }
+
         internal struct GameState
         {
             public LFloat RemainTime;
@@ -43,13 +51,20 @@ namespace Lockstep.Game
 
         public int FramePredictCount = 0;
 
-        public bool IsPause { get; set; }
+        public int Ping { get; private set; }
         public int Tick { get; private set; }
         public Player LocalPlayer;
         public PlayerCommand[] PlayerInputs;
 
+        public int CurEnemyCount
+        {
+            get => _curGameState.CurEnemyCount;
+            set => _curGameState.CurEnemyCount = value;
+        }
+
         private readonly NetworkModule _networkModule;
 
+        private State _state;
         private List<IGameSystem> _systems = new List<IGameSystem>();
         private Dictionary<Type, IGameSystem> _systemMap = new();
 
@@ -70,21 +85,13 @@ namespace Lockstep.Game
         private Dictionary<string, int> _profile2Index = new();
         private Dictionary<int, int> _tick2Id = new Dictionary<int, int>();
 
-        private long _gameStartTimestampMs = -1;
-        private int _tickSinceGameStart = 0;
-
-        private int _preSendInputCount = 1;
         private int _inputTick = 0;
-
         private FrameBuffer _frameBuffer;
-        private int _snapshotFrameInterval = 1;
-
-        private const int _maxSimulationMsPerFrame = 20;
-        private const int _maxPredictFrameCount = 5;
 
         private const int k_frameRate = 20;
         private const int k_updateIntervalMs = 1000 / k_frameRate;
-        private LFloat WorldUpdateTick = new LFloat(true, k_frameRate);
+        //private LFloat WorldUpdateTick = new LFloat(true, k_updateIntervalMs);
+        private LFloat WorldUpdateTick = new LFloat(true, 30);
 
         private WorldGameTime _worldGameTime;
         private FixedTimeCounter _fixedTimeCounter;
@@ -92,31 +99,7 @@ namespace Lockstep.Game
         private const int k_maxPursueTime= 5; // ms
         private int _predictionTick = -1;
         private int _authorityTick = -1;
-        public int SpeedMultiply { get; set; }
-
-        public LFloat RemainTime
-        {
-            get => _curGameState.RemainTime;
-            set => _curGameState.RemainTime = value;
-        }
-
-        public LFloat DeltaTime
-        {
-            get => _curGameState.DeltaTime;
-            set => _curGameState.DeltaTime = value;
-        }
-
-        public int CurEnemyCount
-        {
-            get => _curGameState.CurEnemyCount;
-            set => _curGameState.CurEnemyCount = value;
-        }
-
-        public int CurEnemyId
-        {
-            get => _curGameState.CurEnemyId;
-            set => _curGameState.CurEnemyId = value;
-        }
+        private long _lastWorldTickTime = 0;
 
         public World(NetworkModule networkModule)
         {
@@ -131,6 +114,7 @@ namespace Lockstep.Game
         public void Init()
         {
             Instance = this;
+            _state = State.Stop;
             _frameBuffer = new FrameBuffer();
             RegisterSystems();
 
@@ -142,6 +126,7 @@ namespace Lockstep.Game
 
         public void Destroy()
         {
+            _state = State.Stop;
             foreach (var sys in _systems)
             {
                 sys.Destroy();
@@ -155,19 +140,19 @@ namespace Lockstep.Game
         
         public void Update()
         {
-            if (_gameStartTimestampMs < 0)
+            if (_state != State.Running)
             {
                 return;
             }
 
             _worldGameTime.Update();
-            PredictUpdate();
+            UpdatePredict();
+            UpdateUI();
         }
 
-        private void PredictUpdate()
+        private void UpdatePredict()
         {
             long timeNow = _worldGameTime.ServerNow();
-            int i = 0;
             while (true)
             {
                 if (timeNow < _fixedTimeCounter.FrameTime(_predictionTick + 1))
@@ -186,7 +171,6 @@ namespace Lockstep.Game
                 RunOneFrame(frame);
                 //SendHash(room.PredictionFrame);
 
-                SpeedMultiply = ++i;
                 SendInput(frame);
 
                 long timeNow2 = _worldGameTime.ServerNow();
@@ -246,11 +230,17 @@ namespace Lockstep.Game
                 _profile2Index[playerInfo.ProfileId] = playerInfo.PlayerIndex;
             }
 
+            _state = State.Running;
             PlayerInputs = new PlayerCommand[_playerCount];
-            //SendInput();
-            _gameStartTimestampMs = LTime.realtimeSinceStartupMS;
             _worldGameTime.Start();
             _fixedTimeCounter = new FixedTimeCounter(_worldGameTime.StartTime, 0, k_updateIntervalMs);
+        }
+
+        private void UpdateUI()
+        {
+            GameInfoUI.Instance?.SetPing(Ping);
+            GameInfoUI.Instance?.SetAuthorityTick(_authorityTick);
+            GameInfoUI.Instance?.SetPredictionTick(_predictionTick);
         }
 
         private GameObject LoadPrefab(PrefabType type)
@@ -307,43 +297,20 @@ namespace Lockstep.Game
 
         private void RunOneFrame(ServerFrame frame)
         {
+            long now = _worldGameTime.StampNow();
+            LFloat deltaTime = new LFloat((int)Time.deltaTime);
             // set inputs
             PlayerInputs = frame.Inputs;
-            RunWorldOneFrame();
-            //_frameBuffer.SetClientTick(Tick);
-        }
-
-        private void RunWorldOneFrame()
-        {
             foreach (var sys in _systems)
             {
                 if (sys.Enable)
                 {
                     sys.Update(WorldUpdateTick);
+                    //sys.Update(deltaTime);
                 }
             }
 
             Tick++;
-        }
-
-        private void ProcessInputQueue(ServerFrame frame)
-        {
-            var inputs = frame.Inputs;
-            foreach (var playerInput in PlayerInputs)
-            {
-                playerInput.Reset();
-            }
-
-            foreach (var input in inputs)
-            {
-                var entityId = input.EntityId;
-                if (entityId >= _playerCount)
-                {
-                    continue;
-                }
-
-                PlayerInputs[entityId] = input;
-            }
         }
 
         private void BindView(Entity entity, Entity oldEntity = null)
@@ -899,7 +866,7 @@ namespace Lockstep.Game
             long clientRequestTime = res.ClientTime;
             long serverTime = res.ServerTime;
             long now = TimeHelper.TimeStampNowMs();
-            int ping = (int)(now - clientRequestTime);
+            Ping = (int)(now - clientRequestTime);
             _worldGameTime.ServerMinusClientTime = serverTime + (now - clientRequestTime) / 2 - now;
         }
     }

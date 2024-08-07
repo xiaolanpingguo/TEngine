@@ -1,9 +1,10 @@
-﻿using System.Collections;
+﻿#if UNITY_EDITOR
+
+using System.Collections;
 using System.Collections.Generic;
 using Lockstep.Framework;
 using UnityEditor;
 using UnityEngine;
-using UnityEditorInternal;
 
 
 namespace Lockstep.Game
@@ -115,3 +116,5 @@ namespace Lockstep.Game
         }
     }
 }
+
+#endif

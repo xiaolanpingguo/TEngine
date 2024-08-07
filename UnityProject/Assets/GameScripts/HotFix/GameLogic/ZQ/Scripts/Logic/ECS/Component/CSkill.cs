@@ -4,8 +4,6 @@ using UnityEngine;
 using Lockstep.Framework;
 using System.Text;
 using static Lockstep.Framework.LMathUtils;
-using dnlib.DotNet.Pdb;
-using UnityEngine.Windows;
 
 
 namespace Lockstep.Game

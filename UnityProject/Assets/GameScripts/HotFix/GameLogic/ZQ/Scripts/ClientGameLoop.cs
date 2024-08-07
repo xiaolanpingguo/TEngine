@@ -6,6 +6,7 @@ using C2DS;
 using Google.Protobuf;
 using System.Linq;
 using Sirenix.Utilities;
+using System.Management.Instrumentation;
 
 
 namespace Lockstep.Game
@@ -55,7 +56,7 @@ namespace Lockstep.Game
             _stateMachine.Add(State.End, null, () => { }, null);
             _stateMachine.SwitchTo(State.Start);
 
-            _myPlayerInfo.ProfileId = "1234";
+            _myPlayerInfo.ProfileId = CreateProfileId();
         }
 
         public void CreateGame()
@@ -97,9 +98,10 @@ namespace Lockstep.Game
             _world.Update();
         }
 
-        private int ProfileId2Hash(string profileId)
+        private string CreateProfileId()
         {
-            return profileId.GetHashCode();
+            int id = UnityEngine.Random.Range(0, 10000);
+            return id.ToString();
         }
 
         #region network msg

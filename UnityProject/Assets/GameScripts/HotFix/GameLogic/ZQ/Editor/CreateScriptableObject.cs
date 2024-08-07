@@ -1,3 +1,5 @@
+#if UNITY_EDITOR
+
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -121,3 +123,5 @@ public static class CreateScriptableObjectMenu
         createSOWindow.CreateScriptableAsset(createSOWindow.SelectedObject, destination);
     }
 }
+
+#endif
